@@ -1,0 +1,4 @@
+<%= tag.label(**root_attrs("text-sm font-medium leading-none text-[hsl(var(--senren-foreground))] peer-disabled:cursor-not-allowed peer-disabled:opacity-70", for: for_field)) do %>
+  <%= content %>
+  <% if variant == :required %><span class="text-[hsl(var(--senren-destructive))]" aria-hidden="true"> *</span><% end %>
+<% end %>

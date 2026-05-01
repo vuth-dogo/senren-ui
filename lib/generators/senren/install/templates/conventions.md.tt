@@ -1,0 +1,66 @@
+# Senren Conventions
+
+This file is for both human contributors and AI coding agents. Keep it short
+and obey it strictly.
+
+## Hard rules
+
+1. Use Senren components before writing custom HTML for the same purpose.
+2. Server-render via ViewComponent. Stimulus only for **local** behavior.
+3. Turbo handles server state. Controllers do not fetch/XHR from JS.
+4. No React, Vue, Alpine, lit, or external state framework. Ever.
+5. Tailwind classes must use **semantic tokens** (`bg-background`,
+   `text-foreground`, `bg-primary`, `text-muted-foreground`,
+   `border-border`, `bg-destructive`). Do not hard-code `gray-*`,
+   `slate-*`, `zinc-*`, etc. in component templates.
+6. Every component root carries `data-senren-component="<name>"` so DOM
+   inspection and tests can locate it.
+7. **Render with parens when passing inline content blocks**. Ruby block
+   precedence makes `render Senren::Foo.new(args) { "bar" }` attach the
+   block to `.new`, **not** to `render`, producing an empty component.
+   Use either of these forms instead:
+   ```erb
+   <%= render(Senren::ButtonComponent.new(variant: :primary)) { "Save" } %>
+
+   <%= render Senren::ButtonComponent.new(variant: :primary) do %>
+     Save
+   <% end %>
+   ```
+
+## File ownership
+
+| Path                                | Owned by         |
+| ----------------------------------- | ---------------- |
+| `app/components/senren/**`          | This app         |
+| `app/javascript/controllers/senren/**` | This app      |
+| `app/assets/stylesheets/senren.css` | This app         |
+| `.senren/skill.md`                  | Generated region only (between markers) |
+| `.senren/registry.yml`              | Generator (mirror of gem registry) |
+| `.senren/installed_components.yml`  | Generator (ledger)  |
+| `.senren/conventions.md`            | This file - safe to edit |
+| `public/llms.txt`                   | Generator (do not edit) |
+| `public/llms-full.txt`              | Generator (do not edit) |
+
+## Adding a component
+
+```bash
+bin/rails senren:add <name> [<name>...]
+bin/rails senren:add dialog --no-client     # override registry default
+bin/rails senren:add button --client        # override registry default
+```
+
+After install you can edit any file under `app/components/senren/` directly.
+Senren never overwrites those files unless you pass `--force`.
+
+## Skill file maintenance
+
+`.senren/skill.md` has a generated region delimited by:
+
+```
+<!-- senren:skill:start -->
+...generated...
+<!-- senren:skill:end -->
+```
+
+You can write app-specific notes outside those markers. They are preserved
+across `bin/rails senren:skill:sync`.

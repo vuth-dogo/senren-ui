@@ -1,0 +1,13 @@
+module Senren
+  class <%= class_name %>Component < BaseComponent
+    VARIANTS = {
+      default: ""
+    }.freeze
+
+    SIZES = {
+      sm: "",
+      md: "",
+      lg: ""
+    }.freeze
+  end
+end

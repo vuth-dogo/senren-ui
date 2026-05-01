@@ -1,0 +1,12 @@
+<div data-controller="senren--dropdown-menu" class="relative inline-block" data-state="closed" data-senren-component="dropdown_menu">
+  <div class="inline-flex cursor-pointer" data-state="closed" aria-haspopup="menu" aria-expanded="false" data-senren--dropdown-menu-target="trigger" data-action="click->senren--dropdown-menu#toggle keydown->senren--dropdown-menu#onTriggerKey">
+    <%= trigger %>
+  </div>
+
+  <div data-senren--dropdown-menu-target="menu" role="menu" hidden
+       class="absolute right-0 z-50 mt-2 w-56 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-1 shadow-md">
+    <% items.each do |it| %>
+      <%= it %>
+    <% end %>
+  </div>
+</div>

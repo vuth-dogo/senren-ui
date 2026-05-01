@@ -1,0 +1,6 @@
+<span <%= tag.attributes(**root_attrs("inline-flex items-center gap-1 text-xs text-[hsl(var(--senren-muted-foreground))]")) %>>
+  <% (keys.presence || [content]).compact.each_with_index do |key, index| %>
+    <% if index.positive? %><span aria-hidden="true">+</span><% end %>
+    <kbd class="rounded border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-muted))] px-1.5 py-0.5 font-mono text-[11px] text-[hsl(var(--senren-foreground))] shadow-sm"><%= key %></kbd>
+  <% end %>
+</span>

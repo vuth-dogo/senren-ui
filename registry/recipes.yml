@@ -1,0 +1,79 @@
+recipes:
+  form_basics:
+    description: Minimal form stack - structure, primitives, and submit button.
+    components: [form, label, input, textarea, native_select, button, alert]
+
+  dashboard:
+    description: SaaS dashboard layout with shell, header, and stat cards.
+    components:
+      - app_shell
+      - top_nav
+      - sidebar
+      - page_header
+      - card
+      - badge
+      - button
+      - stat_card
+      - typography
+      - separator
+
+  settings_page:
+    description: Settings page with sectioned form and destructive action.
+    components:
+      - app_shell
+      - sidebar
+      - page_header
+      - card
+      - settings_section
+      - form
+      - input
+      - textarea
+      - switch
+      - button
+      - alert_dialog
+      - separator
+      - typography
+
+  team_management:
+    description: Team list with invite dialog and bulk actions.
+    components:
+      - app_shell
+      - page_header
+      - card
+      - team_member_list
+      - invite_member_dialog
+      - dropdown_menu
+      - bulk_action_bar
+      - search_input
+      - filter_bar
+      - badge
+      - avatar
+      - button
+
+  todolist_index:
+    description: Components used by the apps/todolist Todo index page.
+    components:
+      - app_shell
+      - top_nav
+      - sidebar
+      - page_header
+      - button
+      - card
+      - badge
+      - table
+      - dropdown_menu
+      - pagination
+      - empty_state
+      - filter_bar
+      - search_input
+
+  todolist_form:
+    description: Components used by the apps/todolist Todo new/edit pages.
+    components:
+      - form
+      - label
+      - input
+      - textarea
+      - native_select
+      - button
+      - alert

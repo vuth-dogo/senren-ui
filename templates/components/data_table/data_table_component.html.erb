@@ -1,0 +1,50 @@
+<%= tag.div(**root_attrs("overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] shadow-sm", data: { controller: "senren--data-table" })) do %>
+  <% if toolbar? %>
+    <div class="border-b border-[hsl(var(--senren-border))] p-3"><%= toolbar %></div>
+  <% end %>
+
+  <% if content? && columns.empty? %>
+    <div class="p-3"><%= content %></div>
+  <% else %>
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse text-left text-sm">
+        <% if caption.present? %>
+          <caption class="sr-only"><%= caption %></caption>
+        <% end %>
+        <thead class="bg-[hsl(var(--senren-muted)/0.6)] text-[hsl(var(--senren-muted-foreground))]">
+          <tr>
+            <% columns.each do |column| %>
+              <th scope="col" class="px-4 py-3 font-medium">
+                <% if sortable? %>
+                  <button type="button" class="inline-flex cursor-pointer items-center gap-1 rounded-sm hover:text-[hsl(var(--senren-foreground))]" data-action="click->senren--data-table#sort" data-sort-key="<%= column_sort_key(column) %>">
+                    <%= column_label(column) %>
+                    <span aria-hidden="true">Sort</span>
+                  </button>
+                <% else %>
+                  <%= column_label(column) %>
+                <% end %>
+              </th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[hsl(var(--senren-border))] text-[hsl(var(--senren-foreground))]" data-senren--data-table-target="body">
+          <% rows.each do |row| %>
+            <tr class="transition-colors hover:bg-[hsl(var(--senren-muted)/0.35)]" data-senren--data-table-target="row">
+              <% columns.each do |column| %>
+                <% value = cell_value(row, column) %>
+                <td class="px-4 py-3" data-sort-key="<%= column_sort_key(column) %>" data-sort-value="<%= value %>"><%= value %></td>
+              <% end %>
+            </tr>
+          <% end %>
+          <% if rows.empty? %>
+            <tr><td class="px-4 py-8 text-center text-[hsl(var(--senren-muted-foreground))]" colspan="<%= columns.size.nonzero? || 1 %>"><%= empty_text %></td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+
+  <% if footer? %>
+    <div class="border-t border-[hsl(var(--senren-border))] p-3"><%= footer %></div>
+  <% end %>
+<% end %>

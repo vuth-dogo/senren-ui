@@ -1,0 +1,37 @@
+<div data-controller="senren--sheet" data-senren-component="sheet" id="<%= dom_id %>">
+  <% if trigger? %>
+    <span data-action="click->senren--sheet#open" data-senren--sheet-target="trigger">
+      <%= trigger %>
+    </span>
+  <% else %>
+    <button type="button" data-action="click->senren--sheet#open" data-senren--sheet-target="trigger" class="hidden">Open</button>
+  <% end %>
+
+  <div data-senren--sheet-target="overlay" hidden
+       class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"></div>
+
+  <div data-senren--sheet-target="panel" hidden role="dialog" aria-modal="true"
+       data-open="false"
+       class="fixed z-50 bg-[hsl(var(--senren-background))] text-[hsl(var(--senren-foreground))] shadow-lg transition-transform duration-200 <%= self.class::VARIANTS[variant] %>">
+    <div class="flex h-full flex-col p-6">
+      <% if title? %>
+        <h2 class="text-lg font-semibold"><%= title %></h2>
+      <% end %>
+      <% if description? %>
+        <p class="text-sm text-[hsl(var(--senren-muted-foreground))]"><%= description %></p>
+      <% end %>
+      <div class="mt-4 flex-1 overflow-auto">
+        <%= body || content %>
+      </div>
+      <% if footer? %>
+        <div class="mt-4 border-t border-[hsl(var(--senren-border))] pt-4">
+          <%= footer %>
+        </div>
+      <% end %>
+    </div>
+    <button type="button" data-action="click->senren--sheet#close" aria-label="Close"
+            class="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+</div>

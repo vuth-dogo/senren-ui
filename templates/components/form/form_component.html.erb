@@ -1,0 +1,3 @@
+<%= form_with(model: model, url: url, method: method, multipart: multipart, **root_attrs("space-y-4")) do |f| %>
+  <%= content || capture(f, &Proc.new) %>
+<% end %>

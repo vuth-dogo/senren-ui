@@ -1,0 +1,1053 @@
+# Senren UI - canonical component registry.
+# Schema:
+#   <name>:
+#     category:        actions|forms|overlays|navigation|layout|data|saas|rich
+#     client:          default behavior (bool)
+#     can_have_client: whether --client is meaningful
+#     controller:      Stimulus identifier (or null)
+#     stub:            true => scaffolded placeholder, false/absent => full
+#     files:           paths copied into host app (relative to host root)
+#     depends_on:      [<name>, ...]
+#     pairs_with:      [<name>, ...]
+#     variants:        [<string>, ...]
+#     accessibility:   [<string>, ...]
+#     ai:
+#       use_for:       [<string>, ...]
+#       avoid:         [<string>, ...]
+
+components:
+
+  # ---------------------------------------------------------------- Phase 1
+  button:
+    category: actions
+    client: false
+    can_have_client: true
+    files:
+      - app/components/senren/button_component.rb
+      - app/components/senren/button_component.html.erb
+    depends_on: []
+    pairs_with: [form, dialog, dropdown_menu, alert_dialog]
+    variants: [default, primary, secondary, destructive, ghost, link]
+    accessibility:
+      - Icon-only buttons must include aria-label.
+      - Use button for actions and anchor for navigation.
+    ai:
+      use_for: [primary action, secondary action, form submit, destructive action]
+      avoid:   [using destructive variant for non-destructive actions]
+
+  link:
+    category: actions
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/link_component.rb
+      - app/components/senren/link_component.html.erb
+    depends_on: []
+    pairs_with: [button, breadcrumb]
+    variants: [default, muted, destructive]
+    accessibility: [Use real anchors for navigation, never buttons.]
+    ai:
+      use_for: [in-app navigation, external links]
+      avoid:   [triggering destructive actions via a link]
+
+  badge:
+    category: data
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/badge_component.rb
+      - app/components/senren/badge_component.html.erb
+    depends_on: []
+    pairs_with: [card, table, avatar]
+    variants: [default, secondary, success, warning, destructive, outline]
+    accessibility: [Provide sufficient color contrast; do not encode meaning by color alone.]
+    ai:
+      use_for: [status, priority, counts, tags]
+      avoid:   [interactive actions disguised as badges]
+
+  typography:
+    category: layout
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/typography_component.rb
+      - app/components/senren/typography_component.html.erb
+    depends_on: []
+    pairs_with: [card, page_header]
+    variants: [h1, h2, h3, h4, p, lead, large, small, muted]
+    accessibility: [Heading levels must be sequential; do not skip levels.]
+    ai:
+      use_for: [page titles, body copy, captions]
+      avoid:   [styling without semantic tag matching]
+
+  separator:
+    category: layout
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/separator_component.rb
+      - app/components/senren/separator_component.html.erb
+    depends_on: []
+    pairs_with: [card, settings_section]
+    variants: [horizontal, vertical]
+    accessibility: [role=separator with aria-orientation.]
+    ai:
+      use_for: [grouping content blocks]
+      avoid:   [decorative-only use without semantics]
+
+  skeleton:
+    category: data
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/skeleton_component.rb
+      - app/components/senren/skeleton_component.html.erb
+    depends_on: []
+    pairs_with: [card, table]
+    variants: [default, circle, text]
+    accessibility: [aria-hidden=true while loading; pair with aria-busy on parent.]
+    ai:
+      use_for: [loading placeholders]
+      avoid:   [permanent decoration]
+
+  avatar:
+    category: data
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/avatar_component.rb
+      - app/components/senren/avatar_component.html.erb
+    depends_on: []
+    pairs_with: [card, team_member_list, dropdown_menu]
+    variants: [sm, md, lg]
+    accessibility: [alt text required; fallback to initials with role=img and aria-label.]
+    ai:
+      use_for: [user thumbnail, team list, comments]
+      avoid:   [decorative-only without alt]
+
+  alert:
+    category: data
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/alert_component.rb
+      - app/components/senren/alert_component.html.erb
+    depends_on: []
+    pairs_with: [form, page_header]
+    variants: [default, info, success, warning, destructive]
+    accessibility: [role=alert for error states; role=status for non-urgent updates.]
+    ai:
+      use_for: [form feedback, page-level notices]
+      avoid:   [transient toasts - use a toast component instead]
+
+  card:
+    category: layout
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/card_component.rb
+      - app/components/senren/card_component.html.erb
+    depends_on: []
+    pairs_with: [button, badge, separator]
+    variants: [default, muted, outline]
+    accessibility: [Use heading inside header slot; landmark roles only when meaningful.]
+    ai:
+      use_for: [grouping related content, dashboard widgets, list items]
+      avoid:   [nesting cards inside cards]
+
+  aspect_ratio:
+    category: layout
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/aspect_ratio_component.rb
+      - app/components/senren/aspect_ratio_component.html.erb
+    depends_on: []
+    pairs_with: [card, avatar]
+    variants: [square, video, portrait, ultrawide]
+    accessibility: [Inner media must include alt or aria-label.]
+    ai:
+      use_for: [media, image placeholders, embeds]
+      avoid:   [forcing aspect on text content]
+
+  # ---------------------------------------------------------------- Phase 2
+  label:
+    category: forms
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/label_component.rb
+      - app/components/senren/label_component.html.erb
+    depends_on: []
+    pairs_with: [input, textarea, checkbox, switch, native_select]
+    variants: [default, required]
+    accessibility: [Always associate via for=field-id.]
+    ai:
+      use_for: [labeling form controls]
+      avoid:   [using placeholder as the only label]
+
+  form:
+    category: forms
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/form_component.rb
+      - app/components/senren/form_component.html.erb
+    depends_on: [button]
+    pairs_with: [input, textarea, native_select, label, alert]
+    variants: [default]
+    accessibility: [Group related fields with fieldset/legend; show errors next to fields.]
+    ai:
+      use_for: [Rails form_with wrappers]
+      avoid:   [bypassing CSRF or Rails form helpers]
+
+  input:
+    category: forms
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/input_component.rb
+      - app/components/senren/input_component.html.erb
+    depends_on: [label]
+    pairs_with: [form, label, alert]
+    variants: [default, error]
+    accessibility: [Pair with label; use aria-invalid and aria-describedby on errors.]
+    ai:
+      use_for: [text, email, password, number, search, url]
+      avoid:   [storing structured data in a single text input]
+
+  textarea:
+    category: forms
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/textarea_component.rb
+      - app/components/senren/textarea_component.html.erb
+    depends_on: [label]
+    pairs_with: [form, label, alert]
+    variants: [default, error]
+    accessibility: [Pair with label; provide visible character counter for limits.]
+    ai:
+      use_for: [multi-line text]
+      avoid:   [rich-text editing - use rich_text_editor_lite]
+
+  checkbox:
+    category: forms
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/checkbox_component.rb
+      - app/components/senren/checkbox_component.html.erb
+    depends_on: [label]
+    pairs_with: [form, label, checkbox_group]
+    variants: [default]
+    accessibility: [Always pair with label or aria-label.]
+    ai:
+      use_for: [boolean preferences, multi-select via checkbox_group]
+      avoid:   [single-choice scenarios - use radio_button]
+
+  checkbox_group:
+    category: forms
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/checkbox_group_component.rb
+      - app/components/senren/checkbox_group_component.html.erb
+    depends_on: [checkbox, label]
+    pairs_with: [form, label]
+    variants: [default]
+    accessibility: [Wrap in fieldset/legend.]
+    ai:
+      use_for: [multi-select boolean groups]
+      avoid:   [single-choice groups]
+
+  radio_button:
+    category: forms
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/radio_button_component.rb
+      - app/components/senren/radio_button_component.html.erb
+    depends_on: [label]
+    pairs_with: [form, label]
+    variants: [default]
+    accessibility: [Group via fieldset/legend; share name attribute.]
+    ai:
+      use_for: [single-choice option groups]
+      avoid:   [multi-select - use checkbox_group]
+
+  native_select:
+    category: forms
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/native_select_component.rb
+      - app/components/senren/native_select_component.html.erb
+    depends_on: [label]
+    pairs_with: [form, label]
+    variants: [default, error]
+    accessibility: [Pair with label; native option text must be meaningful.]
+    ai:
+      use_for: [short option lists, mobile-friendly selects]
+      avoid:   [long lists - prefer combobox]
+
+  select:
+    category: forms
+    client: true
+    can_have_client: true
+    controller: senren--select
+    files:
+      - app/components/senren/select_component.rb
+      - app/components/senren/select_component.html.erb
+      - app/javascript/controllers/senren/select_controller.js
+    depends_on: [label, button]
+    pairs_with: [form, label]
+    variants: [default, error]
+    accessibility: [aria-haspopup=listbox; arrow keys for navigation; type-ahead.]
+    ai:
+      use_for: [styled selects with custom option rendering]
+      avoid:   [very long lists - use combobox]
+
+  switch:
+    category: forms
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/switch_component.rb
+      - app/components/senren/switch_component.html.erb
+    depends_on: [label]
+    pairs_with: [form, label, settings_section]
+    variants: [default]
+    accessibility: [role=switch with aria-checked.]
+    ai:
+      use_for: [boolean toggles, settings]
+      avoid:   [actions that need confirmation - use button + dialog]
+
+  masked_input:
+    category: forms
+    client: true
+    can_have_client: true
+    controller: senren--masked-input
+    files:
+      - app/components/senren/masked_input_component.rb
+      - app/components/senren/masked_input_component.html.erb
+      - app/javascript/controllers/senren/masked_input_controller.js
+    depends_on: [input, label]
+    pairs_with: [form, label]
+    variants: [default, error]
+    accessibility: [Always include a description of expected format.]
+    ai:
+      use_for: [phone, postal code, credit card, custom formats]
+      avoid:   [free text fields - use input]
+
+  # ---------------------------------------------------------------- Phase 3
+  dialog:
+    category: overlays
+    client: true
+    can_have_client: true
+    controller: senren--dialog
+    files:
+      - app/components/senren/dialog_component.rb
+      - app/components/senren/dialog_component.html.erb
+      - app/javascript/controllers/senren/dialog_controller.js
+    depends_on: [button]
+    pairs_with: [form, alert_dialog]
+    variants: [default]
+    accessibility:
+      - Must have a visible title.
+      - Must support Escape key close.
+      - Must trap focus and restore on close.
+    ai:
+      use_for: [confirmation modal, short form modal]
+      avoid:   [long multi-step workflows, full page replacement]
+
+  alert_dialog:
+    category: overlays
+    client: true
+    can_have_client: true
+    controller: senren--alert-dialog
+    files:
+      - app/components/senren/alert_dialog_component.rb
+      - app/components/senren/alert_dialog_component.html.erb
+      - app/javascript/controllers/senren/alert_dialog_controller.js
+    depends_on: [button, dialog]
+    pairs_with: [button]
+    variants: [default, destructive]
+    accessibility:
+      - role=alertdialog with aria-labelledby.
+      - Confirm action receives initial focus only when non-destructive.
+    ai:
+      use_for: [destructive action confirmation, irreversible operations]
+      avoid:   [routine modal forms - use dialog]
+
+  dropdown_menu:
+    category: overlays
+    client: true
+    can_have_client: true
+    controller: senren--dropdown-menu
+    files:
+      - app/components/senren/dropdown_menu_component.rb
+      - app/components/senren/dropdown_menu_component.html.erb
+      - app/javascript/controllers/senren/dropdown_menu_controller.js
+    depends_on: [button]
+    pairs_with: [button, table, top_nav]
+    variants: [default]
+    accessibility:
+      - role=menu with role=menuitem children.
+      - Arrow keys to navigate; Escape to close; type-ahead optional.
+    ai:
+      use_for: [contextual actions on rows, account menus]
+      avoid:   [primary navigation - use top_nav or sidebar]
+
+  popover:
+    category: overlays
+    client: true
+    can_have_client: true
+    controller: senren--popover
+    files:
+      - app/components/senren/popover_component.rb
+      - app/components/senren/popover_component.html.erb
+      - app/javascript/controllers/senren/popover_controller.js
+    depends_on: [button]
+    pairs_with: [button, form]
+    variants: [default]
+    accessibility: [aria-expanded on trigger; manage focus on open.]
+    ai:
+      use_for: [small contextual UI like filters or color pickers]
+      avoid:   [large content - use dialog or sheet]
+
+  tooltip:
+    category: overlays
+    client: true
+    can_have_client: true
+    controller: senren--tooltip
+    files:
+      - app/components/senren/tooltip_component.rb
+      - app/components/senren/tooltip_component.html.erb
+      - app/javascript/controllers/senren/tooltip_controller.js
+    depends_on: []
+    pairs_with: [button, badge, icon]
+    variants: [default]
+    accessibility:
+      - Use aria-describedby; never put critical info in tooltips alone.
+      - Keyboard focus must show the tooltip.
+    ai:
+      use_for: [supplementary hints on hover/focus]
+      avoid:   [storing required information only in tooltip]
+
+  hover_card:
+    category: overlays
+    client: true
+    can_have_client: true
+    controller: senren--hover-card
+    files:
+      - app/components/senren/hover_card_component.rb
+      - app/components/senren/hover_card_component.html.erb
+      - app/javascript/controllers/senren/hover_card_controller.js
+    depends_on: []
+    pairs_with: [avatar, link]
+    variants: [default]
+    accessibility: [Provide keyboard activation; do not block touch users.]
+    ai:
+      use_for: [user hover previews, link previews]
+      avoid:   [interactive forms - use popover or dialog]
+
+  sheet:
+    category: overlays
+    client: true
+    can_have_client: true
+    controller: senren--sheet
+    files:
+      - app/components/senren/sheet_component.rb
+      - app/components/senren/sheet_component.html.erb
+      - app/javascript/controllers/senren/sheet_controller.js
+    depends_on: [button]
+    pairs_with: [form]
+    variants: [right, left, top, bottom]
+    accessibility:
+      - Trap focus when open.
+      - Escape to close.
+      - aria-modal=true while open.
+    ai:
+      use_for: [side panels, mobile filters, edit panels]
+      avoid:   [destructive confirmation - use alert_dialog]
+
+  context_menu:
+    category: overlays
+    client: true
+    can_have_client: true
+    controller: senren--context-menu
+    files:
+      - app/components/senren/context_menu_component.rb
+      - app/components/senren/context_menu_component.html.erb
+      - app/javascript/controllers/senren/context_menu_controller.js
+    depends_on: [dropdown_menu]
+    pairs_with: [table, data_table]
+    variants: [default]
+    accessibility:
+      - Triggered by right-click and keyboard equivalent (Shift+F10).
+      - Must be reachable without a pointer.
+    ai:
+      use_for: [right-click actions on rows or canvases]
+      avoid:   [primary navigation; main page actions]
+
+  # ------------------------------------------------------ Phase 4 (stubs)
+  breadcrumb:
+    category: navigation
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/breadcrumb_component.rb
+      - app/components/senren/breadcrumb_component.html.erb
+    depends_on: [link]
+    pairs_with: [page_header]
+    variants: [default]
+    accessibility: [aria-label="Breadcrumb"; mark current page with aria-current=page.]
+    ai:
+      use_for: [hierarchical navigation context]
+      avoid:   [non-hierarchical pages]
+
+  tabs:
+    category: navigation
+    client: true
+    can_have_client: true
+    controller: senren--tabs
+    stub: false
+    files:
+      - app/components/senren/tabs_component.rb
+      - app/components/senren/tabs_component.html.erb
+      - app/javascript/controllers/senren/tabs_controller.js
+    depends_on: []
+    pairs_with: [card]
+    variants: [default, underline]
+    accessibility: [role=tablist with arrow-key navigation and aria-controls.]
+    ai:
+      use_for: [switching between related views in the same context]
+      avoid:   [non-related sections - use a separate page]
+
+  accordion:
+    category: navigation
+    client: true
+    can_have_client: true
+    controller: senren--accordion
+    stub: false
+    files:
+      - app/components/senren/accordion_component.rb
+      - app/components/senren/accordion_component.html.erb
+      - app/javascript/controllers/senren/accordion_controller.js
+    depends_on: []
+    pairs_with: [card]
+    variants: [single, multiple]
+    accessibility: [Buttons toggle aria-expanded; panels use aria-hidden.]
+    ai:
+      use_for: [FAQ, collapsible content sections]
+      avoid:   [primary navigation]
+
+  collapsible:
+    category: navigation
+    client: true
+    can_have_client: true
+    controller: senren--collapsible
+    stub: false
+    files:
+      - app/components/senren/collapsible_component.rb
+      - app/components/senren/collapsible_component.html.erb
+      - app/javascript/controllers/senren/collapsible_controller.js
+    depends_on: []
+    pairs_with: [sidebar, settings_section]
+    variants: [default]
+    accessibility: [aria-expanded on trigger; aria-controls on panel.]
+    ai:
+      use_for: [single show/hide toggles]
+      avoid:   [groups - use accordion]
+
+  sidebar:
+    category: navigation
+    client: true
+    can_have_client: true
+    controller: senren--sidebar
+    stub: false
+    files:
+      - app/components/senren/sidebar_component.rb
+      - app/components/senren/sidebar_component.html.erb
+      - app/javascript/controllers/senren/sidebar_controller.js
+    depends_on: [button]
+    pairs_with: [app_shell, top_nav]
+    variants: [default, compact]
+    accessibility: [role=navigation with aria-label; collapsed state retains tab order.]
+    ai:
+      use_for: [primary app navigation in dashboards]
+      avoid:   [marketing sites - use top_nav]
+
+  theme_toggle:
+    category: navigation
+    client: true
+    can_have_client: true
+    controller: senren--theme-toggle
+    stub: false
+    files:
+      - app/components/senren/theme_toggle_component.rb
+      - app/components/senren/theme_toggle_component.html.erb
+      - app/javascript/controllers/senren/theme_toggle_controller.js
+    depends_on: [button]
+    pairs_with: [top_nav]
+    variants: [default]
+    accessibility: [Announce current theme via aria-pressed or aria-label.]
+    ai:
+      use_for: [light/dark/system theme switching]
+      avoid:   [non-theme settings]
+
+  shortcut_key:
+    category: navigation
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/shortcut_key_component.rb
+      - app/components/senren/shortcut_key_component.html.erb
+    depends_on: []
+    pairs_with: [tooltip, command]
+    variants: [default]
+    accessibility: [Use kbd elements; avoid relying on key visuals alone for instructions.]
+    ai:
+      use_for: [displaying keyboard shortcuts in tooltips and menus]
+      avoid:   [as a button - shortcut_key is presentational]
+
+  # ------------------------------------------------------ Phase 5 (stubs)
+  table:
+    category: data
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/table_component.rb
+      - app/components/senren/table_component.html.erb
+    depends_on: []
+    pairs_with: [pagination, dropdown_menu, badge]
+    variants: [default, compact]
+    accessibility: [Use real th/scope; caption for table summary.]
+    ai:
+      use_for: [tabular data display]
+      avoid:   [layout - use grid/flex]
+
+  pagination:
+    category: data
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/pagination_component.rb
+      - app/components/senren/pagination_component.html.erb
+    depends_on: [button, link]
+    pairs_with: [table, data_table]
+    variants: [default]
+    accessibility: [aria-current=page on current; nav landmark with label.]
+    ai:
+      use_for: [paged lists and tables]
+      avoid:   [infinite scroll feeds]
+
+  progress:
+    category: data
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/progress_component.rb
+      - app/components/senren/progress_component.html.erb
+    depends_on: []
+    pairs_with: [card, alert]
+    variants: [default, success, warning, destructive]
+    accessibility: [role=progressbar with aria-valuenow/min/max.]
+    ai:
+      use_for: [task progress, file upload, loading bars]
+      avoid:   [decorative animation]
+
+  clipboard:
+    category: data
+    client: true
+    can_have_client: true
+    controller: senren--clipboard
+    stub: false
+    files:
+      - app/components/senren/clipboard_component.rb
+      - app/components/senren/clipboard_component.html.erb
+      - app/javascript/controllers/senren/clipboard_controller.js
+    depends_on: [button]
+    pairs_with: [api_key_field, codeblock]
+    variants: [default]
+    accessibility: [Announce copy success via aria-live region.]
+    ai:
+      use_for: [copy to clipboard buttons]
+      avoid:   [non-text content]
+
+  codeblock:
+    category: rich
+    client: false
+    can_have_client: true
+    stub: false
+    files:
+      - app/components/senren/codeblock_component.rb
+      - app/components/senren/codeblock_component.html.erb
+    depends_on: []
+    pairs_with: [clipboard]
+    variants: [default]
+    accessibility: [Use pre/code; preserve whitespace.]
+    ai:
+      use_for: [displaying code samples]
+      avoid:   [running code - this is read-only display]
+
+  command:
+    category: rich
+    client: true
+    can_have_client: true
+    controller: senren--command
+    stub: false
+    files:
+      - app/components/senren/command_component.rb
+      - app/components/senren/command_component.html.erb
+      - app/javascript/controllers/senren/command_controller.js
+    depends_on: [dialog, input]
+    pairs_with: [shortcut_key, dropdown_menu]
+    variants: [default]
+    accessibility: [aria-activedescendant for current option; type-ahead filtering.]
+    ai:
+      use_for: [command palettes, quick search]
+      avoid:   [persistent navigation]
+
+  combobox:
+    category: forms
+    client: true
+    can_have_client: true
+    controller: senren--combobox
+    stub: false
+    files:
+      - app/components/senren/combobox_component.rb
+      - app/components/senren/combobox_component.html.erb
+      - app/javascript/controllers/senren/combobox_controller.js
+    depends_on: [input, button]
+    pairs_with: [form, label]
+    variants: [default, error]
+    accessibility: [WAI-ARIA combobox pattern; aria-expanded; aria-activedescendant.]
+    ai:
+      use_for: [searchable selects, large option lists]
+      avoid:   [short, fixed lists - use native_select]
+
+  calendar:
+    category: forms
+    client: true
+    can_have_client: true
+    controller: senren--calendar
+    stub: false
+    files:
+      - app/components/senren/calendar_component.rb
+      - app/components/senren/calendar_component.html.erb
+      - app/javascript/controllers/senren/calendar_controller.js
+    depends_on: [button]
+    pairs_with: [date_picker]
+    variants: [default]
+    accessibility: [grid with row/columnheader; arrow keys to navigate days.]
+    ai:
+      use_for: [date display and selection]
+      avoid:   [time-only selection]
+
+  date_picker:
+    category: forms
+    client: true
+    can_have_client: true
+    controller: senren--date-picker
+    stub: false
+    files:
+      - app/components/senren/date_picker_component.rb
+      - app/components/senren/date_picker_component.html.erb
+      - app/javascript/controllers/senren/date_picker_controller.js
+    depends_on: [calendar, popover, input]
+    pairs_with: [form, label]
+    variants: [default, error]
+    accessibility: [Pair input with hidden calendar; provide manual typing fallback.]
+    ai:
+      use_for: [date input fields]
+      avoid:   [date ranges - use a range component once added]
+
+  carousel:
+    category: rich
+    client: true
+    can_have_client: true
+    controller: senren--carousel
+    stub: false
+    files:
+      - app/components/senren/carousel_component.rb
+      - app/components/senren/carousel_component.html.erb
+      - app/javascript/controllers/senren/carousel_controller.js
+    depends_on: [button]
+    pairs_with: [card]
+    variants: [default]
+    accessibility: [Provide pause/prev/next controls; respect prefers-reduced-motion.]
+    ai:
+      use_for: [media galleries, marketing highlights]
+      avoid:   [primary navigation, important content gating]
+
+  # ------------------------------------------------------ Phase 6
+  app_shell:
+    category: saas
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/app_shell_component.rb
+      - app/components/senren/app_shell_component.html.erb
+    depends_on: [sidebar, top_nav]
+    pairs_with: [page_header]
+    variants: [default, compact]
+    accessibility: [Provide skip-to-content link; main landmark for page body.]
+    ai:
+      use_for: [SaaS dashboard layout root]
+      avoid:   [marketing pages]
+
+  top_nav:
+    category: saas
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/top_nav_component.rb
+      - app/components/senren/top_nav_component.html.erb
+    depends_on: [link, button, dropdown_menu]
+    pairs_with: [app_shell, sidebar]
+    variants: [default]
+    accessibility: [role=banner; nav landmark with label.]
+    ai:
+      use_for: [global header with brand and account menu]
+      avoid:   [primary in-app navigation - use sidebar]
+
+  page_header:
+    category: saas
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/page_header_component.rb
+      - app/components/senren/page_header_component.html.erb
+    depends_on: [typography, button]
+    pairs_with: [breadcrumb, app_shell]
+    variants: [default]
+    accessibility: [Use h1 for page title.]
+    ai:
+      use_for: [titled page header with actions]
+      avoid:   [stacking multiple page_headers per page]
+
+  empty_state:
+    category: saas
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/empty_state_component.rb
+      - app/components/senren/empty_state_component.html.erb
+    depends_on: [button, typography]
+    pairs_with: [card, table]
+    variants: [default, illustrated]
+    accessibility: [Provide a meaningful heading and a primary action.]
+    ai:
+      use_for: [zero-result lists, no-data dashboards]
+      avoid:   [error states - use alert]
+
+  stat_card:
+    category: saas
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/stat_card_component.rb
+      - app/components/senren/stat_card_component.html.erb
+    depends_on: [card, typography]
+    pairs_with: [badge]
+    variants: [default, success, warning, destructive]
+    accessibility: [Avoid color-only meaning; include label and value text.]
+    ai:
+      use_for: [dashboard KPI tiles]
+      avoid:   [interactive widgets - use card with explicit controls]
+
+  settings_section:
+    category: saas
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/settings_section_component.rb
+      - app/components/senren/settings_section_component.html.erb
+    depends_on: [card, separator, typography]
+    pairs_with: [form, switch, button]
+    variants: [default]
+    accessibility: [Each section has a heading and consistent label/value layout.]
+    ai:
+      use_for: [grouped settings inside a settings page]
+      avoid:   [unrelated content blocks]
+
+  data_table:
+    category: saas
+    client: true
+    can_have_client: true
+    controller: senren--data-table
+    stub: false
+    files:
+      - app/components/senren/data_table_component.rb
+      - app/components/senren/data_table_component.html.erb
+      - app/javascript/controllers/senren/data_table_controller.js
+    depends_on: [table, dropdown_menu, pagination]
+    pairs_with: [filter_bar, search_input]
+    variants: [default]
+    accessibility: [Inherits from table; columns must have th/scope.]
+    ai:
+      use_for: [sortable, filterable record lists]
+      avoid:   [static layout grids]
+
+  filter_bar:
+    category: saas
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/filter_bar_component.rb
+      - app/components/senren/filter_bar_component.html.erb
+    depends_on: [button, dropdown_menu]
+    pairs_with: [data_table, search_input]
+    variants: [default]
+    accessibility: [Filter controls are real form controls with labels.]
+    ai:
+      use_for: [list filters above tables]
+      avoid:   [primary navigation]
+
+  search_input:
+    category: saas
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/search_input_component.rb
+      - app/components/senren/search_input_component.html.erb
+    depends_on: [input, label]
+    pairs_with: [filter_bar, data_table]
+    variants: [default]
+    accessibility: [aria-label or visible label; type=search; submit on Enter.]
+    ai:
+      use_for: [search above lists or in headers]
+      avoid:   [global navigation - use command]
+
+  bulk_action_bar:
+    category: saas
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/bulk_action_bar_component.rb
+      - app/components/senren/bulk_action_bar_component.html.erb
+    depends_on: [button, dropdown_menu]
+    pairs_with: [data_table, table]
+    variants: [default]
+    accessibility: [Show count of selected items in an aria-live region.]
+    ai:
+      use_for: [acting on multiple selected rows]
+      avoid:   [single-row actions - use dropdown_menu]
+
+  team_member_list:
+    category: saas
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/team_member_list_component.rb
+      - app/components/senren/team_member_list_component.html.erb
+    depends_on: [avatar, badge, button, dropdown_menu]
+    pairs_with: [invite_member_dialog, search_input]
+    variants: [default]
+    accessibility: [Use semantic list markup.]
+    ai:
+      use_for: [team management pages]
+      avoid:   [arbitrary user lists - compose with table or card]
+
+  invite_member_dialog:
+    category: saas
+    client: true
+    can_have_client: true
+    controller: senren--invite-member-dialog
+    stub: false
+    files:
+      - app/components/senren/invite_member_dialog_component.rb
+      - app/components/senren/invite_member_dialog_component.html.erb
+      - app/javascript/controllers/senren/invite_member_dialog_controller.js
+    depends_on: [dialog, form, input, button]
+    pairs_with: [team_member_list]
+    variants: [default]
+    accessibility: [Inherit dialog accessibility; validate email server-side.]
+    ai:
+      use_for: [team invitation flow]
+      avoid:   [bulk imports - use a dedicated screen]
+
+  billing_plan_card:
+    category: saas
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/billing_plan_card_component.rb
+      - app/components/senren/billing_plan_card_component.html.erb
+    depends_on: [card, button, badge, typography]
+    pairs_with: [settings_section]
+    variants: [default, current, recommended]
+    accessibility: [Use heading; price and features must be readable.]
+    ai:
+      use_for: [pricing page or billing settings]
+      avoid:   [feature comparison tables - use table]
+
+  api_key_field:
+    category: saas
+    client: true
+    can_have_client: true
+    controller: senren--api-key-field
+    stub: false
+    files:
+      - app/components/senren/api_key_field_component.rb
+      - app/components/senren/api_key_field_component.html.erb
+      - app/javascript/controllers/senren/api_key_field_controller.js
+    depends_on: [input, button, clipboard]
+    pairs_with: [settings_section]
+    variants: [default]
+    accessibility: [Reveal/hide must be reachable by keyboard; copy via clipboard with announcement.]
+    ai:
+      use_for: [secret key display with reveal/copy/regenerate]
+      avoid:   [storing secrets in plain text on the server side]
+
+  activity_feed:
+    category: saas
+    client: false
+    can_have_client: false
+    stub: false
+    files:
+      - app/components/senren/activity_feed_component.rb
+      - app/components/senren/activity_feed_component.html.erb
+    depends_on: [avatar, badge, typography]
+    pairs_with: [card]
+    variants: [default]
+    accessibility: [Use a list; each entry has a relative time element.]
+    ai:
+      use_for: [audit logs, comment threads, change history]
+      avoid:   [transient notifications - use alert or toast]
+
+  rich_text_editor_lite:
+    category: rich
+    client: true
+    can_have_client: true
+    controller: senren--rich-text-editor-lite
+    stub: false
+    files:
+      - app/components/senren/rich_text_editor_lite_component.rb
+      - app/components/senren/rich_text_editor_lite_component.html.erb
+      - app/javascript/controllers/senren/rich_text_editor_lite_controller.js
+    depends_on: [button]
+    pairs_with: [form, label]
+    variants: [default]
+    accessibility: [Toolbar buttons must have aria-label; use contenteditable role=textbox.]
+    ai:
+      use_for: [light formatting (bold/italic/links/lists) only]
+      avoid:   [tables, embeds, media - out of scope for v0.1]

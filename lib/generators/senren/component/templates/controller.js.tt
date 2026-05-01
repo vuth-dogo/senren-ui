@@ -1,0 +1,23 @@
+import { Controller } from "@hotwired/stimulus"
+
+// Stimulus controller for Senren <%= class_name %>.
+// Identifier: <%= stimulus_identifier %>
+//
+// Responsibilities (local UI only):
+// - Manage open/close, focus, or keyboard behavior for this component.
+// Forbidden:
+// - fetch / XHR (Turbo handles server state)
+// - importing React, Vue, Alpine, lit, or any other framework
+export default class extends Controller {
+  static targets = []
+  static values  = {}
+  static classes = []
+
+  connect() {
+    // initialization
+  }
+
+  disconnect() {
+    // cleanup
+  }
+}

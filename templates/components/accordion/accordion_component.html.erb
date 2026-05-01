@@ -1,0 +1,16 @@
+<div <%= tag.attributes(**root_attrs("divide-y divide-[hsl(var(--senren-border))] rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-background))]", data: { controller: "senren--accordion", "senren--accordion-multiple-value": multiple? })) %>>
+  <% items.each_with_index do |item, index| %>
+    <% expanded = open_item?(item, index) %>
+    <section>
+      <h3>
+        <button type="button" class="flex w-full cursor-pointer items-center justify-between gap-4 px-4 py-3 text-left text-sm font-medium text-[hsl(var(--senren-foreground))] transition-colors hover:bg-[hsl(var(--senren-muted)/0.5)]" aria-expanded="<%= expanded %>" aria-controls="<%= item[:id] %>-panel" data-senren--accordion-target="trigger" data-panel-id="<%= item[:id] %>" data-action="click->senren--accordion#toggle">
+          <span><%= item[:title] %></span>
+          <span aria-hidden="true" class="text-[hsl(var(--senren-muted-foreground))]">+</span>
+        </button>
+      </h3>
+      <div id="<%= item[:id] %>-panel" data-senren--accordion-target="panel" data-panel-id="<%= item[:id] %>" <%= "hidden" unless expanded %> class="px-4 pb-4 text-sm leading-6 text-[hsl(var(--senren-muted-foreground))]">
+        <%= item[:content].presence || content %>
+      </div>
+    </section>
+  <% end %>
+</div>

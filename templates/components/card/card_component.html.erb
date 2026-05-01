@@ -1,0 +1,13 @@
+<%= tag.div(**root_attrs("rounded-(--senren-radius) border shadow-sm")) do %>
+  <% if header? %>
+    <div class="flex flex-col space-y-1.5 p-6 border-b border-[hsl(var(--senren-border))]"><%= header %></div>
+  <% end %>
+  <% if body? %>
+    <div class="p-6"><%= body %></div>
+  <% else %>
+    <div class="p-6"><%= content %></div>
+  <% end %>
+  <% if footer? %>
+    <div class="flex items-center p-6 pt-0 border-t border-[hsl(var(--senren-border))]"><%= footer %></div>
+  <% end %>
+<% end %>

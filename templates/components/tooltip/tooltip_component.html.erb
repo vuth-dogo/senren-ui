@@ -1,0 +1,9 @@
+<span data-controller="senren--tooltip" class="relative inline-block" data-senren-component="tooltip">
+  <span tabindex="0"
+        aria-describedby="<%= id %>"
+        data-action="mouseenter->senren--tooltip#show mouseleave->senren--tooltip#hide focus->senren--tooltip#show blur->senren--tooltip#hide">
+    <%= content %>
+  </span>
+  <span id="<%= id %>" role="tooltip" hidden data-senren--tooltip-target="bubble"
+        class="absolute z-50 mt-1 whitespace-nowrap rounded-md bg-[hsl(var(--senren-foreground))] text-[hsl(var(--senren-background))] px-2 py-1 text-xs shadow"><%= text %></span>
+</span>

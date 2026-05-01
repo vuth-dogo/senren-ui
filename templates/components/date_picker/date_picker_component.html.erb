@@ -1,0 +1,5 @@
+<div <%= tag.attributes(**root_attrs("flex w-full items-center gap-2", data: { controller: "senren--date-picker" })) %>>
+  <input type="date" id="<%= id %>" name="<%= name %>" value="<%= value %>" placeholder="<%= placeholder %>" data-senren--date-picker-target="input" class="hover:cursor-pointerh-10 w-full rounded-(--senren-radius) border bg-[hsl(var(--senren-background))] px-3 text-sm text-[hsl(var(--senren-foreground))] outline-none transition-colors focus:ring-2 focus:ring-[hsl(var(--senren-ring))] <%= self.class::VARIANTS[variant] %>">
+  <button type="button" data-action="click->senren--date-picker#today" class="inline-flex h-10 cursor-pointer items-center rounded-(--senren-radius) border border-[hsl(var(--senren-border))] px-3 text-sm font-medium hover:bg-[hsl(var(--senren-accent))]">Today</button>
+  <button type="button" data-action="click->senren--date-picker#clear" class="inline-flex h-10 cursor-pointer items-center rounded-(--senren-radius) px-3 text-sm text-[hsl(var(--senren-muted-foreground))] hover:bg-[hsl(var(--senren-accent))]">Clear</button>
+</div>

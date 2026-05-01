@@ -1,0 +1,22 @@
+<%= tag.div(**root_attrs("rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] p-4 shadow-sm")) do %>
+  <% if content? && items.empty? %>
+    <%= content %>
+  <% else %>
+    <ol class="space-y-4">
+      <% items.each do |item| %>
+        <li class="relative flex gap-3">
+          <span class="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--senren-muted))] text-xs font-semibold text-[hsl(var(--senren-muted-foreground))]"><%= item_value(item, :initials) || "!" %></span>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm text-[hsl(var(--senren-foreground))]"><%= item_value(item, :title) %></p>
+            <% if item_value(item, :description).present? %>
+              <p class="mt-1 text-sm leading-6 text-[hsl(var(--senren-muted-foreground))]"><%= item_value(item, :description) %></p>
+            <% end %>
+            <% if item_value(item, :time).present? %>
+              <time class="mt-1 block text-xs text-[hsl(var(--senren-muted-foreground))]"><%= item_value(item, :time) %></time>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+  <% end %>
+<% end %>

@@ -1,0 +1,35 @@
+<%= tag.div(**root_attrs("inline-block", data: { controller: "senren--invite-member-dialog" })) do %>
+  <% if trigger? %>
+    <span data-action="click->senren--invite-member-dialog#open" data-senren--invite-member-dialog-target="trigger"><%= trigger %></span>
+  <% else %>
+    <button type="button" class="inline-flex h-10 cursor-pointer items-center justify-center rounded-(--senren-radius) bg-[hsl(var(--senren-primary))] px-4 text-sm font-medium text-[hsl(var(--senren-primary-foreground))] hover:opacity-90" data-action="click->senren--invite-member-dialog#open" data-senren--invite-member-dialog-target="trigger">
+      <%= button_label %>
+    </button>
+  <% end %>
+
+  <div hidden data-senren--invite-member-dialog-target="overlay" class="fixed inset-0 z-40 bg-[hsl(var(--senren-foreground)/0.42)] backdrop-blur-sm"></div>
+  <div hidden id="<%= dom_id %>" data-senren--invite-member-dialog-target="panel" role="dialog" aria-modal="true" aria-labelledby="<%= dom_id %>-title" tabindex="-1" class="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] p-6 text-[hsl(var(--senren-popover-foreground))] shadow-lg">
+    <h2 id="<%= dom_id %>-title" class="font-display text-lg font-semibold"><%= title %></h2>
+    <% if description.present? %>
+      <p class="mt-1.5 text-sm leading-6 text-[hsl(var(--senren-muted-foreground))]"><%= description %></p>
+    <% end %>
+
+    <div class="mt-5 space-y-4">
+      <% if content? %>
+        <%= content %>
+      <% else %>
+        <label class="block text-sm font-medium text-[hsl(var(--senren-foreground))]" for="<%= dom_id %>-email">Email</label>
+        <input id="<%= dom_id %>-email" name="<%= email_name %>" type="email" placeholder="teammate@company.com" class="h-10 w-full rounded-(--senren-radius) border border-[hsl(var(--senren-input))] bg-[hsl(var(--senren-background))] px-3 text-sm outline-none focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
+        <label class="block text-sm font-medium text-[hsl(var(--senren-foreground))]" for="<%= dom_id %>-role">Role</label>
+        <select id="<%= dom_id %>-role" name="<%= role_name %>" class="h-10 w-full rounded-(--senren-radius) border border-[hsl(var(--senren-input))] bg-[hsl(var(--senren-background))] px-3 text-sm outline-none focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
+          <% roles.each do |role| %><option><%= role %></option><% end %>
+        </select>
+      <% end %>
+    </div>
+
+    <div class="mt-6 flex justify-end gap-2">
+      <button type="button" class="inline-flex h-10 cursor-pointer items-center rounded-(--senren-radius) px-4 text-sm font-medium hover:bg-[hsl(var(--senren-accent))]" data-action="click->senren--invite-member-dialog#close">Cancel</button>
+      <% if footer? %><%= footer %><% else %><button type="submit" class="inline-flex h-10 cursor-pointer items-center rounded-(--senren-radius) bg-[hsl(var(--senren-primary))] px-4 text-sm font-medium text-[hsl(var(--senren-primary-foreground))] hover:opacity-90">Send invite</button><% end %>
+    </div>
+  </div>
+<% end %>

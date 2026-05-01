@@ -1,0 +1,20 @@
+<%= tag.header(**root_attrs("flex flex-col gap-4 border-b border-[hsl(var(--senren-border))] pb-6 sm:flex-row sm:items-end sm:justify-between")) do %>
+  <% if content? && title.blank? && description.blank? %>
+    <%= content %>
+  <% else %>
+    <div class="min-w-0">
+      <% if eyebrow? %>
+        <div class="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--senren-muted-foreground))]"><%= eyebrow %></div>
+      <% end %>
+      <% if title.present? %>
+        <h1 class="font-display text-3xl font-semibold tracking-tight text-[hsl(var(--senren-foreground))]"><%= title %></h1>
+      <% end %>
+      <% if description.present? %>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-[hsl(var(--senren-muted-foreground))]"><%= description %></p>
+      <% end %>
+    </div>
+    <% if actions? %>
+      <div class="flex shrink-0 flex-wrap items-center gap-2"><%= actions %></div>
+    <% end %>
+  <% end %>
+<% end %>

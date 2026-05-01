@@ -1,0 +1,22 @@
+<%= tag.div(**root_attrs("rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] shadow-sm")) do %>
+  <% if content? && members.empty? %>
+    <div class="p-4"><%= content %></div>
+  <% else %>
+    <ul class="divide-y divide-[hsl(var(--senren-border))]">
+      <% members.each do |member| %>
+        <li class="flex items-center justify-between gap-4 p-4">
+          <div class="flex min-w-0 items-center gap-3">
+            <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--senren-muted))] text-sm font-semibold text-[hsl(var(--senren-muted-foreground))]"><%= initials_for(member) %></span>
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium text-[hsl(var(--senren-foreground))]"><%= member_value(member, :name) %></p>
+              <p class="truncate text-xs text-[hsl(var(--senren-muted-foreground))]"><%= member_value(member, :role) || member_value(member, :email) %></p>
+            </div>
+          </div>
+          <% if member_value(member, :status).present? %>
+            <span class="rounded-full bg-[hsl(var(--senren-muted))] px-2 py-1 text-xs font-medium text-[hsl(var(--senren-muted-foreground))]"><%= member_value(member, :status) %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

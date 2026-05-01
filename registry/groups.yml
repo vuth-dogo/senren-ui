@@ -1,0 +1,25 @@
+groups:
+  - id: actions
+    title: Actions
+    description: Buttons, links, and clickable affordances.
+  - id: forms
+    title: Forms
+    description: Form structure, labels, inputs, selects, validation surfaces.
+  - id: overlays
+    title: Overlays
+    description: Dialogs, popovers, tooltips, sheets, menus.
+  - id: navigation
+    title: Navigation
+    description: Tabs, breadcrumbs, sidebar, theme toggle, shortcut keys.
+  - id: layout
+    title: Layout
+    description: Cards, separators, app shells, page headers, aspect ratios.
+  - id: data
+    title: Data Display
+    description: Tables, badges, avatars, progress, skeletons, pagination.
+  - id: saas
+    title: SaaS Blocks
+    description: Composite blocks for SaaS apps - settings, billing, team, search, filters.
+  - id: rich
+    title: Rich Content
+    description: Editors, code blocks, carousels, command palettes.

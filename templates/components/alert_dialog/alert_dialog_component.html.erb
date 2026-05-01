@@ -1,0 +1,34 @@
+<div data-controller="senren--alert-dialog" data-senren-component="alert_dialog" id="<%= dom_id %>">
+  <% if trigger? %>
+    <span data-action="click->senren--alert-dialog#open" data-senren--alert-dialog-target="trigger">
+      <%= trigger %>
+    </span>
+  <% else %>
+    <button type="button" data-action="click->senren--alert-dialog#open"
+            data-senren--alert-dialog-target="trigger"
+            class="hidden">Open</button>
+  <% end %>
+
+  <div data-senren--alert-dialog-target="overlay" hidden
+       class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"></div>
+
+  <div data-senren--alert-dialog-target="panel" hidden
+       role="alertdialog" aria-modal="true" aria-labelledby="<%= dom_id %>-title" aria-describedby="<%= dom_id %>-desc"
+       tabindex="-1"
+       class="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-6 shadow-lg">
+    <% if title? %>
+      <h2 id="<%= dom_id %>-title" class="text-lg font-semibold"><%= title %></h2>
+    <% end %>
+    <% if description? %>
+      <p id="<%= dom_id %>-desc" class="mt-2 text-sm text-[hsl(var(--senren-muted-foreground))]"><%= description %></p>
+    <% end %>
+    <div class="mt-6 flex justify-end gap-2">
+      <% if cancel? %>
+        <span data-action="click->senren--alert-dialog#close"><%= cancel %></span>
+      <% end %>
+      <% if confirm? %>
+        <%= confirm %>
+      <% end %>
+    </div>
+  </div>
+</div>

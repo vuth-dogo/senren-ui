@@ -1,0 +1,13 @@
+<%= tag.div(**root_attrs("space-y-2", data: { controller: "senren--api-key-field", "senren--api-key-field-reveal-label-value": reveal_label, "senren--api-key-field-hide-label-value": hide_label, "senren--api-key-field-copy-label-value": copy_label })) do %>
+  <% if content? && value.blank? %>
+    <%= content %>
+  <% else %>
+    <label class="block text-sm font-medium text-[hsl(var(--senren-foreground))]"><%= label %></label>
+    <div class="flex flex-col gap-2 sm:flex-row">
+      <input type="password" readonly value="<%= value %>" data-senren--api-key-field-target="input" class="h-10 min-w-0 flex-1 rounded-(--senren-radius) border border-[hsl(var(--senren-input))] bg-[hsl(var(--senren-muted)/0.35)] px-3 font-mono text-sm text-[hsl(var(--senren-foreground))] outline-none focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
+      <button type="button" data-senren--api-key-field-target="revealButton" data-action="click->senren--api-key-field#toggle" class="inline-flex h-10 cursor-pointer items-center justify-center rounded-(--senren-radius) border border-[hsl(var(--senren-border))] px-3 text-sm font-medium hover:bg-[hsl(var(--senren-accent))]"><%= reveal_label %></button>
+      <button type="button" data-action="click->senren--api-key-field#copy" class="inline-flex h-10 cursor-pointer items-center justify-center rounded-(--senren-radius) bg-[hsl(var(--senren-primary))] px-3 text-sm font-medium text-[hsl(var(--senren-primary-foreground))] hover:opacity-90"><%= copy_label %></button>
+    </div>
+    <span class="sr-only" aria-live="polite" data-senren--api-key-field-target="status"></span>
+  <% end %>
+<% end %>

@@ -1,0 +1,32 @@
+<%= tag.div(**root_attrs("overflow-hidden rounded-(--senren-radius) border shadow-sm", data: { controller: "senren--rich-text-editor-lite", "senren--rich-text-editor-lite-debug-value": debug? })) do %>
+  <label for="<%= dom_id %>-editor" class="sr-only"><%= label %></label>
+  <textarea hidden name="<%= name %>" data-senren--rich-text-editor-lite-target="input"><%= initial_content %></textarea>
+
+  <% if toolbar? %>
+    <div class="flex flex-wrap items-center gap-1 border-b border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-muted)/0.35)] p-2">
+      <% [
+        ["formatBlock:p", "P", "Paragraph"],
+        ["formatBlock:h1", "H1", "Heading 1"],
+        ["formatBlock:h2", "H2", "Heading 2"],
+        ["formatBlock:h3", "H3", "Heading 3"],
+        ["bold", "B", "Bold"],
+        ["italic", "I", "Italic"],
+        ["createLink", "Link", "Create link"],
+        ["insertUnorderedList", "List", "Bulleted list"],
+        ["insertOrderedList", "1.", "Numbered list"],
+        ["align:left", "Left", "Align left"],
+        ["align:center", "Center", "Align center"],
+        ["align:right", "Right", "Align right"],
+        ["align:justify", "Justify", "Justify"]
+      ].each do |command, label_text, aria_label| %>
+        <button type="button" disabled class="inline-flex h-8 cursor-pointer items-center rounded-(--senren-radius) px-2 text-sm font-medium text-[hsl(var(--senren-foreground))] hover:bg-[hsl(var(--senren-accent))] disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-[hsl(var(--senren-accent))]" data-senren--rich-text-editor-lite-target="button" data-command="<%= command %>" data-action="pointerdown->senren--rich-text-editor-lite#keepSelection mousedown->senren--rich-text-editor-lite#keepSelection touchstart->senren--rich-text-editor-lite#keepSelection click->senren--rich-text-editor-lite#format" aria-label="<%= aria_label %>" aria-pressed="false">
+          <%= label_text %>
+        </button>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div id="<%= dom_id %>-editor" role="textbox" aria-multiline="true" aria-label="<%= label %>" contenteditable="true" data-placeholder="<%= placeholder %>" data-senren--rich-text-editor-lite-target="editor" data-action="click->senren--rich-text-editor-lite#openLink input->senren--rich-text-editor-lite#sync input->senren--rich-text-editor-lite#rememberSelection keyup->senren--rich-text-editor-lite#rememberSelection keyup->senren--rich-text-editor-lite#updateToolbar mouseup->senren--rich-text-editor-lite#rememberSelection mouseup->senren--rich-text-editor-lite#updateToolbar touchend->senren--rich-text-editor-lite#rememberSelection paste->senren--rich-text-editor-lite#syncSoon" class="min-h-40 cursor-text bg-[hsl(var(--senren-background))] p-4 text-left text-sm leading-6 text-[hsl(var(--senren-foreground))] outline-none focus:ring-2 focus:ring-inset focus:ring-[hsl(var(--senren-ring))]">
+    <%= sanitize(initial_content, tags: %w[p br strong b em i a ul ol li h1 h2 h3], attributes: %w[href rel target data-align]) %>
+  </div>
+<% end %>

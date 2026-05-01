@@ -1,0 +1,26 @@
+<div <%= tag.attributes(**root_attrs("w-full overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))]")) %>>
+  <table class="w-full border-collapse text-left text-sm <%= self.class::VARIANTS[variant] %>">
+    <% if caption.present? %>
+      <caption class="sr-only"><%= caption %></caption>
+    <% end %>
+    <thead class="bg-[hsl(var(--senren-muted)/0.6)] text-[hsl(var(--senren-muted-foreground))]">
+      <tr>
+        <% columns.each do |column| %>
+          <th scope="col" class="px-4 py-3 font-medium"><%= column_label(column) %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-[hsl(var(--senren-border))] bg-[hsl(var(--senren-background))] text-[hsl(var(--senren-foreground))]">
+      <% rows.each do |row| %>
+        <tr class="transition-colors hover:bg-[hsl(var(--senren-muted)/0.4)]">
+          <% columns.each do |column| %>
+            <td class="px-4 py-3"><%= cell_value(row, column) %></td>
+          <% end %>
+        </tr>
+      <% end %>
+      <% if rows.empty? && content? %>
+        <tr><td class="px-4 py-6" colspan="<%= columns.size.nonzero? || 1 %>"><%= content %></td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

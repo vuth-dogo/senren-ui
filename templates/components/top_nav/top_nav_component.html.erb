@@ -1,0 +1,21 @@
+<header <%= tag.attributes(**root_attrs("sticky top-0 z-30 border-b border-[hsl(var(--senren-border))] backdrop-blur-md")) %>>
+  <div class="mx-auto flex h-14 w-full max-w-[1400px] items-center gap-6 px-4 lg:px-8">
+    <div class="min-w-0 flex-none font-display text-sm font-semibold text-[hsl(var(--senren-foreground))]">
+      <% if brand? %><%= brand %><% else %>Senren<% end %>
+    </div>
+
+    <% if items.any? %>
+      <nav aria-label="<%= label %>" class="hidden min-w-0 items-center gap-1 md:flex">
+        <% items.each do |item| %>
+          <%= link_to item[:label], item[:href], class: "rounded-(--senren-radius) px-3 py-2 text-sm font-medium transition-colors #{active_item?(item) ? 'bg-[hsl(var(--senren-accent))] text-[hsl(var(--senren-accent-foreground))]' : 'text-[hsl(var(--senren-muted-foreground))] hover:bg-[hsl(var(--senren-accent))] hover:text-[hsl(var(--senren-accent-foreground))]'}" %>
+        <% end %>
+      </nav>
+    <% elsif content? %>
+      <div class="min-w-0 flex-1"><%= content %></div>
+    <% end %>
+
+    <% if actions? %>
+      <div class="ml-auto flex items-center gap-2"><%= actions %></div>
+    <% end %>
+  </div>
+</header>

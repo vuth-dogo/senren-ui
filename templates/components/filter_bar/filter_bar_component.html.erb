@@ -1,0 +1,5 @@
+<%= tag.div(**root_attrs("rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] p-3 shadow-sm", role: "search", "aria-label": label)) do %>
+  <div class="flex flex-wrap items-center gap-2">
+    <%= content %>
+  </div>
+<% end %>

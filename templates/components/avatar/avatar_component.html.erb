@@ -1,0 +1,27 @@
+<%= tag.span(**root_attrs("relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[hsl(var(--senren-muted))] text-[hsl(var(--senren-foreground))] font-semibold shadow-sm ring-1 ring-[hsl(var(--senren-border))]", role: "img", "aria-label": alt.presence || fallback)) do %>
+  <% if src.present? %>
+    <%= image_tag src, alt: alt.to_s, class: "h-full w-full object-cover" %>
+  <% else %>
+    <svg aria-hidden="true" viewBox="0 0 64 64" preserveAspectRatio="none" class="absolute inset-0 h-full w-full">
+      <rect width="64" height="64" fill="#2b9bd7" />
+      <circle cx="42" cy="15" r="8" fill="#fffbea" />
+      <path d="M0 27 C10 20 16 22 24 17 C31 13 37 23 45 18 C54 12 58 22 64 20 L64 64 L0 64 Z" fill="#f6a4c8" />
+      <path d="M0 36 C10 29 19 35 29 29 C39 23 48 33 64 27 L64 64 L0 64 Z" fill="#86c84a" />
+      <path d="M5 46 C17 39 34 40 59 43 C50 53 23 57 5 46 Z" fill="#bdeef4" />
+      <path d="M0 50 C10 44 18 48 25 43 C28 51 42 48 46 55 C56 48 60 53 64 50 L64 64 L0 64 Z" fill="#7fc547" />
+      <path d="M2 54 C11 49 18 51 25 47 C28 55 16 60 5 61 Z" fill="#b59ce9" opacity=".9" />
+      <path d="M44 49 C52 45 59 47 64 44 L64 64 L45 64 C41 58 40 53 44 49 Z" fill="#16a060" opacity=".9" />
+      <g fill="#107e76" opacity=".45">
+        <circle cx="8" cy="12" r=".8" />
+        <circle cx="17" cy="25" r=".6" />
+        <circle cx="28" cy="9" r=".7" />
+        <circle cx="36" cy="32" r=".6" />
+        <circle cx="51" cy="25" r=".7" />
+        <circle cx="57" cy="38" r=".6" />
+      </g>
+    </svg>
+    <% if fallback.present? %>
+      <span class="relative z-10 rounded-full bg-[hsl(var(--senren-background)/0.72)] px-1.5 leading-none text-[hsl(var(--senren-foreground))] shadow-sm"><%= fallback %></span>
+    <% end %>
+  <% end %>
+<% end %>

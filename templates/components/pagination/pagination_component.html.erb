@@ -1,0 +1,11 @@
+<nav <%= tag.attributes(**root_attrs("flex items-center justify-center gap-1", aria: { label: label })) %>>
+  <% prev_page = current_page - 1 %>
+  <%= link_to "Previous", page_url(prev_page), class: "rounded-md border border-[hsl(var(--senren-border))] px-3 py-2 text-sm #{current_page == 1 ? "pointer-events-none opacity-50" : "hover:bg-[hsl(var(--senren-accent))]"}", aria: { disabled: current_page == 1 } %>
+
+  <% (1..total_pages).each do |page| %>
+    <%= link_to page, page_url(page), class: "inline-flex h-9 min-w-9 items-center justify-center rounded-md px-3 text-sm font-medium #{page == current_page ? "bg-[hsl(var(--senren-primary))] text-[hsl(var(--senren-primary-foreground))]" : "text-[hsl(var(--senren-muted-foreground))] hover:bg-[hsl(var(--senren-accent))] hover:text-[hsl(var(--senren-accent-foreground))]"}", aria: { current: (page == current_page ? "page" : nil) } %>
+  <% end %>
+
+  <% next_page = current_page + 1 %>
+  <%= link_to "Next", page_url(next_page), class: "rounded-md border border-[hsl(var(--senren-border))] px-3 py-2 text-sm #{current_page == total_pages ? "pointer-events-none opacity-50" : "hover:bg-[hsl(var(--senren-accent))]"}", aria: { disabled: current_page == total_pages } %>
+</nav>

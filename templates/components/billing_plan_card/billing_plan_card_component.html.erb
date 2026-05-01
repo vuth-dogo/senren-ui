@@ -1,0 +1,28 @@
+<%= tag.div(**root_attrs("relative rounded-(--senren-radius) border bg-[hsl(var(--senren-card))] p-6 shadow-sm")) do %>
+  <% if badge.present? %>
+    <span class="absolute right-4 top-4 rounded-full bg-[hsl(var(--senren-accent))] px-2.5 py-1 text-xs font-semibold text-[hsl(var(--senren-accent-foreground))]"><%= badge %></span>
+  <% end %>
+
+  <% if content? && name.blank? %>
+    <%= content %>
+  <% else %>
+    <% if name.present? %><h3 class="font-display text-lg font-semibold text-[hsl(var(--senren-foreground))]"><%= name %></h3><% end %>
+    <% if description.present? %><p class="mt-2 text-sm leading-6 text-[hsl(var(--senren-muted-foreground))]"><%= description %></p><% end %>
+    <% if price.present? %>
+      <div class="mt-5 flex items-end gap-1">
+        <span class="font-display text-4xl font-semibold tracking-tight text-[hsl(var(--senren-foreground))]"><%= price %></span>
+        <% if interval.present? %><span class="pb-1 text-sm text-[hsl(var(--senren-muted-foreground))]"><%= interval %></span><% end %>
+      </div>
+    <% end %>
+    <% if features.any? %>
+      <ul class="mt-5 space-y-2 text-sm text-[hsl(var(--senren-muted-foreground))]">
+        <% features.each do |feature| %>
+          <li class="flex gap-2"><span class="text-[hsl(var(--senren-success))]">+</span><span><%= feature %></span></li>
+        <% end %>
+      </ul>
+    <% end %>
+    <% if cta_label.present? %>
+      <%= link_to cta_label, cta_href || "#", class: "mt-6 inline-flex h-10 w-full items-center justify-center rounded-(--senren-radius) bg-[hsl(var(--senren-primary))] px-4 text-sm font-medium text-[hsl(var(--senren-primary-foreground))] hover:opacity-90" %>
+    <% end %>
+  <% end %>
+<% end %>

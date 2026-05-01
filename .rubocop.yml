@@ -1,0 +1,51 @@
+AllCops:
+  NewCops: enable
+  SuggestExtensions: false
+  TargetRubyVersion: 3.1
+
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Naming/PredicateMethod:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - 'templates/components/**/*_component.rb'
+
+Metrics/AbcSize:
+  Max: 65
+
+Metrics/ClassLength:
+  Max: 150
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/MethodLength:
+  Max: 40
+
+Metrics/ParameterLists:
+  Exclude:
+    - 'templates/components/**/*_component.rb'
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+Metrics/BlockLength:
+  Exclude:
+    - 'lib/tasks/*.rake'
+    - 'senren-ui.gemspec'
+    - 'test/**/*_test.rb'
+
+Lint/MissingSuper:
+  Exclude:
+    - 'templates/components/**/*_component.rb'
+
+Style/OneClassPerFile:
+  Exclude:
+    - 'bin/*.rb'

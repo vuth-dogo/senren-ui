@@ -1,0 +1,17 @@
+/.bundle/
+/vendor/bundle
+/pkg/
+/tmp/
+/log/
+/coverage/
+/.idea/
+/.vscode/
+*.gem
+*.rbc
+.DS_Store
+test/dummy/log/*.log
+test/dummy/tmp/
+test/dummy/db/*.sqlite3
+test/dummy/db/*.sqlite3-journal
+node_modules/
+images/

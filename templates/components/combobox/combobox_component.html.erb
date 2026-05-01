@@ -1,0 +1,19 @@
+<div <%= tag.attributes(**root_attrs("relative w-full", data: { controller: "senren--combobox" })) %>>
+  <input type="hidden" name="<%= name %>" value="<%= value %>" data-senren--combobox-target="value">
+  <button type="button" class="group flex h-10 w-full cursor-pointer items-center justify-between rounded-(--senren-radius) border bg-[hsl(var(--senren-background))] px-3 text-left text-sm text-[hsl(var(--senren-foreground))] transition-colors hover:bg-[hsl(var(--senren-muted)/0.35)] <%= self.class::VARIANTS[variant] %>" aria-haspopup="listbox" aria-expanded="false" data-state="closed" data-senren--combobox-target="button" data-action="click->senren--combobox#toggle">
+    <span data-senren--combobox-target="label"><%= selected_label || placeholder %></span>
+    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0 text-[hsl(var(--senren-muted-foreground))] transition-transform duration-150 data-[state=open]:rotate-180" data-state="closed" data-senren--combobox-target="chevron">
+      <path d="m5 8 5 5 5-5"></path>
+    </svg>
+  </button>
+  <div data-senren--combobox-target="panel" hidden class="absolute z-50 mt-2 w-full rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] p-2 shadow-md">
+    <input type="text" placeholder="<%= placeholder %>" data-senren--combobox-target="search" data-action="input->senren--combobox#filter keydown->senren--combobox#onKey" class="mb-2 h-9 w-full rounded-md border border-[hsl(var(--senren-input))] bg-[hsl(var(--senren-background))] px-2 text-sm outline-none focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
+    <div role="listbox" class="max-h-56 overflow-auto">
+      <% options.each do |option| %>
+        <button type="button" role="option" data-senren--combobox-target="option" data-value="<%= option[:value] %>" data-label="<%= option[:label] %>" data-action="click->senren--combobox#choose" class="block w-full cursor-pointer rounded-md px-2 py-2 text-left text-sm text-[hsl(var(--senren-popover-foreground))] hover:bg-[hsl(var(--senren-accent))]">
+          <%= option[:label] %>
+        </button>
+      <% end %>
+    </div>
+  </div>
+</div>

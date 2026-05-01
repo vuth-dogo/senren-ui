@@ -1,0 +1,21 @@
+<div <%= tag.attributes(**root_attrs("w-72 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] p-3 text-[hsl(var(--senren-card-foreground))]", data: { controller: "senren--calendar" })) %>>
+  <% if name.present? %>
+    <input type="hidden" name="<%= name %>" value="<%= selected&.iso8601 %>" data-senren--calendar-target="value">
+  <% end %>
+  <div class="mb-3 flex items-center justify-between">
+    <p class="font-display text-sm font-semibold tracking-tight"><%= title %></p>
+  </div>
+  <div class="grid grid-cols-7 gap-1 text-center text-xs text-[hsl(var(--senren-muted-foreground))]">
+    <% weekday_labels.each do |day| %>
+      <div class="py-1"><%= day %></div>
+    <% end %>
+  </div>
+  <div role="grid" class="mt-1 grid grid-cols-7 gap-1">
+    <% calendar_days.each do |day| %>
+      <% outside = day.month != date.month %>
+      <button type="button" role="gridcell" data-senren--calendar-target="day" data-date="<%= day.iso8601 %>" data-action="click->senren--calendar#select" class="h-9 cursor-pointer rounded-md text-sm transition-colors <%= selected?(day) ? "bg-[hsl(var(--senren-primary))] text-[hsl(var(--senren-primary-foreground))]" : "hover:bg-[hsl(var(--senren-accent))] hover:text-[hsl(var(--senren-accent-foreground))]" %> <%= outside ? "text-[hsl(var(--senren-muted-foreground)/0.45)]" : "text-[hsl(var(--senren-foreground))]" %>">
+        <%= day.day %>
+      </button>
+    <% end %>
+  </div>
+</div>

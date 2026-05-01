@@ -1,0 +1,14 @@
+<aside <%= tag.attributes(**root_attrs("flex min-h-80 flex-col rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] p-3 text-[hsl(var(--senren-card-foreground))] #{self.class::VARIANTS[variant]}", data: { controller: "senren--sidebar" })) %>>
+  <div class="mb-4 flex items-center justify-between gap-2 px-2">
+    <div class="truncate font-display text-sm font-semibold tracking-tight"><%= brand %></div>
+    <button type="button" class="cursor-pointer rounded-md px-2 py-1 text-xs text-[hsl(var(--senren-muted-foreground))] hover:bg-[hsl(var(--senren-accent))]" data-action="click->senren--sidebar#toggle" aria-label="Toggle sidebar">Toggle</button>
+  </div>
+  <nav aria-label="<%= label %>" class="space-y-1">
+    <% items.each do |item| %>
+      <%= link_to item[:label], item[:href], class: "block truncate rounded-md px-3 py-2 text-sm transition-colors #{item[:active] ? "bg-[hsl(var(--senren-primary))] text-[hsl(var(--senren-primary-foreground))]" : "text-[hsl(var(--senren-muted-foreground))] hover:bg-[hsl(var(--senren-accent))] hover:text-[hsl(var(--senren-accent-foreground))]"}" %>
+    <% end %>
+  </nav>
+  <% if content? %>
+    <div class="mt-auto pt-4 text-xs text-[hsl(var(--senren-muted-foreground))]"><%= content %></div>
+  <% end %>
+</aside>

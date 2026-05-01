@@ -1,0 +1,9 @@
+<div <%= tag.attributes(**root_attrs("rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))]", data: { controller: "senren--collapsible" })) %>>
+  <button type="button" class="flex w-full cursor-pointer items-center justify-between gap-4 px-4 py-3 text-left text-sm font-medium text-[hsl(var(--senren-card-foreground))]" aria-expanded="<%= open? %>" data-senren--collapsible-target="trigger" data-action="click->senren--collapsible#toggle">
+    <span><%= trigger || title %></span>
+    <span aria-hidden="true" class="text-[hsl(var(--senren-muted-foreground))]">+</span>
+  </button>
+  <div data-senren--collapsible-target="panel" <%= "hidden" unless open? %> class="border-t border-[hsl(var(--senren-border))] px-4 py-3 text-sm text-[hsl(var(--senren-muted-foreground))]">
+    <%= body || content %>
+  </div>
+</div>

@@ -1,0 +1,4 @@
+<button type="button" <%= tag.attributes(**root_attrs("inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-background))] px-3 text-sm font-medium text-[hsl(var(--senren-foreground))] transition-colors hover:bg-[hsl(var(--senren-accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]", data: { controller: "senren--theme-toggle", action: "click->senren--theme-toggle#toggle" }, aria: { label: label, pressed: "false" })) %>>
+  <span aria-hidden="true" data-senren--theme-toggle-target="icon">O</span>
+  <span data-senren--theme-toggle-target="label"><%= label %></span>
+</button>

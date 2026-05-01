@@ -1,0 +1,18 @@
+<%= tag.div(**root_attrs("rounded-(--senren-radius) border border-dashed p-8 text-center text-[hsl(var(--senren-muted-foreground))]")) do %>
+  <% if content? && title.blank? && description.blank? %>
+    <%= content %>
+  <% else %>
+    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[hsl(var(--senren-accent))] text-[hsl(var(--senren-accent-foreground))]">
+      <% if icon? %><%= icon %><% else %><span class="text-lg font-semibold">+</span><% end %>
+    </div>
+    <% if title.present? %>
+      <h2 class="mt-4 font-display text-lg font-semibold text-[hsl(var(--senren-foreground))]"><%= title %></h2>
+    <% end %>
+    <% if description.present? %>
+      <p class="mx-auto mt-2 max-w-sm text-sm leading-6"><%= description %></p>
+    <% end %>
+    <% if actions? %>
+      <div class="mt-5 flex justify-center gap-2"><%= actions %></div>
+    <% end %>
+  <% end %>
+<% end %>

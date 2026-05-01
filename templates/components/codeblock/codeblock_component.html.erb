@@ -1,0 +1,11 @@
+<%= tag.figure(**root_attrs("overflow-hidden rounded-(--senren-radius) border")) do %>
+  <% if filename.present? || language_label.present? || caption.present? %>
+    <figcaption class="flex items-center justify-between gap-3 border-b border-[hsl(var(--senren-border))] px-4 py-2 text-xs text-[hsl(var(--senren-muted-foreground))]">
+      <span class="min-w-0 truncate font-medium text-[hsl(var(--senren-foreground))]"><%= filename.presence || caption %></span>
+      <% if language_label.present? %>
+        <span class="shrink-0 rounded bg-[hsl(var(--senren-muted))] px-1.5 py-0.5 font-mono uppercase tracking-wide"><%= language_label %></span>
+      <% end %>
+    </figcaption>
+  <% end %>
+  <pre class="overflow-x-auto p-4 text-left text-sm leading-6 text-[hsl(var(--senren-foreground))] <%= wrap? ? 'whitespace-pre-wrap break-words' : '' %>"><code class="font-mono"><%= code_text %></code></pre>
+<% end %>

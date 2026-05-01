@@ -1,0 +1,14 @@
+<%= tag.div(**wrapper_attrs) do %>
+  <%= tag.select(**select_attrs) do %>
+    <% if prompt %>
+      <option value=""><%= prompt %></option>
+    <% end %>
+    <% options.each do |opt| %>
+      <% value, label = Array === opt ? opt : [opt, opt] %>
+      <option value="<%= value %>" <%= "selected" if selected.to_s == value.to_s %>><%= label %></option>
+    <% end %>
+  <% end %>
+  <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--senren-muted-foreground))] transition-transform duration-150 group-focus-within:rotate-180">
+    <path d="m5 8 5 5 5-5"></path>
+  </svg>
+<% end %>

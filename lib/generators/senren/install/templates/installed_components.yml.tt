@@ -1,0 +1,4 @@
+# This file is the ledger of Senren components installed in this app.
+# It is updated by `bin/rails senren:add` and `bin/rails senren:install`.
+# Do not edit by hand unless you know what you are doing.
+installed: []

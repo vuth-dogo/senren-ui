@@ -1,0 +1,22 @@
+<%= tag.div(**root_attrs("overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] shadow-sm", data: { controller: "senren--command" })) do %>
+  <% if content? && items.empty? %>
+    <%= content %>
+  <% else %>
+    <label for="<%= dom_id %>-input" class="sr-only"><%= label %></label>
+    <div class="border-b border-[hsl(var(--senren-border))] p-2">
+      <input id="<%= dom_id %>-input" type="search" autocomplete="off" placeholder="<%= placeholder %>" aria-label="<%= label %>" aria-controls="<%= dom_id %>-list" aria-activedescendant="" data-senren--command-target="input" data-action="input->senren--command#filter keydown->senren--command#onKey" class="h-10 w-full rounded-(--senren-radius) bg-[hsl(var(--senren-background))] px-3 text-sm text-[hsl(var(--senren-foreground))] outline-none placeholder:text-[hsl(var(--senren-muted-foreground))] focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
+    </div>
+    <div id="<%= dom_id %>-list" role="listbox" aria-label="<%= label %>" data-senren--command-target="list" class="max-h-72 overflow-y-auto p-1.5">
+      <% items.each_with_index do |item, index| %>
+        <% tag_name = item[:href].present? ? :a : :button %>
+        <%= tag.public_send(tag_name, href: item[:href], type: (tag_name == :button ? "button" : nil), id: item[:id], role: "option", data: { "senren--command-target": "option", action: "click->senren--command#choose", label: item[:keywords] }, class: "block w-full cursor-pointer rounded-(--senren-radius) px-3 py-2 text-left text-sm transition-colors hover:bg-[hsl(var(--senren-accent))] aria-selected:bg-[hsl(var(--senren-accent))] aria-selected:text-[hsl(var(--senren-accent-foreground))]", "aria-selected": (index.zero? ? "true" : "false")) do %>
+          <span class="block font-medium"><%= item[:label] %></span>
+          <% if item[:description].present? %>
+            <span class="mt-0.5 block text-xs text-[hsl(var(--senren-muted-foreground))]"><%= item[:description] %></span>
+          <% end %>
+        <% end %>
+      <% end %>
+      <div hidden data-senren--command-target="empty" class="px-3 py-8 text-center text-sm text-[hsl(var(--senren-muted-foreground))]"><%= empty_text %></div>
+    </div>
+  <% end %>
+<% end %>

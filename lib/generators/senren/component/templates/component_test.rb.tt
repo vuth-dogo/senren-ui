@@ -1,0 +1,16 @@
+require "test_helper"
+
+class Senren::<%= class_name %>ComponentTest < ViewComponent::TestCase
+  test "renders with default variant" do
+    render_inline(Senren::<%= class_name %>Component.new) { "hello" }
+
+    assert_selector "[data-senren-component='<%= file_name %>']"
+    assert_text "hello"
+  end
+
+  test "rejects unknown variant" do
+    assert_raises(ArgumentError) do
+      Senren::<%= class_name %>Component.new(variant: :nope)
+    end
+  end
+end

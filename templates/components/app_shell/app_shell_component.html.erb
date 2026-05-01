@@ -1,0 +1,28 @@
+<%= tag.div(**root_attrs("min-h-screen text-[hsl(var(--senren-foreground))]")) do %>
+  <a href="#<%= content_id %>" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-(--senren-radius) focus:bg-[hsl(var(--senren-primary))] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-[hsl(var(--senren-primary-foreground))]">
+    <%= skip_label %>
+  </a>
+
+  <% if top_nav? %>
+    <%= top_nav %>
+  <% end %>
+
+  <div class="mx-auto grid w-full max-w-[1400px] gap-6 px-4 py-6 md:grid-cols-[16rem_minmax(0,1fr)] lg:px-8">
+    <% if sidebar? %>
+      <aside class="min-w-0"><%= sidebar %></aside>
+    <% end %>
+
+    <main id="<%= content_id %>" class="min-w-0 <%= sidebar? ? '' : 'md:col-span-2' %>">
+      <% if header? %>
+        <div class="mb-6"><%= header %></div>
+      <% end %>
+      <%= content %>
+    </main>
+  </div>
+
+  <% if footer? %>
+    <footer class="border-t border-[hsl(var(--senren-border))] px-4 py-6 text-sm text-[hsl(var(--senren-muted-foreground))] lg:px-8">
+      <%= footer %>
+    </footer>
+  <% end %>
+<% end %>

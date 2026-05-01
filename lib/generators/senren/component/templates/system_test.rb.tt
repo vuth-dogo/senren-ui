@@ -1,0 +1,7 @@
+require "application_system_test_case"
+
+class Senren::<%= class_name %>Test < ApplicationSystemTestCase
+  test "<%= file_name %> connects its Stimulus controller" do
+    skip "Add a demo route or fixture page that renders Senren::<%= class_name %>Component, then assert behavior here."
+  end
+end

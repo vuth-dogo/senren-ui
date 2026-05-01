@@ -1,0 +1,68 @@
+<%= tag.section(**root_attrs("relative overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] text-[hsl(var(--senren-card-foreground))] shadow-sm", data: { controller: "senren--carousel" }, role: "region", "aria-roledescription": "carousel", "aria-label": label)) do %>
+  <% if content? && slides.empty? %>
+    <%= content %>
+  <% else %>
+    <div class="relative" data-action="keydown->senren--carousel#onKey" tabindex="0">
+      <% slides.each_with_index do |slide, index| %>
+        <article data-senren--carousel-target="slide" data-index="<%= index %>" class="<%= index.zero? ? '' : 'hidden' %>">
+          <% if slide[:image_url].present? %>
+            <img src="<%= slide[:image_url] %>" alt="<%= slide[:alt] || slide[:title] %>" class="aspect-video w-full object-cover">
+          <% else %>
+            <div class="relative flex aspect-video items-end overflow-hidden bg-[hsl(var(--senren-muted)/0.45)] p-6">
+              <svg aria-hidden="true" viewBox="0 0 960 540" preserveAspectRatio="none" class="absolute inset-0 h-full w-full">
+                <rect width="960" height="540" fill="#2397cf" />
+                <circle cx="486" cy="75" r="55" fill="#fffbea" />
+                <path d="M0 181 C72 158 111 165 156 124 C206 82 243 133 291 113 C340 92 383 159 437 127 C486 98 521 145 565 120 C611 94 649 151 704 92 C755 38 798 94 830 134 C880 127 912 153 960 137 L960 315 L0 315 Z" fill="#f4a6c8" />
+                <path d="M0 255 C72 214 124 230 193 205 C251 184 280 227 332 199 C398 165 449 215 520 190 C608 158 642 232 728 197 C817 159 867 224 960 178 L960 540 L0 540 Z" fill="#8fd04e" />
+                <path d="M118 313 C213 276 366 272 538 294 C691 314 792 288 883 318 C764 384 546 401 348 380 C235 368 160 350 118 313 Z" fill="#b9edf5" />
+                <path d="M0 350 C73 321 145 352 217 318 C287 285 336 340 413 324 C474 311 520 341 570 319 C661 279 737 343 805 313 C864 287 912 321 960 301 L960 540 L0 540 Z" fill="#79c945" />
+                <path d="M0 427 C61 391 102 415 150 383 C187 430 247 424 287 470 C216 500 102 514 0 490 Z" fill="#b59ce9" />
+                <path d="M657 394 C733 356 804 380 862 342 C901 403 934 398 960 421 L960 540 L676 540 C622 491 615 428 657 394 Z" fill="#b59ce9" opacity=".86" />
+                <path d="M0 456 C57 434 105 459 163 428 C186 482 261 469 298 517 C218 539 95 552 0 527 Z" fill="#f29bc7" opacity=".86" />
+                <path d="M752 423 C812 395 879 415 960 381 L960 540 L725 540 C706 499 715 449 752 423 Z" fill="#129b5a" opacity=".92" />
+                <g fill="#0a7f77" opacity=".48">
+                  <circle cx="44" cy="93" r="1.2" /><circle cx="86" cy="143" r="1.4" /><circle cx="140" cy="238" r="1.1" /><circle cx="212" cy="168" r="1.5" />
+                  <circle cx="318" cy="74" r="1.1" /><circle cx="384" cy="218" r="1.4" /><circle cx="470" cy="158" r="1.2" /><circle cx="548" cy="251" r="1.5" />
+                  <circle cx="635" cy="118" r="1.1" /><circle cx="716" cy="230" r="1.4" /><circle cx="803" cy="152" r="1.2" /><circle cx="899" cy="260" r="1.5" />
+                  <circle cx="110" cy="438" r="1.4" /><circle cx="248" cy="468" r="1.2" /><circle cx="406" cy="423" r="1.5" /><circle cx="592" cy="460" r="1.2" />
+                  <circle cx="742" cy="445" r="1.5" /><circle cx="884" cy="420" r="1.2" />
+                </g>
+              </svg>
+              <div class="relative z-10 max-w-md rounded-(--senren-radius) bg-[hsl(var(--senren-background)/0.78)] p-4 shadow-sm ring-1 ring-[hsl(var(--senren-border)/0.7)] backdrop-blur">
+                <% if slide[:badge].present? %>
+                  <span class="mb-3 inline-flex rounded-full bg-[hsl(var(--senren-accent))] px-2.5 py-1 text-xs font-semibold text-[hsl(var(--senren-accent-foreground))]"><%= slide[:badge] %></span>
+                <% end %>
+                <h3 class="font-display text-2xl font-semibold tracking-tight text-[hsl(var(--senren-foreground))]"><%= slide[:title] %></h3>
+                <% if slide[:description].present? %>
+                  <p class="mt-2 text-sm leading-6 text-[hsl(var(--senren-muted-foreground))]"><%= slide[:description] %></p>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </article>
+      <% end %>
+    </div>
+
+    <% if slides.size > 1 %>
+      <div class="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-between px-3">
+        <button type="button" class="pointer-events-auto inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-background)/0.88)] text-[hsl(var(--senren-foreground))] shadow-sm transition hover:-translate-y-0.5 hover:bg-[hsl(var(--senren-accent))] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]" data-action="click->senren--carousel#previous" aria-label="Previous slide">
+          <svg aria-hidden="true" viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.5 4.5 7 10l5.5 5.5" />
+          </svg>
+        </button>
+        <button type="button" class="pointer-events-auto inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-background)/0.88)] text-[hsl(var(--senren-foreground))] shadow-sm transition hover:-translate-y-0.5 hover:bg-[hsl(var(--senren-accent))] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]" data-action="click->senren--carousel#next" aria-label="Next slide">
+          <svg aria-hidden="true" viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7.5 4.5 13 10l-5.5 5.5" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="absolute bottom-3 left-0 right-0 z-10 flex justify-center gap-1.5">
+        <% slides.each_with_index do |_slide, index| %>
+          <button type="button" class="h-2.5 w-2.5 cursor-pointer rounded-full bg-[hsl(var(--senren-background)/0.72)] ring-1 ring-[hsl(var(--senren-border))] transition-all aria-current:w-6 aria-current:bg-[hsl(var(--senren-primary))]" data-senren--carousel-target="dot" data-index="<%= index %>" data-action="click->senren--carousel#goTo" aria-label="Go to slide <%= index + 1 %>" aria-current="<%= index.zero? ? 'true' : 'false' %>"></button>
+        <% end %>
+      </div>
+    <% end %>
+    <p class="sr-only" aria-live="polite" data-senren--carousel-target="status">Slide 1 of <%= slides.size %></p>
+  <% end %>
+<% end %>

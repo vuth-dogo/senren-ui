@@ -1,0 +1,164 @@
+/*
+ * Senren UI - Spring Garden tokens.
+ * HSL channels are written without hsl() wrapping so Tailwind utilities like
+ *   bg-[hsl(var(--senren-background))]
+ * can compose them with opacity modifiers.
+ *
+ * The palette is intentionally colorful: pond blue, sakura pink, young leaf
+ * green, iris violet, and warm paper. Components stay SaaS-practical while
+ * avoiding the black-and-white default UI look.
+ */
+
+:root {
+  --senren-background: 54 100% 97%;
+  --senren-foreground: 178 62% 12%;
+
+  --senren-muted: 83 54% 91%;
+  --senren-muted-foreground: 181 24% 34%;
+
+  --senren-card: 52 100% 99%;
+  --senren-card-foreground: 178 62% 12%;
+
+  --senren-popover: 52 100% 99%;
+  --senren-popover-foreground: 178 62% 12%;
+
+  --senren-border: 174 42% 78%;
+  --senren-input: 174 42% 78%;
+  --senren-ring: 196 86% 48%;
+
+  --senren-primary: 151 74% 29%;
+  --senren-primary-foreground: 58 100% 97%;
+
+  --senren-secondary: 334 95% 89%;
+  --senren-secondary-foreground: 178 56% 18%;
+
+  --senren-accent: 194 86% 82%;
+  --senren-accent-foreground: 188 72% 18%;
+
+  --senren-destructive: 350 78% 55%;
+  --senren-destructive-foreground: 54 100% 97%;
+
+  --senren-success: 132 52% 37%;
+  --senren-success-foreground: 54 100% 97%;
+
+  --senren-warning: 44 92% 61%;
+  --senren-warning-foreground: 38 58% 16%;
+
+  --senren-radius: 0.5rem;
+
+  --senren-palette-sky: 202 88% 44%;
+  --senren-palette-sakura: 334 95% 89%;
+  --senren-palette-pond: 194 86% 82%;
+  --senren-palette-leaf: 88 58% 57%;
+  --senren-palette-iris: 255 70% 80%;
+  --senren-palette-paper: 54 100% 97%;
+}
+
+.dark {
+  --senren-background: 202 58% 9%;
+  --senren-foreground: 54 100% 94%;
+
+  --senren-muted: 188 34% 17%;
+  --senren-muted-foreground: 174 28% 72%;
+
+  --senren-card: 199 50% 13%;
+  --senren-card-foreground: 54 100% 94%;
+
+  --senren-popover: 199 50% 13%;
+  --senren-popover-foreground: 54 100% 94%;
+
+  --senren-border: 188 31% 25%;
+  --senren-input: 188 31% 25%;
+  --senren-ring: 194 86% 72%;
+
+  --senren-primary: 132 55% 66%;
+  --senren-primary-foreground: 166 62% 10%;
+
+  --senren-secondary: 334 74% 74%;
+  --senren-secondary-foreground: 202 58% 9%;
+
+  --senren-accent: 194 76% 63%;
+  --senren-accent-foreground: 202 58% 9%;
+
+  --senren-destructive: 350 72% 62%;
+  --senren-destructive-foreground: 54 100% 97%;
+
+  --senren-success: 132 55% 66%;
+  --senren-success-foreground: 166 62% 10%;
+
+  --senren-warning: 44 92% 68%;
+  --senren-warning-foreground: 38 58% 16%;
+}
+
+/* Convenience aliases. Components prefer Tailwind semantic utilities, but raw HTML can use these. */
+.senren-bg          { background-color: hsl(var(--senren-background)); }
+.senren-fg          { color: hsl(var(--senren-foreground)); }
+.senren-border      { border-color: hsl(var(--senren-border)); }
+.senren-radius      { border-radius: var(--senren-radius); }
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] a {
+  color: hsl(var(--senren-primary));
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] a:hover {
+  color: hsl(var(--senren-ring));
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] ul,
+[data-senren-component="rich_text_editor_lite"] [contenteditable] ol {
+  margin-block: 0.5rem;
+  padding-inline-start: 1.35rem;
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] ul {
+  list-style: disc;
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] ol {
+  list-style: decimal;
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] li + li {
+  margin-top: 0.25rem;
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] p + p {
+  margin-top: 0.5rem;
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] h1,
+[data-senren-component="rich_text_editor_lite"] [contenteditable] h2,
+[data-senren-component="rich_text_editor_lite"] [contenteditable] h3 {
+  color: hsl(var(--senren-foreground));
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] h1 {
+  font-size: 1.5rem;
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] h2 {
+  font-size: 1.25rem;
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] h3 {
+  font-size: 1.125rem;
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] :is(p, h1, h2, h3, li)[data-align="center"] {
+  text-align: center;
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] :is(p, h1, h2, h3, li)[data-align="right"] {
+  text-align: right;
+}
+
+[data-senren-component="rich_text_editor_lite"] [contenteditable] :is(p, h1, h2, h3, li)[data-align="justify"] {
+  text-align: justify;
+}

@@ -1,0 +1,10 @@
+<%= tag.fieldset(**root_attrs("space-y-2")) do %>
+  <% if legend? %>
+    <legend class="text-sm font-medium text-[hsl(var(--senren-foreground))]"><%= legend %></legend>
+  <% end %>
+  <div class="flex flex-col gap-2">
+    <% options.each do |opt| %>
+      <%= opt %>
+    <% end %>
+  </div>
+<% end %>

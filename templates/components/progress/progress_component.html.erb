@@ -1,0 +1,11 @@
+<div <%= tag.attributes(**root_attrs("w-full")) %>>
+  <% if label.present? %>
+    <div class="mb-2 flex items-center justify-between text-sm">
+      <span class="font-medium text-[hsl(var(--senren-foreground))]"><%= label %></span>
+      <span class="text-[hsl(var(--senren-muted-foreground))]"><%= percent %>%</span>
+    </div>
+  <% end %>
+  <div role="progressbar" aria-valuemin="0" aria-valuemax="<%= max.to_i %>" aria-valuenow="<%= value.to_i %>" class="h-2 w-full overflow-hidden rounded-full bg-[hsl(var(--senren-muted))]">
+    <div class="h-full rounded-full transition-all <%= self.class::VARIANTS[variant] %>" style="width: <%= percent %>%"></div>
+  </div>
+</div>

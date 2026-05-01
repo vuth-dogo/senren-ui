@@ -1,0 +1,23 @@
+<% if items.any? %>
+  <nav <%= tag.attributes(**root_attrs("text-sm text-[hsl(var(--senren-muted-foreground))]", aria: { label: label })) %>>
+    <ol class="flex flex-wrap items-center gap-2">
+      <% items.each_with_index do |item, index| %>
+        <% current = index == items.length - 1 || item[:href].blank? %>
+        <li class="flex items-center gap-2">
+          <% if index.positive? %>
+            <span aria-hidden="true" class="select-none text-[hsl(var(--senren-muted-foreground)/0.7)]"><%= separator %></span>
+          <% end %>
+          <% if current %>
+            <span aria-current="page" class="font-medium text-[hsl(var(--senren-foreground))]"><%= item[:label] %></span>
+          <% else %>
+            <%= link_to item[:label], item[:href], class: "transition-colors hover:text-[hsl(var(--senren-foreground))]" %>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+  </nav>
+<% else %>
+  <nav <%= tag.attributes(**root_attrs("text-sm text-[hsl(var(--senren-muted-foreground))]", aria: { label: label })) %>>
+    <%= content %>
+  </nav>
+<% end %>

@@ -1,0 +1,8 @@
+<label class="inline-flex items-center gap-2 cursor-pointer">
+  <%= tag.input(**root_attrs("h-4 w-4 border border-[hsl(var(--senren-input))] text-[hsl(var(--senren-primary))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]", type: "radio", id: id, name: name, value: value, checked: checked)) %>
+  <% if label %>
+    <span class="text-sm font-medium text-[hsl(var(--senren-foreground))]"><%= label %></span>
+  <% else %>
+    <%= content %>
+  <% end %>
+</label>

@@ -1,0 +1,12 @@
+<%= tag.div(**root_attrs("rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-foreground))] p-3 text-[hsl(var(--senren-background))] shadow-md", role: "status", "aria-live": "polite")) do %>
+  <% if content? && selected_count.nil? && !actions? %>
+    <%= content %>
+  <% else %>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="text-sm font-medium"><%= selection_text || "Selection ready" %></div>
+      <% if actions? %>
+        <div class="flex flex-wrap items-center gap-2"><%= actions %></div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
