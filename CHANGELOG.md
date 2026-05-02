@@ -9,6 +9,10 @@ bug fixes only.
 
 ## [Unreleased]
 
+### Added
+
+- Documentation site deployed at [senren-ui.dev](https://www.senren-ui.dev).
+
 ## [0.1.2] — 2026-05-02
 
 ### Fixed

@@ -2,6 +2,8 @@
 
 > 洗練 — refined, polished, sophisticated.
 
+**[Live Docs & Component Reference → senren-ui.dev](https://www.senren-ui.dev)**
+
 A Rails-native UI component library built on **ViewComponent**, **Hotwire
 (Turbo + Stimulus)**, and **TailwindCSS**, with a centralized AI-agent
 skill system and a source-copy install model inspired by shadcn/ui.

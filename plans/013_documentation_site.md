@@ -66,8 +66,8 @@ Out of scope for v0.1 of the site:
 7. Production hosting is **Fly.io** (cheap, supports SQLite +
    Litestream, single-region is fine). Document the deploy in
    `apps/site/README.md` but do not deploy in this plan.
-8. The site domain is `senren.dev` (placeholder until the user
-   confirms). All links in `llms.txt` point to that domain.
+8. The site domain is `senren-ui.dev`. All links in `llms.txt` point
+   to that domain.
 9. Search v0.1: client-side index served as `public/search-index.json`,
    built by a `bin/build_search_index.rb` script that walks the docs
    tree and the registry. Senren `Command` UI consumes it.
@@ -153,7 +153,7 @@ apps/site/
 - `senren-rails/registry/recipes.yml` — add `marketing_hero`,
   `feature_grid`, `docs_layout`, `component_preview` recipes used
   by the site.
-- `senren-rails/README.md` — link to `https://senren.dev` once live.
+- `senren-rails/README.md` — link to `https://www.senren-ui.dev` once live.
 - `senren-rails/CHANGELOG.md` — record v0.1.0 site launch.
 
 ## Expected behavior
