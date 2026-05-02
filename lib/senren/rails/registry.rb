@@ -61,12 +61,12 @@ module Senren
         @components.values
       end
 
-      def each(&block)
-        all.each(&block)
+      def each(&)
+        all.each(&)
       end
 
-      def find_each(&block)
-        each(&block)
+      def find_each(&)
+        each(&)
       end
 
       def names
