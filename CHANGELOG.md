@@ -9,6 +9,16 @@ bug fixes only.
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-05-02
+
+### Fixed
+
+- Progress component no longer paints variant background on the full root
+  container. Variant color is now applied only to the indicator fill bar.
+- Improved progress visuals by separating track/fill styling more clearly
+  (`h-2.5` track) and using smoother fill-width transition
+  (`transition-[width] duration-300 ease-out`).
+
 ## [0.1.1] — 2026-05-02
 
 ### Added

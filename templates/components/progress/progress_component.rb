@@ -3,6 +3,12 @@
 module Senren
   class ProgressComponent < BaseComponent
     VARIANTS = {
+      default: '',
+      success: '',
+      warning: '',
+      destructive: ''
+    }.freeze
+    INDICATOR_VARIANTS = {
       default: 'bg-[hsl(var(--senren-primary))]',
       success: 'bg-[hsl(var(--senren-success))]',
       warning: 'bg-[hsl(var(--senren-warning))]',
@@ -21,6 +27,10 @@ module Senren
 
     def percent
       ((value / max) * 100).clamp(0, 100).round
+    end
+
+    def indicator_class
+      INDICATOR_VARIANTS.fetch(variant)
     end
   end
 end
