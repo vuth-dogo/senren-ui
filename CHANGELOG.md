@@ -7,11 +7,12 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 v0.x is a pre-stable line: minor bumps may break things; patch bumps are
 bug fixes only.
 
-## [Unreleased]
+## [0.1.3] — 2026-05-02
 
 ### Added
 
 - Documentation site deployed at [senren-ui.dev](https://www.senren-ui.dev).
+- Gem homepage now points to the live docs site.
 
 ## [0.1.2] — 2026-05-02
 
