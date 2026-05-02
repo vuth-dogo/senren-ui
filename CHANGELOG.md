@@ -9,6 +9,8 @@ bug fixes only.
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-05-02
+
 ### Added
 
 - Initial gem skeleton, engine, and version constant.
@@ -51,7 +53,7 @@ bug fixes only.
 - Docs-site feedback issues now resolved at gem template level (not app-only):
   sidebar compact truncation UX and tabs header active-state mismatch.
 
-## [0.1.0] — TBD
+## [0.1.0] — 2026-04-27
 
 First tagged release once the Unreleased entries are validated end-to-end
 in `apps/todolist` per `plans/011_release_checklist.md`.
