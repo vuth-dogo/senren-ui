@@ -26,6 +26,30 @@ bug fixes only.
 - Centralized `.senren/skill.md` system with preserved user-region.
 - `public/llms.txt` and `public/llms-full.txt` generation.
 - `apps/todolist` Rails app dogfooding the gem via local path.
+- Bun-based JS tooling for Stimulus templates:
+  - `bun run controllers:syntax`
+  - `bun run controllers:lint`
+  - `bun run controllers:lint:fix`
+  - `bun run controllers:check`
+- Biome lint configuration (`biome.json`) scoped to
+  `templates/controllers/**/*.js`.
+
+### Changed
+
+- `SidebarComponent` template + Stimulus controller now support robust
+  compact/expanded syncing:
+  - hides brand/footer in compact mode
+  - shows link initials in compact mode and full labels in expanded mode
+  - uses a hamburger icon toggle with `aria-expanded`
+  - applies smoother width/label transition behavior
+- `TabsComponent` template + Stimulus controller now use
+  `data-state="active|inactive"` for tab and panel state, so header active
+  styling updates correctly after client-side tab switches.
+
+### Fixed
+
+- Docs-site feedback issues now resolved at gem template level (not app-only):
+  sidebar compact truncation UX and tabs header active-state mismatch.
 
 ## [0.1.0] — TBD
 

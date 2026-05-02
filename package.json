@@ -1,0 +1,14 @@
+{
+  "name": "senren-ui-tooling",
+  "private": true,
+  "packageManager": "bun@1.2.22",
+  "scripts": {
+    "controllers:syntax": "bun run scripts/check_js_syntax.js templates/controllers",
+    "controllers:lint": "bunx @biomejs/biome lint templates/controllers",
+    "controllers:lint:fix": "bunx @biomejs/biome lint --write templates/controllers",
+    "controllers:check": "bun run controllers:syntax && bun run controllers:lint"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4"
+  }
+}

@@ -26,9 +26,12 @@ export default class extends Controller {
       const selected = target === tab
       target.setAttribute("aria-selected", selected ? "true" : "false")
       target.tabIndex = selected ? 0 : -1
+      target.dataset.state = selected ? "active" : "inactive"
     })
     this.panelTargets.forEach((panel) => {
-      panel.hidden = panel.dataset.panelId !== panelId
+      const selected = panel.dataset.panelId === panelId
+      panel.hidden = !selected
+      panel.dataset.state = selected ? "active" : "inactive"
     })
   }
 

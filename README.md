@@ -118,7 +118,10 @@ See `registry/components.yml` for the canonical list. v0.1 ships:
 
 ```bash
 bundle install
+bun install
 bundle exec rake test            # gem tests
+bun run controllers:check        # lint + syntax check for templates/controllers/*.js
+bun run controllers:lint:fix     # auto-fix lint issues for controllers
 bundle exec rake test:system     # Stimulus/system tests
 ```
 

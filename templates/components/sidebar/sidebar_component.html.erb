@@ -1,14 +1,24 @@
-<aside <%= tag.attributes(**root_attrs("flex min-h-80 flex-col rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] p-3 text-[hsl(var(--senren-card-foreground))] #{self.class::VARIANTS[variant]}", data: { controller: "senren--sidebar" })) %>>
+<aside <%= tag.attributes(**root_attrs("flex min-h-80 flex-col overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] p-3 text-[hsl(var(--senren-card-foreground))] transition-[width] duration-300 ease-in-out", data: { controller: "senren--sidebar" })) %>>
   <div class="mb-4 flex items-center justify-between gap-2 px-2">
-    <div class="truncate font-display text-sm font-semibold tracking-tight"><%= brand %></div>
-    <button type="button" class="cursor-pointer rounded-md px-2 py-1 text-xs text-[hsl(var(--senren-muted-foreground))] hover:bg-[hsl(var(--senren-accent))]" data-action="click->senren--sidebar#toggle" aria-label="Toggle sidebar">Toggle</button>
+    <div data-senren--sidebar-target="brand" class="truncate font-display text-sm font-semibold tracking-tight"><%= brand %></div>
+    <button type="button" data-senren--sidebar-target="toggleButton" class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-[hsl(var(--senren-muted-foreground))] transition-colors hover:bg-[hsl(var(--senren-accent))] hover:text-[hsl(var(--senren-accent-foreground))]" data-action="click->senren--sidebar#toggle" aria-label="Toggle sidebar" aria-expanded="<%= variant != :compact %>">
+      <span class="sr-only">Toggle sidebar</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 6h18" />
+        <path d="M3 12h18" />
+        <path d="M3 18h18" />
+      </svg>
+    </button>
   </div>
   <nav aria-label="<%= label %>" class="space-y-1">
     <% items.each do |item| %>
-      <%= link_to item[:label], item[:href], class: "block truncate rounded-md px-3 py-2 text-sm transition-colors #{item[:active] ? "bg-[hsl(var(--senren-primary))] text-[hsl(var(--senren-primary-foreground))]" : "text-[hsl(var(--senren-muted-foreground))] hover:bg-[hsl(var(--senren-accent))] hover:text-[hsl(var(--senren-accent-foreground))]"}" %>
+      <%= link_to item[:href], title: item[:label], data: { "senren--sidebar-target": "link" }, class: "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-all duration-200 #{item[:active] ? "bg-[hsl(var(--senren-primary))] text-[hsl(var(--senren-primary-foreground))]" : "text-[hsl(var(--senren-muted-foreground))] hover:bg-[hsl(var(--senren-accent))] hover:text-[hsl(var(--senren-accent-foreground))]"}" do %>
+        <span data-senren--sidebar-target="linkInitial" class="inline-flex h-4 w-0 items-center justify-center overflow-hidden text-xs font-semibold uppercase tracking-wide opacity-0 transition-all duration-200"><%= item[:label].to_s.first&.upcase || "•" %></span>
+        <span data-senren--sidebar-target="linkLabel" class="max-w-40 truncate opacity-100 transition-all duration-200"><%= item[:label] %></span>
+      <% end %>
     <% end %>
   </nav>
   <% if content? %>
-    <div class="mt-auto pt-4 text-xs text-[hsl(var(--senren-muted-foreground))]"><%= content %></div>
+    <div data-senren--sidebar-target="footer" class="mt-auto pt-4 text-xs text-[hsl(var(--senren-muted-foreground))]"><%= content %></div>
   <% end %>
 </aside>

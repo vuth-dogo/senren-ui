@@ -19,7 +19,9 @@ this file before opening a PR.
 git clone <repo>
 cd senren-rails
 bundle install
+bun install
 bundle exec rake test
+bun run controllers:check
 ```
 
 To exercise the gem against a real Rails app, use the bundled workspace:
@@ -61,3 +63,5 @@ bin/rails server
 - One logical change per commit.
 - Mention the affected plan and history files in the commit body.
 - Run `bundle exec rake test` before pushing.
+- Run `bun run controllers:check` before pushing if you touched
+  `templates/controllers/*.js`.

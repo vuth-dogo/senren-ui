@@ -2,7 +2,7 @@
   <div role="tablist" aria-label="<%= label %>" class="<%= self.class::VARIANTS[variant] %> flex flex-wrap items-center gap-1">
     <% items.each do |item| %>
       <% selected = active_item?(item) %>
-      <button type="button" role="tab" id="<%= item[:id] %>-tab" aria-selected="<%= selected %>" aria-controls="<%= item[:id] %>-panel" tabindex="<%= selected ? 0 : -1 %>" data-senren--tabs-target="tab" data-panel-id="<%= item[:id] %>" data-action="click->senren--tabs#select keydown->senren--tabs#onKey" class="cursor-pointer rounded-[calc(var(--senren-radius)-2px)] px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))] <%= selected ? "bg-[hsl(var(--senren-background))] text-[hsl(var(--senren-foreground))] shadow-sm" : "text-[hsl(var(--senren-muted-foreground))] hover:text-[hsl(var(--senren-foreground))]" %>">
+      <button type="button" role="tab" id="<%= item[:id] %>-tab" aria-selected="<%= selected %>" aria-controls="<%= item[:id] %>-panel" tabindex="<%= selected ? 0 : -1 %>" data-senren--tabs-target="tab" data-panel-id="<%= item[:id] %>" data-state="<%= selected ? "active" : "inactive" %>" data-action="click->senren--tabs#select keydown->senren--tabs#onKey" class="cursor-pointer rounded-[calc(var(--senren-radius)-2px)] px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))] text-[hsl(var(--senren-muted-foreground))] data-[state=active]:bg-[hsl(var(--senren-background))] data-[state=active]:text-[hsl(var(--senren-foreground))] data-[state=active]:shadow-sm data-[state=inactive]:hover:text-[hsl(var(--senren-foreground))]">
         <%= item[:label] %>
       </button>
     <% end %>
@@ -10,7 +10,7 @@
   <div class="mt-4">
     <% items.each do |item| %>
       <% selected = active_item?(item) %>
-      <section id="<%= item[:id] %>-panel" role="tabpanel" aria-labelledby="<%= item[:id] %>-tab" data-senren--tabs-target="panel" data-panel-id="<%= item[:id] %>" <%= "hidden" unless selected %> class="rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] p-4 text-sm text-[hsl(var(--senren-card-foreground))]">
+      <section id="<%= item[:id] %>-panel" role="tabpanel" aria-labelledby="<%= item[:id] %>-tab" data-senren--tabs-target="panel" data-panel-id="<%= item[:id] %>" data-state="<%= selected ? "active" : "inactive" %>" <%= "hidden" unless selected %> class="rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] p-4 text-sm text-[hsl(var(--senren-card-foreground))]">
         <%= item[:content].presence || content %>
       </section>
     <% end %>
