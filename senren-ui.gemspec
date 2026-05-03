@@ -16,14 +16,14 @@ Gem::Specification.new do |spec|
     AI-agent skill system. Components are copied into the host app (source-copy
     architecture) so developers and AI agents can read and edit them directly.
   DESC
-  spec.homepage      = 'https://github.com/vuth-dogo/senren-ui'
+  spec.homepage      = 'https://www.senren-ui.dev/'
   spec.license       = 'MIT'
   spec.required_ruby_version = '>= 3.1.0'
 
   spec.metadata['homepage_uri']    = spec.homepage
-  spec.metadata['source_code_uri'] = "#{spec.homepage}/tree/main"
-  spec.metadata['changelog_uri']   = "#{spec.homepage}/blob/main/CHANGELOG.md"
-  spec.metadata['docs_uri']         = 'https://www.senren-ui.dev'
+  spec.metadata['source_code_uri'] = 'https://github.com/vuth-dogo/senren-ui'
+  spec.metadata['changelog_uri']   = 'https://github.com/vuth-dogo/senren-ui/blob/main/CHANGELOG.md'
+  spec.metadata['docs_uri']        = spec.homepage
   spec.metadata['rubygems_mfa_required'] = 'true'
 
   spec.files = Dir[
