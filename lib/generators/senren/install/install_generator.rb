@@ -27,10 +27,6 @@ module Senren
         empty_directory 'app/assets/stylesheets'
       end
 
-      def create_public_dir
-        empty_directory 'public'
-      end
-
       def copy_base_files
         template 'base_component.rb.tt', 'app/components/senren/base_component.rb'
         template 'senren.css.tt',                'app/assets/stylesheets/senren.css'
@@ -47,14 +43,15 @@ module Senren
         Senren::Rails::SkillWriter.new(paths: host_paths).sync!
       end
 
-      def write_llms_files
-        say_status :senren, 'writing public/llms.txt and public/llms-full.txt'
-        Senren::Rails::LlmsWriter.new(paths: host_paths).generate!
+      def write_agent_files
+        say_status :senren, 'syncing Codex/Cursor/Claude/Copilot instruction files'
+        Senren::Rails::AgentRulesWriter.new(paths: host_paths).sync!
       end
 
       def print_next_steps
         say "\nSenren installed."
         say 'Next: bin/rails senren:add button card badge alert dialog'
+        say 'Then: bin/rails senren:agents:sync'
       end
 
       private

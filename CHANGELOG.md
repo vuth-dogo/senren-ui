@@ -7,6 +7,35 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 v0.x is a pre-stable line: minor bumps may break things; patch bumps are
 bug fixes only.
 
+## [0.1.5] — 2026-05-03
+
+### Added
+
+- Multi-agent instruction sync system (`AgentRulesWriter`). A single
+  source-of-truth file (`.senren/agent-rules.md`) plus marker-managed
+  adapter files for Codex (`AGENTS.md`), Claude (`CLAUDE.md`),
+  Copilot (`.github/copilot-instructions.md`), and Cursor
+  (`.cursor/rules/senren.mdc`).
+- New rake task `senren:agents:sync`.
+- Plan 014 and Plan 015 documentation.
+
+### Changed
+
+- `LlmsWriter` is now a thin backward-compatible wrapper that delegates
+  to `AgentRulesWriter`. No more `public/llms*.txt` generation.
+- `senren:llms:generate` kept as deprecated alias.
+- `Doctor` checks now validate agent instruction files instead of
+  `public/llms*.txt`.
+- Doctor `run!` refactored into `runtime_checks` + `installation_checks`.
+- Install generator no longer creates `public/` directory.
+
+### Fixed
+
+- Deprecated `senren:llms:generate` task now passes `registry:` kwarg
+  consistently with all other call sites.
+- Release checklist items updated to reflect agent sync system.
+- Test assertion style standardized on Minitest-native `refute`.
+
 ## [0.1.4] — 2026-05-02
 
 ### Fixed

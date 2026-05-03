@@ -14,8 +14,7 @@ skill system and a source-copy install model inspired by shadcn/ui.
 - A registry of well-tested ViewComponents and Stimulus controllers.
 - A centralized `.senren/skill.md` file so AI coding agents understand
   every installed component, its dependencies, and its anti-patterns.
-- An `llms.txt` / `llms-full.txt` generator so AI agents can discover
-  Senren without scraping your codebase.
+- A multi-agent instruction sync for Codex, Claude, Copilot, and Cursor.
 
 ## What Senren is not
 
@@ -52,7 +51,7 @@ bin/rails generate senren:component picker --no-client  # without Stimulus
 bin/rails senren:add dialog --client        # install interactive official component
 bin/rails senren:add button                 # install static official component
 bin/rails senren:skill:sync                 # rebuild .senren/skill.md
-bin/rails senren:llms:generate              # rebuild public/llms*.txt
+bin/rails senren:agents:sync                # rebuild .senren/agent-rules + adapters
 bin/rails senren:doctor                     # check installation health
 ```
 
@@ -96,11 +95,16 @@ After install, your app contains:
 - `.senren/registry.yml` — mirror of the gem-side registry.
 - `.senren/installed_components.yml` — ledger of installed components.
 - `.senren/conventions.md` — Senren conventions for humans and agents.
-- `public/llms.txt`, `public/llms-full.txt` — discoverable AI summary.
+- `.senren/agent-rules.md` — source of truth for generated agent rules.
+- `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`,
+  `.cursor/rules/senren.mdc` — marker-managed adapter files for each agent.
 
 The skill file uses `<!-- senren:skill:start -->` / `:end` markers; only
 the region between them is rewritten by the generator, so any notes you
 add outside the markers are preserved.
+
+Agent adapter files are also marker-managed, so Senren updates only its own
+generated block and preserves your existing instructions outside that block.
 
 ## Component list
 

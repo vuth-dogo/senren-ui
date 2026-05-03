@@ -42,6 +42,17 @@ Out of scope for v0.1 of the site:
 - Comments / discussions (link to GitHub Discussions)
 - Internationalization (English only for v0.1)
 
+## Progress update (2026-05-03)
+
+- Site is now live at `https://www.senren-ui.dev`.
+- Release/documentation follow-ups landed in the gem line:
+  - `986c176`: docs links updated to `senren-ui.dev`
+  - `b7af64a`: v0.1.3 release bump
+  - `45ba8d5`: restored GitHub homepage and added `docs_uri`
+  - `77bc014`: finalized metadata links in v0.1.4
+- This plan has moved from delivery mode to maintenance mode
+  (content/link correctness and release metadata consistency).
+
 ## Decisions
 
 1. **Build inside the workspace as `apps/site`**, mirroring the
@@ -189,20 +200,20 @@ apps/site/
 
 ## Acceptance criteria
 
-- [ ] `apps/site` boots with `bin/rails server` after a clean clone.
-- [ ] Landing page renders without console errors.
-- [ ] At least 10 component pages (Phase 1) render with live preview
+- [x] `apps/site` boots with `bin/rails server` after a clean clone.
+- [x] Landing page renders without console errors.
+- [x] At least 10 component pages (Phase 1) render with live preview
       + source code + props table + AI agent rules.
-- [ ] Phase 2 + Phase 3 component pages render at minimum: live
+- [x] Phase 2 + Phase 3 component pages render at minimum: live
       preview + AI agent rules. Source code may be loaded lazily.
-- [ ] At least one full example page (`/examples/dashboard`) renders.
-- [ ] Dark mode toggle works.
-- [ ] `Cmd/Ctrl-K` palette opens (or graceful fallback if Command
+- [x] At least one full example page (`/examples/dashboard`) renders.
+- [x] Dark mode toggle works.
+- [x] `Cmd/Ctrl-K` palette opens (or graceful fallback if Command
       component is still a stub).
-- [ ] `public/llms.txt` and `public/llms-full.txt` exist and pass the
+- [x] `public/llms.txt` and `public/llms-full.txt` exist and pass the
       llms.txt test.
-- [ ] Smoke test green.
-- [ ] History file recorded for the implementation session.
+- [x] Smoke test green.
+- [x] History file recorded for the implementation session.
 
 ## Implementation phases
 

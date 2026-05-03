@@ -16,6 +16,7 @@ module Senren
       def registry_mirror       = senren_dir.join('registry.yml')
       def installed_components  = senren_dir.join('installed_components.yml')
       def conventions_file      = senren_dir.join('conventions.md')
+      def agent_rules_file      = senren_dir.join('agent-rules.md')
 
       def components_dir        = root.join('app', 'components', 'senren')
       def base_component_path   = components_dir.join('base_component.rb')
@@ -24,12 +25,20 @@ module Senren
 
       def stimulus_dir          = root.join('app', 'javascript', 'controllers', 'senren')
 
-      def llms_short            = root.join('public', 'llms.txt')
-      def llms_full             = root.join('public', 'llms-full.txt')
+      def github_dir            = root.join('.github')
+      def copilot_instructions  = github_dir.join('copilot-instructions.md')
+      def cursor_rules_dir      = root.join('.cursor', 'rules')
+      def cursor_rule_file      = cursor_rules_dir.join('senren.mdc')
+      def claude_md             = root.join('CLAUDE.md')
+      def codex_agents_md       = root.join('AGENTS.md')
 
       def ensure_dirs!
         [senren_dir, components_dir, stimulus_dir,
-         stylesheet_path.dirname, llms_short.dirname].each(&:mkpath)
+         stylesheet_path.dirname, github_dir, cursor_rules_dir].each(&:mkpath)
+      end
+
+      def ensure_agent_dirs!
+        [senren_dir, github_dir, cursor_rules_dir].each(&:mkpath)
       end
     end
   end

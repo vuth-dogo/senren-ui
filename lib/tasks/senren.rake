@@ -16,27 +16,39 @@ namespace :senren do
     installed = copier.install(names, client_override: options[:client_override], force: options[:force])
 
     Senren::Rails::SkillWriter.new(registry: registry, paths: paths).sync!
-    Senren::Rails::LlmsWriter.new(registry: registry, paths: paths).generate!
+    Senren::Rails::AgentRulesWriter.new(registry: registry, paths: paths).sync!
 
     puts "Installed: #{installed.join(', ')}"
   end
 
   namespace :skill do
-    desc 'Rebuild .senren/skill.md from the registry and installed_components ledger.'
+    desc 'Rebuild .senren/skill.md and refresh agent instruction adapters.'
     task sync: :environment do
       paths    = Senren::Rails::HostPaths.new
       registry = Senren::Rails::Registry.load!
       file = Senren::Rails::SkillWriter.new(registry: registry, paths: paths).sync!
       puts "Wrote #{file}"
+      Senren::Rails::AgentRulesWriter.new(registry: registry, paths: paths).sync!
+    end
+  end
+
+  namespace :agents do
+    desc 'Regenerate .senren/agent-rules.md and adapter instruction files.'
+    task sync: :environment do
+      paths    = Senren::Rails::HostPaths.new
+      registry = Senren::Rails::Registry.load!
+      files = Senren::Rails::AgentRulesWriter.new(registry: registry, paths: paths).sync!
+      files.each { |f| puts "Wrote #{f}" }
     end
   end
 
   namespace :llms do
-    desc 'Regenerate public/llms.txt and public/llms-full.txt.'
+    desc 'Deprecated alias for senren:agents:sync.'
     task generate: :environment do
+      puts 'senren:llms:generate is deprecated. Running senren:agents:sync instead.'
       paths    = Senren::Rails::HostPaths.new
       registry = Senren::Rails::Registry.load!
-      files = Senren::Rails::LlmsWriter.new(registry: registry, paths: paths).generate!
+      files = Senren::Rails::AgentRulesWriter.new(registry: registry, paths: paths).sync!
       files.each { |f| puts "Wrote #{f}" }
     end
   end

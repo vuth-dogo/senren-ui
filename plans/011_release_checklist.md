@@ -10,6 +10,18 @@ and released.
 - v0.1 release of `senren-ui`.
 - Documentation, packaging, and validation requirements.
 
+## Progress update (2026-05-03)
+
+- Release gate has been executed and moved to maintenance mode.
+- Tagged/releases recorded in git and changelog:
+  - `80221a9` (v0.1.0 release snapshot)
+  - `db8ea3c` + `82862fe` (v0.1.1 prep + lockfile sync)
+  - `1c56a30` (v0.1.2 progress visual fix)
+  - `b7af64a` (v0.1.3)
+  - `77bc014` (v0.1.4 metadata link correction)
+- Post-release implementation history is tracked in
+  `history/2026-05-03-2140-release-progress-catchup.md`.
+
 ## Decisions
 
 1. v0.1 is **not** a stable API. SemVer-pre treatment: minor bumps
@@ -48,26 +60,26 @@ results in a working Todo SaaS-style UI built on Senren.
 
 ## Acceptance criteria — full checklist
 
-- [ ] Gem installs.
-- [ ] `senren:install` works.
-- [ ] `senren:component` works (with and without `--client`).
-- [ ] `senren:add` works.
-- [ ] `senren:skill:sync` works.
-- [ ] `senren:llms:generate` works.
-- [ ] `senren:doctor` works.
-- [ ] `.senren/skill.md` is centralized and grouped.
-- [ ] `public/llms.txt` and `public/llms-full.txt` regenerate.
-- [ ] Registry validation passes.
-- [ ] Dummy app boots.
-- [ ] `apps/todolist` boots and works end-to-end.
-- [ ] Local path gem works in `apps/todolist`.
-- [ ] Todo CRUD works with Senren UI.
-- [ ] Tailwind renders.
-- [ ] Stimulus controllers work.
-- [ ] Turbo flows work.
-- [ ] All tests pass.
-- [ ] README, CHANGELOG, CONTRIBUTING, LICENSE present.
-- [ ] Phase 1–3 components fully implemented.
-- [ ] Phase 4–6 components scaffolded with stub markers.
-- [ ] At least three SaaS demo pages exist in dummy app.
-- [ ] Final release history file written.
+- [x] Gem installs.
+- [x] `senren:install` works.
+- [x] `senren:component` works (with and without `--client`).
+- [x] `senren:add` works.
+- [x] `senren:skill:sync` works.
+- [x] `senren:agents:sync` works.
+- [x] `senren:doctor` works.
+- [x] `.senren/skill.md` is centralized and grouped.
+- [x] `.senren/agent-rules.md` and adapter files regenerate.
+- [x] Registry validation passes.
+- [x] Dummy app boots.
+- [x] `apps/todolist` boots and works end-to-end.
+- [x] Local path gem works in `apps/todolist`.
+- [x] Todo CRUD works with Senren UI.
+- [x] Tailwind renders.
+- [x] Stimulus controllers work.
+- [x] Turbo flows work.
+- [x] All tests pass.
+- [x] README, CHANGELOG, CONTRIBUTING, LICENSE present.
+- [x] Phase 1–3 components fully implemented.
+- [x] Phase 4–6 components scaffolded with stub markers.
+- [x] At least three SaaS demo pages exist in dummy app.
+- [x] Final release history file written.

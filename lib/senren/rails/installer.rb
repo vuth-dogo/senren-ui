@@ -5,7 +5,7 @@ require 'fileutils'
 module Senren
   module Rails
     # Idempotent installer that lays down the .senren directory, base
-    # component, stylesheet, and initial llms files. Reused by the install
+    # component, stylesheet, and agent instruction files. Reused by the install
     # generator and by ad-hoc rake task entry points.
     class Installer
       attr_reader :paths, :stdout
@@ -20,7 +20,7 @@ module Senren
         install_static_files(force: force)
         mirror_registry
         SkillWriter.new(paths: paths).sync!
-        LlmsWriter.new(paths: paths).generate!
+        AgentRulesWriter.new(paths: paths).sync!
         print_next_steps
         true
       end
@@ -73,6 +73,7 @@ module Senren
 
             bin/rails senren:add button card badge alert
             bin/rails senren:add dialog dropdown_menu
+            bin/rails senren:agents:sync
             bin/rails senren:doctor
 
           Read .senren/skill.md and .senren/conventions.md to get oriented.

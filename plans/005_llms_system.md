@@ -1,5 +1,11 @@
 # Plan 005 — llms.txt System
 
+## Status (2026-05-03)
+
+Superseded by `plans/014_multi_agent_instruction_sync.md`.
+Senren now uses `.senren/agent-rules.md` plus agent-specific adapter files
+instead of `public/llms*.txt`.
+
 ## Purpose
 
 Define the generation, structure, and update flow for

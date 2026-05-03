@@ -17,19 +17,7 @@ module Senren
       end
 
       def run!
-        results = []
-        results << check('ViewComponent gem available')           { defined?(::ViewComponent) }
-        results << check('TailwindCSS stylesheet present')        { paths.stylesheet_path.exist? }
-        results << check('Stimulus directory present')            { paths.stimulus_dir.directory? }
-        results << check('Turbo gem available')                   { defined?(::Turbo) || gem_loadable?('turbo-rails') }
-        results << check('.senren directory exists')              { paths.senren_dir.directory? }
-        results << check('.senren/skill.md exists')               { paths.skill_file.file? }
-        results << check('.senren/registry.yml exists')           { paths.registry_mirror.file? }
-        results << check('.senren/installed_components.yml exists') { paths.installed_components.file? }
-        results << check('public/llms.txt exists')                { paths.llms_short.file? }
-        results << check('public/llms-full.txt exists')           { paths.llms_full.file? }
-        results << check('app/components/senren exists')          { paths.components_dir.directory? }
-        results << check('app/javascript/controllers/senren exists') { paths.stimulus_dir.directory? }
+        results = runtime_checks + installation_checks
         installed = installed_count
         results << Result.new("#{installed} component(s) installed", installed >= 0, nil)
 
@@ -55,6 +43,31 @@ module Senren
         true
       rescue Gem::LoadError
         false
+      end
+
+      def runtime_checks
+        [
+          check('ViewComponent gem available')    { defined?(::ViewComponent) },
+          check('TailwindCSS stylesheet present') { paths.stylesheet_path.exist? },
+          check('Stimulus directory present')     { paths.stimulus_dir.directory? },
+          check('Turbo gem available')            { defined?(::Turbo) || gem_loadable?('turbo-rails') }
+        ]
+      end
+
+      def installation_checks
+        [
+          check('.senren directory exists')               { paths.senren_dir.directory? },
+          check('.senren/skill.md exists')                { paths.skill_file.file? },
+          check('.senren/registry.yml exists')            { paths.registry_mirror.file? },
+          check('.senren/installed_components.yml exists') { paths.installed_components.file? },
+          check('.senren/agent-rules.md exists')          { paths.agent_rules_file.file? },
+          check('AGENTS.md exists')                       { paths.codex_agents_md.file? },
+          check('CLAUDE.md exists')                       { paths.claude_md.file? },
+          check('.github/copilot-instructions.md exists') { paths.copilot_instructions.file? },
+          check('.cursor/rules/senren.mdc exists')        { paths.cursor_rule_file.file? },
+          check('app/components/senren exists')           { paths.components_dir.directory? },
+          check('app/javascript/controllers/senren exists') { paths.stimulus_dir.directory? }
+        ]
       end
 
       def installed_count

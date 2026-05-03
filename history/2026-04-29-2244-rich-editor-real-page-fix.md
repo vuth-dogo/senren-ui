@@ -35,3 +35,10 @@
   RichTextEditorLite controllers.
 - `bin/rails tailwindcss:build`
 - `bundle exec rake test` in `senren-rails`
+
+## Follow-up progress (2026-05-03)
+
+- Work after this fix shifted to release hardening and docs-site
+  metadata consistency.
+- See `history/2026-05-03-2140-release-progress-catchup.md` for the
+  v0.1.0 → v0.1.4 catch-up timeline.

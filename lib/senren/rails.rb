@@ -9,6 +9,7 @@ module Senren
     autoload :Registry,         'senren/rails/registry'
     autoload :ComponentCopier,  'senren/rails/component_copier'
     autoload :SkillWriter,      'senren/rails/skill_writer'
+    autoload :AgentRulesWriter, 'senren/rails/agent_rules_writer'
     autoload :LlmsWriter,       'senren/rails/llms_writer'
     autoload :Installer,        'senren/rails/installer'
     autoload :Doctor,           'senren/rails/doctor'

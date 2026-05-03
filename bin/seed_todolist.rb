@@ -20,7 +20,7 @@ require 'senren/rails/registry'
 require 'senren/rails/host_paths'
 require 'senren/rails/component_copier'
 require 'senren/rails/skill_writer'
-require 'senren/rails/llms_writer'
+require 'senren/rails/agent_rules_writer'
 
 # Re-point gem locators (lib/senren/rails.rb is not loaded - it requires Rails::Engine).
 module Senren
@@ -67,5 +67,5 @@ puts "  installed components: #{installed.size}"
 skill = Senren::Rails::SkillWriter.new(registry: registry, paths: paths).sync!
 puts "  wrote #{skill}"
 
-llms = Senren::Rails::LlmsWriter.new(registry: registry, paths: paths).generate!
-llms.each { |f| puts "  wrote #{f}" }
+agent_files = Senren::Rails::AgentRulesWriter.new(registry: registry, paths: paths).sync!
+agent_files.each { |f| puts "  wrote #{f}" }

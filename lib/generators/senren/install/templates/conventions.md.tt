@@ -38,8 +38,11 @@ and obey it strictly.
 | `.senren/registry.yml`              | Generator (mirror of gem registry) |
 | `.senren/installed_components.yml`  | Generator (ledger)  |
 | `.senren/conventions.md`            | This file - safe to edit |
-| `public/llms.txt`                   | Generator (do not edit) |
-| `public/llms-full.txt`              | Generator (do not edit) |
+| `.senren/agent-rules.md`            | Generator (do not edit) |
+| `AGENTS.md`                         | Generated region only (between markers) |
+| `CLAUDE.md`                         | Generated region only (between markers) |
+| `.github/copilot-instructions.md`   | Generated region only (between markers) |
+| `.cursor/rules/senren.mdc`          | Generated region only (between markers) |
 
 ## Adding a component
 
@@ -64,3 +67,10 @@ Senren never overwrites those files unless you pass `--force`.
 
 You can write app-specific notes outside those markers. They are preserved
 across `bin/rails senren:skill:sync`.
+
+## Agent instruction maintenance
+
+Senren writes a shared source file at `.senren/agent-rules.md` and syncs
+adapter files for Codex/Cursor/Claude/Copilot. For adapter files, only the
+generated block between markers is managed by Senren; your custom notes
+outside markers are preserved.
