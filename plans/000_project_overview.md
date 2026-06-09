@@ -9,7 +9,7 @@ the source of truth that every later plan refers back to.
 ## Scope
 
 - The `senren-ui` gem source in `senren-rails/`.
-- The `apps/todolist` real Rails dogfooding app.
+- The git-ignored `.local/preview` real Rails dogfooding app.
 - The AI-agent surface (`.senren/skill.md`, `public/llms.txt`,
   `public/llms-full.txt`).
 - The component registry, generators, and rake tasks.
@@ -30,8 +30,8 @@ Out of scope for v0.1:
 4. TailwindCSS is the styling layer, with semantic CSS variables.
 5. AI-agent documentation is **centralized** in `.senren/skill.md`, grouped
    by logical category. One file per component is explicitly rejected.
-6. The workspace contains both the gem and a real Rails app
-   (`apps/todolist`). `test/dummy` alone is not sufficient validation.
+6. The workspace contains both the gem and a real Rails preview app
+   (`.local/preview`). `test/dummy` alone is not sufficient validation.
 7. Planning (`/plans`) and history (`/history`) are mandatory, not optional.
 8. Senren v0.1 must scaffold every component listed in section 21 of
    `master_prompt.md`, even if some are stubbed and clearly marked.
@@ -55,7 +55,7 @@ to answer:
 - What technologies does it use and explicitly forbid?
 - Where do component files live?
 - Where is the AI-agent guidance located?
-- Why is `apps/todolist` part of the workspace?
+- Why is `.local/preview` part of the workspace?
 
 ## Test strategy
 

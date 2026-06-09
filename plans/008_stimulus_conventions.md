@@ -20,10 +20,12 @@ remains small, local, and predictable.
 2. Controller identifiers use double-dash namespace:
    `senren--dialog`, `senren--dropdown-menu`, `senren--tabs`,
    `senren--combobox`, `senren--theme-toggle`, `senren--clipboard`.
-3. Controllers are auto-registered by the host app's existing
-   `controllers/index.js` if it uses `eagerLoadControllersFrom`.
-   For Importmap apps that pin individually, the install generator
-   prints exact pin lines.
+3. Controllers are registered by the host app's existing
+   `controllers/index.js`. For small apps, the Stimulus default
+   `eagerLoadControllersFrom` behavior is acceptable. For apps with many
+   interactive components, use `lazyLoadControllersFrom` and set
+   `preload: false` on the Importmap controller pins so unused Senren
+   controllers are not downloaded during initial page load.
 4. Controllers handle **only** local UI behavior:
    open/close, focus management, keyboard navigation, copy to
    clipboard, theme toggle, tabs activation, accordion toggle,
@@ -38,6 +40,12 @@ remains small, local, and predictable.
    contract.
 7. Controllers must include accessibility behavior by default
    (Escape to close dialog, focus trap, aria-expanded toggling).
+8. Controllers must not write unsanitized HTML or evaluate dynamic
+   code. `innerHTML =`, `outerHTML =`, `insertAdjacentHTML`,
+   `document.write`, `eval`, and `new Function` are blocked by
+   `test/security/javascript_controller_security_test.rb`. If a
+   controller must handle rich text, keep it isolated, sanitize on the
+   server, and add a dedicated regression test.
 
 ## Files to create
 
@@ -57,6 +65,9 @@ senren-rails/test/system/<each>_test.rb
 - Component generator writes a controller skeleton matching this plan
   by default. `--no-client` skips it for static-only custom
   components.
+- `README.md` documents the optional lazy Stimulus / Importmap
+  configuration for host apps that need to keep initial JavaScript
+  small.
 
 ## Expected behavior
 
@@ -67,6 +78,8 @@ senren-rails/test/system/<each>_test.rb
   attributes, never via inline event handlers.
 - Removing a controller from the host app degrades gracefully: the
   component still renders; the interactive feature is the only loss.
+- A host app using lazy registration can render static pages without
+  fetching unrelated Senren controller modules.
 
 ## Test strategy
 
@@ -75,6 +88,11 @@ senren-rails/test/system/<each>_test.rb
   Dialog open/close, DropdownMenu keyboard nav, Tabs activation,
   Combobox filter, Clipboard copy, ThemeToggle.
 - Lint test asserting no controller imports forbidden libraries.
+- Static security tests asserting no unsafe DOM sinks or dynamic code
+  evaluation are introduced.
+- `bin/performance` asserts Stimulus controllers stay below payload
+  budgets and do not introduce network calls or external UI framework
+  imports.
 
 ## Acceptance criteria
 
@@ -83,3 +101,8 @@ senren-rails/test/system/<each>_test.rb
 - [ ] No controller does fetch/XHR or imports React/Vue/Alpine.
 - [ ] Every interactive component has a system test.
 - [ ] Accessibility behavior (Escape, focus trap, aria) covered.
+- [x] Host-app guidance documents on-demand controller loading for
+      Importmap applications with many interactive components.
+- [x] Unsafe DOM sinks are covered by a local security test.
+- [x] Stimulus payload and runtime boundaries are covered by
+      `bin/performance`.

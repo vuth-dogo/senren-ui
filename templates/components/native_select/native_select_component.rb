@@ -13,20 +13,23 @@ module Senren
       lg: 'h-12 text-base px-4'
     }.freeze
 
-    def initialize(name:, options:, selected: nil, id: nil, prompt: nil, variant: :default, size: :md, class_name: nil,
-                   **html)
+    # native_arrow: true  → keep browser/OS native arrow (appearance-auto)
+    # native_arrow: false → use custom SVG arrow (appearance-none + SVG overlay)
+    def initialize(name:, options:, selected: nil, id: nil, prompt: nil, native_arrow: true,
+                   variant: :default, size: :md, class_name: nil, **html)
       super(variant: variant, size: size, class_name: class_name, **html)
       @name = name
       @options = options
       @selected = selected
       @id = id || name.to_s.parameterize
       @prompt = prompt
+      @native_arrow = native_arrow
     end
 
     attr_reader :name, :options, :selected, :id, :prompt
 
-    def wrapper_attrs
-      { class: 'group relative w-full', data: { senren_component: senren_component_name } }
+    def native_arrow?
+      @native_arrow
     end
 
     def select_attrs
@@ -39,9 +42,18 @@ module Senren
       )
     end
 
+    def root_select_attrs
+      attrs = select_attrs
+      data = (attrs[:data] || {}).merge(senren_component: senren_component_name)
+
+      attrs.merge(data: data)
+    end
+
     def select_classes
+      appearance = native_arrow? ? 'appearance-auto' : 'appearance-none pr-9'
       [
-        'flex w-full cursor-pointer appearance-none rounded-(--senren-radius) border bg-[hsl(var(--senren-background))] pr-9 text-[hsl(var(--senren-foreground))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50',
+        'w-full cursor-pointer rounded-(--senren-radius) border bg-[hsl(var(--senren-background))] text-[hsl(var(--senren-foreground))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50',
+        appearance,
         self.class::VARIANTS[variant],
         self.class::SIZES[size],
         class_name,

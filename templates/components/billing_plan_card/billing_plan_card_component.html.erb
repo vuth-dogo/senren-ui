@@ -22,7 +22,7 @@
       </ul>
     <% end %>
     <% if cta_label.present? %>
-      <%= link_to cta_label, cta_href || "#", class: "mt-6 inline-flex h-10 w-full items-center justify-center rounded-(--senren-radius) bg-[hsl(var(--senren-primary))] px-4 text-sm font-medium text-[hsl(var(--senren-primary-foreground))] hover:opacity-90" %>
+      <%= link_to cta_label, safe_url(cta_href), class: "mt-6 inline-flex h-10 w-full items-center justify-center rounded-(--senren-radius) bg-[hsl(var(--senren-primary))] px-4 text-sm font-medium text-[hsl(var(--senren-primary-foreground))] hover:opacity-90" %>
     <% end %>
   <% end %>
 <% end %>

@@ -42,6 +42,10 @@ bin/rails senren:add button card badge alert form input \
   textarea native_select table dropdown_menu dialog alert_dialog
 ```
 
+`senren:add` also works via `bundle exec rails senren:add ...`. The older
+bracketed Rake task form, `bin/rails 'senren:add[button,card]'`, remains
+supported for backward compatibility.
+
 ## Daily commands
 
 ```bash
@@ -50,10 +54,38 @@ bin/rails generate senren:component picker --client  # custom component with Sti
 bin/rails generate senren:component picker --no-client  # without Stimulus
 bin/rails senren:add dialog --client        # install interactive official component
 bin/rails senren:add button                 # install static official component
+bundle exec rails senren:add form input     # equivalent alternate entry point
 bin/rails senren:skill:sync                 # rebuild .senren/skill.md
 bin/rails senren:agents:sync                # rebuild .senren/agent-rules + adapters
 bin/rails senren:doctor                     # check installation health
 ```
+
+## Keeping Stimulus JavaScript small
+
+Senren copies only installed client controllers into your Rails app, but an
+Importmap app can still download every controller on initial page load if it
+keeps the default eager Stimulus loader and preload configuration. Once your
+app has several interactive components, switch Stimulus to lazy loading:
+
+```javascript
+// app/javascript/controllers/index.js
+import { application } from "controllers/application"
+import { lazyLoadControllersFrom } from "@hotwired/stimulus-loading"
+
+lazyLoadControllersFrom("controllers", application)
+```
+
+Disable import-map preloading for those on-demand controller modules:
+
+```ruby
+# config/importmap.rb
+pin_all_from "app/javascript/controllers", under: "controllers", preload: false
+```
+
+This keeps controllers mapped and usable while loading each module only when
+its `data-controller` identifier appears in the page. Minification or source
+maps are an application build/deployment decision; Senren deliberately ships
+editable source controllers into the host app.
 
 ## Using a component
 
@@ -73,17 +105,27 @@ bin/rails senren:doctor                     # check installation health
 
 ## Workspace layout
 
-This repository ships as a workspace with a real Rails dogfooding app:
+This repository ships as a gem source checkout with a git-ignored local
+preview host:
 
 ```text
-senren-workspace/
-  senren-rails/        # the local gem source directory
-  apps/
-    todolist/          # real Rails app that uses senren-ui via local path
+senren-ui/
+  .local/
+    preview/           # local Rails preview host, ignored by git
 ```
 
-`apps/todolist` is the production-like acceptance test for Senren — a
-small SaaS-style Todo manager built entirely from Senren components.
+Use `bin/seed_preview` to create or refresh `.local/preview`. It
+installs a small Senren component preview route, imports `senren.css`,
+and loads Tailwind's browser runtime for local visual checks.
+
+```bash
+bin/seed_preview
+cd .local/preview
+bin/rails server
+```
+
+The full documentation/reference site lives outside this gem checkout in
+`senren-ui-page`.
 
 ## AI Agent skill system
 
@@ -126,6 +168,8 @@ See `registry/components.yml` for the canonical list. v0.1 ships:
 bundle install
 bun install
 bundle exec rake test            # gem tests
+bin/system                       # headless browser system tests
+bin/performance                  # local payload/performance budgets
 bun run controllers:check        # lint + syntax check for templates/controllers/*.js
 bun run controllers:lint:fix     # auto-fix lint issues for controllers
 bundle exec rake test:system     # Stimulus/system tests
@@ -138,6 +182,20 @@ See `CONTRIBUTING.md`. Two rules to know up front:
 1. Every meaningful change creates or updates a file in `history/`.
 2. Architectural decisions are captured in `plans/` before code is
    written.
+
+## Open source maintenance baseline
+
+This repo ships with a GitHub baseline for safer public maintenance:
+
+- CI on pull requests and `main` pushes for tests, RuboCop, and JS checks.
+- CodeQL analysis for Ruby and JavaScript.
+- Dependabot updates for Bundler, JS tooling, and GitHub Actions.
+- PR and issue templates, `CODEOWNERS`, `CODE_OF_CONDUCT.md`, and
+  `SECURITY.md`.
+
+Repository controls such as branch protection, required checks, release
+permissions, and auto-delete branch still need to be enabled in GitHub
+repository settings.
 
 ## License
 

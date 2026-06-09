@@ -1,0 +1,64 @@
+name: Bug report
+description: Report a defect in the gem, generator output, or docs site.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please include a minimal reproduction and the exact command or render path that failed.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: One sentence describing the bug.
+      placeholder: NativeSelect drops data-senren-component when native_arrow is false
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: List the exact setup and commands needed to reproduce the issue.
+      placeholder: |
+        1. Add gem from GitHub
+        2. Run bin/rails generate senren:install
+        3. Render Senren::NativeSelectComponent...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: input
+    id: ruby
+    attributes:
+      label: Ruby version
+      placeholder: ruby 3.4.2
+
+  - type: input
+    id: rails
+    attributes:
+      label: Rails version
+      placeholder: Rails 8.0.2
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or screenshots
+      description: Paste the error, stack trace, or screenshot if available.
+      render: shell

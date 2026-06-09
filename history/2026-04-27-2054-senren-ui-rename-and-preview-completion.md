@@ -36,7 +36,7 @@ Rename the gem from `senren-rails` to `senren-ui`, complete live previews in
 - Added curated `apps/site` live preview partials for all promoted components.
 - Re-ran `senren-rails/bin/seed_site.rb` to copy updated templates and
   registry metadata into `apps/site`.
-- Re-ran `senren-rails/bin/seed_todolist.rb` to refresh todolist generated
+- Re-ran `senren-rails/bin/seed_preview` to refresh preview generated
   metadata after the gem rename.
 - Updated active planning/master docs to teach `senren-ui` as the gem name.
   Historical history files were left unchanged.
@@ -49,7 +49,7 @@ bundle install                         # in senren-rails
 bundle install                         # in apps/site
 bundle install                         # in apps/todolist
 ruby senren-rails/bin/seed_site.rb
-ruby senren-rails/bin/seed_todolist.rb
+ruby senren-rails/bin/seed_preview
 bundle exec rake test                  # in senren-rails
 bin/rails test                         # in apps/todolist
 bin/rails tailwindcss:build            # in apps/site

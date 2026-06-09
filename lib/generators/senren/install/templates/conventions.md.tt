@@ -20,11 +20,11 @@ and obey it strictly.
    block to `.new`, **not** to `render`, producing an empty component.
    Use either of these forms instead:
    ```erb
-   <%= render(Senren::ButtonComponent.new(variant: :primary)) { "Save" } %>
+   <%%= render(Senren::ButtonComponent.new(variant: :primary)) { "Save" } %>
 
-   <%= render Senren::ButtonComponent.new(variant: :primary) do %>
+   <%%= render Senren::ButtonComponent.new(variant: :primary) do %>
      Save
-   <% end %>
+   <%% end %>
    ```
 
 ## File ownership
@@ -47,9 +47,13 @@ and obey it strictly.
 ## Adding a component
 
 ```bash
-bin/rails senren:add <name> [<name>...]
-bin/rails senren:add dialog --no-client     # override registry default
-bin/rails senren:add button --client        # override registry default
+bin/rails senren:add dialog
+bin/rails senren:add button card badge
+bin/rails senren:add dialog --no-client       # override registry default
+bundle exec rails senren:add button --client  # equivalent alternate entry point
+
+# Backward-compatible legacy task syntax:
+bin/rails 'senren:add[button,card,badge]'
 ```
 
 After install you can edit any file under `app/components/senren/` directly.

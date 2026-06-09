@@ -53,10 +53,18 @@ Out of scope for v0.1 of the site:
 - This plan has moved from delivery mode to maintenance mode
   (content/link correctness and release metadata consistency).
 
+## Maintenance update (2026-05-21)
+
+- The live documentation/reference surface is maintained outside this
+  gem checkout as `senren-ui-page`.
+- This plan keeps the historical `apps/site` implementation notes for
+  traceability, but new gem-checkout preview work should use
+  `.local/preview` and `bin/seed_preview`.
+
 ## Decisions
 
 1. **Build inside the workspace as `apps/site`**, mirroring the
-   `apps/todolist` pattern. Same Rails 8 + Propshaft + importmap +
+   local preview host pattern. Same Rails 8 + Propshaft + importmap +
    tailwindcss-rails + ViewComponent stack, same `gem "senren-ui",
    path: "../../senren-rails", require: "senren/rails"` install. This guarantees Senren is
    exercised the same way an end user would exercise it.
@@ -221,7 +229,7 @@ The site is built incrementally so the user can review and steer:
 
 1. **Phase A — Skeleton** (~1 session)
    - Create `apps/site` with the same scaffold pattern used for
-     `apps/todolist`. Wire local-path gem, Tailwind, importmap,
+     `.local/preview`. Wire local-path gem, Tailwind, importmap,
      Senren install + Phase 1 components.
    - Layouts + landing page only.
    - Acceptance: boots, landing page renders.

@@ -1,4 +1,4 @@
-<label class="inline-flex items-center gap-3 cursor-pointer">
+<%= tag.label(**root_attrs("inline-flex items-center gap-3 cursor-pointer")) do %>
   <span class="relative inline-flex h-6 w-11 items-center rounded-full bg-[hsl(var(--senren-muted))] has-[:checked]:bg-[hsl(var(--senren-primary))] transition-colors">
     <input type="checkbox" role="switch" id="<%= id %>" name="<%= name %>" value="<%= value %>" <%= "checked" if checked %> class="peer sr-only">
     <span aria-hidden="true" class="absolute left-0.5 top-0.5 inline-block h-5 w-5 transform rounded-full bg-[hsl(var(--senren-background))] transition-transform peer-checked:translate-x-5"></span>
@@ -8,4 +8,4 @@
   <% else %>
     <%= content %>
   <% end %>
-</label>
+<% end %>

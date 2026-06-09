@@ -29,7 +29,7 @@ module Senren
           id: data[:id] || data['id'] || "#{dom_id}-option-#{index}",
           label: label,
           description: description,
-          href: data[:href] || data['href'],
+          href: safe_url(data[:href] || data['href'], fallback: nil),
           keywords: [label, description, keywords].flatten.compact.join(' ')
         }
       end

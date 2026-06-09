@@ -21,7 +21,7 @@ module Senren
           {
             title: slide[:title] || slide['title'],
             description: slide[:description] || slide['description'],
-            image_url: slide[:image_url] || slide['image_url'],
+            image_url: safe_media_url(slide[:image_url] || slide['image_url']),
             alt: slide[:alt] || slide['alt'],
             badge: slide[:badge] || slide['badge']
           }

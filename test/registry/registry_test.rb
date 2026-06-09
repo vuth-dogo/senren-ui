@@ -71,6 +71,71 @@ module Senren
       def test_unknown_component_raises
         assert_raises(ArgumentError) { @registry.fetch('totally_made_up') }
       end
+
+      def test_validation_rejects_unknown_component_keys
+        registry = registry_with(
+          'button' => component_data('button').merge('unexpected' => true)
+        )
+
+        error = assert_raises(RuntimeError) { registry.validate! }
+
+        assert_includes error.message, 'button: unknown keys unexpected'
+      end
+
+      def test_validation_rejects_file_paths_outside_component_contract
+        registry = registry_with(
+          'button' => component_data('button').merge('files' => ['app/components/senren/../unsafe.rb'])
+        )
+
+        error = assert_raises(RuntimeError) { registry.validate! }
+
+        assert_includes error.message, 'button: invalid file path "app/components/senren/../unsafe.rb"'
+      end
+
+      def test_validation_requires_client_controller_file
+        registry = registry_with(
+          'dialog' => component_data('dialog').merge(
+            'client' => true,
+            'can_have_client' => true,
+            'controller' => 'senren--dialog',
+            'files' => [
+              'app/components/senren/dialog_component.rb',
+              'app/components/senren/dialog_component.html.erb'
+            ]
+          )
+        )
+
+        error = assert_raises(RuntimeError) { registry.validate! }
+
+        assert_includes error.message, 'dialog: client=true requires a Stimulus controller file'
+      end
+
+      private
+
+      def registry_with(components)
+        Senren::Rails::Registry.new(
+          { 'components' => components },
+          { 'groups' => [] },
+          { 'recipes' => {} }
+        )
+      end
+
+      def component_data(name)
+        {
+          'category' => 'actions',
+          'client' => false,
+          'can_have_client' => true,
+          'files' => [
+            "app/components/senren/#{name}_component.rb",
+            "app/components/senren/#{name}_component.html.erb"
+          ],
+          'depends_on' => [],
+          'pairs_with' => [],
+          'variants' => [],
+          'accessibility' => [],
+          'ai' => { 'use_for' => [], 'avoid' => [] }
+        }
+      end
     end
   end
 end

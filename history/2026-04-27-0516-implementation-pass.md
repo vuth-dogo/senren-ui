@@ -156,7 +156,7 @@ executed via the rake task in this environment):
 - `app/assets/stylesheets/senren.css` - full light + dark tokens.
 - `public/llms.txt` (under 4 KB) and `public/llms-full.txt`.
 
-Helper script `bin/seed_todolist.rb` is the deterministic equivalent
+Helper script `bin/seed_preview` is the deterministic equivalent
 of the rake tasks; it is committed so future runs produce
 byte-identical output.
 
@@ -178,7 +178,7 @@ cd apps && rails new todolist --skip-git --skip-system-test --skip-jbuilder \
                               --database=sqlite3
 
 # Senren artifacts generated via the gem's own classes
-ruby /home/vudogo/senren/senren-rails/bin/seed_todolist.rb
+ruby /home/vudogo/senren/senren-rails/bin/seed_preview
 ```
 
 ## Tests Run
@@ -223,7 +223,7 @@ in this environment because Rails fails to boot (see Issues Found).
   `bin/rails senren:add`, `bin/rails db:setup`, and
   `bin/rails test`.
 - The gem's library classes were exercised directly (without booting
-  Rails) via `bin/seed_todolist.rb` so the deterministic install
+  Rails) via `bin/seed_preview` so the deterministic install
   output is captured and committed.
 
 ## Issues Found
@@ -278,7 +278,7 @@ on the shipped gem.
 ## Fixes Applied
 
 - Switched bulk stub generation from bash heredocs to Ruby
-  (`bin/seed_todolist.rb` + an inline ruby step) to avoid the
+  (`bin/seed_preview` + an inline ruby step) to avoid the
   expansion issue.
 - All `write_to_file` calls now use the WSL UNC path
   (`\\wsl.localhost\Ubuntu-22.04\home\vudogo\senren\...`) to land
@@ -294,7 +294,7 @@ on the shipped gem.
    system libssl on the user's machine is out of scope for this
    session.
 3. **The deterministic install output for `apps/todolist` was
-   pre-generated** via `bin/seed_todolist.rb` so the workspace is
+   pre-generated** via `bin/seed_preview` so the workspace is
    complete and inspectable even before Rails can boot.
 
 ## Next Steps

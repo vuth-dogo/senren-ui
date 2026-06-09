@@ -24,7 +24,7 @@ Finished: 2026-04-27 11:31 UTC
   in most browsers; this restores expected web UI behavior. Anchors
   rendered with `as: :a` already inherit pointer from `href`, so the
   fix is harmless there.
-- Re-ran `senren-rails/bin/seed_todolist.rb` to refresh the installed
+- Re-ran `senren-rails/bin/seed_preview` to refresh the installed
   copy in `apps/todolist`. The seed now uses `force: true` so library
   updates propagate cleanly.
 
@@ -48,7 +48,7 @@ Finished: 2026-04-27 11:31 UTC
 ## Commands Run
 
 ```bash
-ruby /home/vudogo/senren/senren-rails/bin/seed_todolist.rb
+ruby /home/vudogo/senren/senren-rails/bin/seed_preview
 bin/rails test               # in apps/todolist
 bin/rails runner /tmp/check_imports.rb  # smoke check
 ```

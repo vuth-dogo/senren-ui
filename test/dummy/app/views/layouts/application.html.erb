@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Senren Dummy</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+      [hidden], .hidden { display: none !important; }
+      .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+      body { margin: 0; font-family: system-ui, sans-serif; background: white; color: #111827; }
+      main { padding: 24px; }
+      section { margin-block: 16px; }
+      button, input, textarea, select { font: inherit; }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "@hotwired/stimulus": "/assets/stimulus.js",
+          "controllers/": "/assets/controllers/"
+        }
+      }
+    </script>
+    <script type="module" src="/assets/application.js"></script>
+  </head>
+  <body>
+    <%= yield %>
+  </body>
+</html>

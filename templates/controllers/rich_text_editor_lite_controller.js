@@ -1,5 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
+const ALLOWED_LINK_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"])
+
 // senren--rich-text-editor-lite
 // Local UI: tiny contenteditable toolbar synced to a hidden textarea.
 export default class extends Controller {
@@ -280,8 +282,16 @@ export default class extends Controller {
   normalizeUrl(rawUrl) {
     const url = String(rawUrl || "").trim()
     if (url.length === 0) return null
-    if (/^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(url)) return url
-    return `https://${url}`
+    if (url.startsWith("#")) return url
+    if (url.startsWith("/") && !url.startsWith("//")) return url
+
+    const candidate = /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`
+    try {
+      const parsed = new URL(candidate, window.location.origin)
+      return ALLOWED_LINK_PROTOCOLS.has(parsed.protocol) ? parsed.href : null
+    } catch (_) {
+      return null
+    }
   }
 
   activeRange() {

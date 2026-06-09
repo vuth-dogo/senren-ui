@@ -3,22 +3,19 @@
 require 'senren/rails'
 
 namespace :senren do
-  desc 'Install one or more Senren components: rake senren:add[button,dialog] or bin/rails senren:add button dialog'
-  task :add, [:names] => :environment do |_t, args|
+  desc 'Install one or more Senren components. Preferred: bin/rails senren:add button dialog. ' \
+       "Legacy: bin/rails 'senren:add[button,dialog]'"
+  task :add, [:names] do |_t, args|
     names = parse_names(args)
     options = parse_options
-    abort 'Usage: bin/rails senren:add NAME [NAME...] [--client | --no-client]' if names.empty?
 
-    paths    = Senren::Rails::HostPaths.new
-    registry = Senren::Rails::Registry.load!
-    copier   = Senren::Rails::ComponentCopier.new(registry: registry, paths: paths)
-
-    installed = copier.install(names, client_override: options[:client_override], force: options[:force])
-
-    Senren::Rails::SkillWriter.new(registry: registry, paths: paths).sync!
-    Senren::Rails::AgentRulesWriter.new(registry: registry, paths: paths).sync!
-
-    puts "Installed: #{installed.join(', ')}"
+    Senren::Rails::ComponentInstaller.new.install(
+      names: names,
+      client_override: options[:client_override],
+      force: options[:force]
+    )
+  rescue ArgumentError => e
+    abort e.message
   end
 
   namespace :skill do
@@ -67,11 +64,7 @@ def parse_names(args)
   raw.concat(args.extras)
   raw << args[:names] if args[:names]
   raw.concat(ARGV.drop_while { |a| !a.start_with?('senren:') }.drop(1))
-  raw
-    .flatten
-    .flat_map { |s| s.to_s.split(/[,\s]+/) }
-    .reject { |s| s.empty? || s.start_with?('-') }
-    .uniq
+  Senren::Rails::ComponentInstaller.normalize_names(raw)
 end
 
 def parse_options

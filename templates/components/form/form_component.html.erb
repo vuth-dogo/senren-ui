@@ -1,3 +1,10 @@
-<%= form_with(model: model, url: url, method: method, multipart: multipart, **root_attrs("space-y-4")) do |f| %>
+<%
+  form_opts = {}
+  form_opts[:model]     = model     if model
+  form_opts[:url]       = url       if url
+  form_opts[:method]    = method    if method
+  form_opts[:multipart] = multipart if multipart
+%>
+<%= form_with(**form_opts, **root_attrs("space-y-4")) do |f| %>
   <%= content || capture(f, &Proc.new) %>
 <% end %>

@@ -7,6 +7,24 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 v0.x is a pre-stable line: minor bumps may break things; patch bumps are
 bug fixes only.
 
+## [0.1.6] — 2026-06-09
+
+### Added
+
+- Local preview app now seeds the full registered Senren component set and renders an exhaustive component kitchen sink.
+
+### Changed
+
+- `bin/seed_preview` is now the canonical local preview seed command and targets `.local/preview`.
+- `bin/seed_preview` writes a local-path gem entry that works for custom preview roots.
+- `.rubocop.yml` target Ruby version now matches the gem runtime floor required by ViewComponent 4.x.
+
+### Fixed
+
+- `safe_url` now accepts same-origin relative URLs such as `?page=:page`, `./settings`, and `settings` while still rejecting unsafe schemes and hosts.
+- `ComponentCopier` applies the same URL rules when patching existing host apps.
+- Local preview layout keeps the Tailwind browser compiler enabled so the preview renders correctly out of the box.
+
 ## [0.1.5] — 2026-05-03
 
 ### Added
@@ -79,7 +97,7 @@ bug fixes only.
 - Tailwind design-token stylesheet (`senren.css`) with light/dark.
 - Centralized `.senren/skill.md` system with preserved user-region.
 - `public/llms.txt` and `public/llms-full.txt` generation.
-- `apps/todolist` Rails app dogfooding the gem via local path.
+- A Rails dogfooding app for local-path gem integration.
 - Bun-based JS tooling for Stimulus templates:
   - `bun run controllers:syntax`
   - `bun run controllers:lint`
@@ -108,4 +126,4 @@ bug fixes only.
 ## [0.1.0] — 2026-04-27
 
 First tagged release once the Unreleased entries are validated end-to-end
-in `apps/todolist` per `plans/011_release_checklist.md`.
+against the project dogfooding app per `plans/011_release_checklist.md`.

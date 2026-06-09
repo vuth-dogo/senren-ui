@@ -66,11 +66,11 @@ senren-rails/test/components/tokens_lint_test.rb
   hard-coded `gray-`, `slate-`, `zinc-`, `red-`, `blue-` etc. and
   fail if found outside an allowlist.
 - Snapshot test: `senren.css` content is byte-stable across runs.
-- Visual smoke test in `apps/todolist`: light and dark mode toggle.
+- Visual smoke test in `.local/preview`: light and dark mode toggle.
 
 ## Acceptance criteria
 
 - [ ] `senren.css` exists and contains both `:root` and `.dark`.
 - [ ] No hard-coded color utilities in component templates.
-- [ ] Dark mode works in `apps/todolist`.
+- [ ] Dark mode works in `.local/preview`.
 - [ ] Token names documented in `docs/tokens.md`.

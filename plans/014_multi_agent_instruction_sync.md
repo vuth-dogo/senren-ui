@@ -44,8 +44,7 @@ existing project instructions.
 - `lib/tasks/senren.rake`
 - `lib/generators/senren/install/install_generator.rb`
 - `lib/generators/senren/install/templates/conventions.md.tt`
-- `bin/seed_site.rb`
-- `bin/seed_todolist.rb`
+- `bin/seed_preview`
 - `README.md`
 
 ## Expected behavior

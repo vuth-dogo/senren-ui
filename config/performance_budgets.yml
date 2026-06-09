@@ -1,0 +1,13 @@
+controllers:
+  total_bytes: 50000
+  total_gzip_bytes: 14000
+  file_bytes: 18000
+components:
+  total_bytes: 140000
+  file_bytes: 8000
+system:
+  static_dom_nodes: 180
+  interactive_dom_nodes: 420
+  kitchen_sink_dom_nodes: 1600
+  interaction_ms: 500
+  long_task_ms: 200

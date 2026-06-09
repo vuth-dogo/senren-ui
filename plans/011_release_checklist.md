@@ -22,6 +22,15 @@ and released.
 - Post-release implementation history is tracked in
   `history/2026-05-03-2140-release-progress-catchup.md`.
 
+## Maintenance update (2026-05-21)
+
+- The old tracked workspace assumption has been replaced by a
+  git-ignored local preview host at `.local/preview`.
+- `bin/seed_preview` creates or refreshes that local host and writes a
+  root component preview route.
+- The full documentation/reference app is maintained separately as
+  `senren-ui-page`.
+
 ## Decisions
 
 1. v0.1 is **not** a stable API. SemVer-pre treatment: minor bumps
@@ -29,9 +38,9 @@ and released.
 2. v0.1 must satisfy section 29 of `master_prompt.md` in full.
 3. Release artifacts: built `.gem` file plus a tagged git commit.
    No public RubyGems push for v0.1 (local path install only).
-4. The `apps/todolist` app must boot, render the Todo index using
-   Senren components, and pass its tests on a clean machine using
-   only `bundle install` and `bin/rails db:setup`.
+4. The local `.local/preview` preview host must be reproducible with
+   `bin/seed_preview` and render Senren components with Tailwind
+   styling.
 
 ## Files to create / modify
 
@@ -44,9 +53,8 @@ and released.
 
 ## Expected behavior
 
-Following the `bundle install` → `bin/rails db:setup` →
-`bin/rails server` flow inside `apps/todolist` on a clean machine
-results in a working Todo SaaS-style UI built on Senren.
+Following `bundle install` → `bin/seed_preview` → `cd .local/preview`
+→ `bin/rails server` results in a local Senren component preview.
 
 ## Test strategy
 
@@ -54,9 +62,9 @@ results in a working Todo SaaS-style UI built on Senren.
   document results in a final history file
   (`history/<timestamp>-v0.1-release-validation.md`).
 - Run gem tests: `bundle exec rake test`.
-- Run todolist tests: from `apps/todolist`, `bin/rails test` and
-  `bin/rails test:system`.
-- Smoke test in browser: load `/todos`, create, edit, delete a todo.
+- Run `test/seed_preview_test.rb` to confirm the local preview host
+  files are generated.
+- Smoke test in browser: load `/` in `.local/preview`.
 
 ## Acceptance criteria — full checklist
 
@@ -71,9 +79,9 @@ results in a working Todo SaaS-style UI built on Senren.
 - [x] `.senren/agent-rules.md` and adapter files regenerate.
 - [x] Registry validation passes.
 - [x] Dummy app boots.
-- [x] `apps/todolist` boots and works end-to-end.
-- [x] Local path gem works in `apps/todolist`.
-- [x] Todo CRUD works with Senren UI.
+- [x] `.local/preview` preview host is reproducible.
+- [x] Local path gem works in `.local/preview`.
+- [x] Local preview renders Senren UI components.
 - [x] Tailwind renders.
 - [x] Stimulus controllers work.
 - [x] Turbo flows work.

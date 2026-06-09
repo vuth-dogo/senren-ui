@@ -1,0 +1,16 @@
+<main data-testid="static-preview">
+  <%= render(Senren::TypographyComponent.new(variant: :h1)) { "Senren Static Preview" } %>
+  <%= render(Senren::ButtonComponent.new(variant: :primary)) { "Primary action" } %>
+  <%= render(Senren::BadgeComponent.new(variant: :success)) { "Stable" } %>
+  <%= render(Senren::CardComponent.new) do |card| %>
+    <% card.with_header { "Card header" } %>
+    <% card.with_body { "Static card body" } %>
+  <% end %>
+  <%= render(Senren::InputComponent.new(name: :title, value: "Hello")) %>
+  <%= render(Senren::TextareaComponent.new(name: :notes, value: "Notes")) %>
+  <%= render(Senren::NativeSelectComponent.new(name: :status, options: [%w[draft Draft], %w[published Published]], selected: "draft")) %>
+  <%= render(Senren::AlertComponent.new(variant: :info)) do |alert| %>
+    <% alert.with_title { "Ready" } %>
+    <% alert.with_description { "Static preview rendered." } %>
+  <% end %>
+</main>

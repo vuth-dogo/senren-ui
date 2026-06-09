@@ -1,0 +1,60 @@
+<main data-testid="interactive-preview">
+  <h1>Senren Interactive Preview</h1>
+
+  <section>
+    <%= render Senren::DialogComponent.new(id: "system-dialog") do |dialog| %>
+      <% dialog.with_trigger do %>
+        <%= render(Senren::ButtonComponent.new(id: "dialog-open")) { "Open dialog" } %>
+      <% end %>
+      <% dialog.with_title { "Dialog title" } %>
+      <% dialog.with_description { "Dialog description" } %>
+      <% dialog.with_body { "Dialog body" } %>
+    <% end %>
+  </section>
+
+  <section>
+    <%= render Senren::DropdownMenuComponent.new do |menu| %>
+      <% menu.with_trigger do %>
+        <%= render(Senren::ButtonComponent.new(id: "dropdown-trigger")) { "Menu actions" } %>
+      <% end %>
+      <% menu.with_item { "First action" } %>
+      <% menu.with_item { "Second action" } %>
+    <% end %>
+  </section>
+
+  <section>
+    <%= render Senren::TabsComponent.new(
+      items: [
+        { id: "overview", label: "Overview", content: "Overview panel" },
+        { id: "details", label: "Details", content: "Details panel" }
+      ]
+    ) %>
+  </section>
+
+  <section>
+    <%= render Senren::AccordionComponent.new(
+      items: [
+        { id: "basic", title: "Basic", content: "Basic content" },
+        { id: "advanced", title: "Advanced", content: "Advanced content" }
+      ]
+    ) %>
+  </section>
+
+  <section>
+    <%= render Senren::CollapsibleComponent.new(title: "More options") do %>
+      Hidden options
+    <% end %>
+  </section>
+
+  <section>
+    <%= render Senren::ComboboxComponent.new(
+      name: "status",
+      placeholder: "Choose status",
+      options: [%w[draft Draft], %w[published Published], %w[archived Archived]]
+    ) %>
+  </section>
+
+  <section>
+    <%= render Senren::RichTextEditorLiteComponent.new(name: "body", value: "<p>Initial content</p>") %>
+  </section>
+</main>

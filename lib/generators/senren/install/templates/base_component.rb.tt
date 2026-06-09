@@ -1,3 +1,6 @@
+require 'uri'
+require 'view_component'
+
 module Senren
   # Base class for every Senren ViewComponent.
   #
@@ -6,13 +9,16 @@ module Senren
   # - variant and size resolution against class-level constants
   # - small class merger (no external `tailwind_merge` dependency in v0.1)
   # - a default root-attribute helper that emits `data-senren-component="<name>"`
-  class BaseComponent < ViewComponent::Base
-    VARIANTS = { default: "" }.freeze
-    SIZES    = { md: "" }.freeze
+  class BaseComponent < ::ViewComponent::Base
+    VARIANTS = { default: '' }.freeze
+    SIZES    = { md: '' }.freeze
+    SAFE_URL_PROTOCOLS = %w[http https mailto tel].freeze
+    SAFE_MEDIA_URL_PROTOCOLS = %w[http https].freeze
 
     attr_reader :class_name, :variant, :size, :html_attrs
 
     def initialize(variant: :default, size: :md, class_name: nil, **html_attrs)
+      super()
       @variant = resolve!(variant, self.class::VARIANTS, :variant)
       @size    = resolve!(size,    self.class::SIZES,    :size)
       @class_name = class_name
@@ -22,24 +28,51 @@ module Senren
     # Compose final root attributes; subclasses pass their base classes.
     def root_attrs(*classes, **extra)
       data = (extra.delete(:data) || {}).merge(senren_component: senren_component_name)
-      tag_class = merge_classes(classes, self.class::VARIANTS[@variant], self.class::SIZES[@size], @class_name, extra.delete(:class))
+      tag_class = merge_classes(
+        classes,
+        self.class::VARIANTS[@variant],
+        self.class::SIZES[@size],
+        @class_name,
+        extra.delete(:class)
+      )
       { class: tag_class, data: data, **html_attrs, **extra }
     end
 
     def senren_component_name
-      self.class.name.to_s.sub(/^Senren::/, "").sub(/Component$/, "").gsub(/([a-z])([A-Z])/, '\1_\2').downcase
+      self.class.name.to_s.sub(/^Senren::/, '').sub(/Component$/, '').gsub(/([a-z])([A-Z])/, '\1_\2').downcase
     end
 
     private
 
+    def safe_url(value, fallback: '#', protocols: SAFE_URL_PROTOCOLS)
+      url = value.to_s.strip
+      return fallback if url.empty?
+      return url if url.start_with?('#')
+      return url if url.start_with?('/') && !url.start_with?('//')
+
+      uri = URI.parse(url)
+      return url if uri.scheme && Array(protocols).map(&:to_s).include?(uri.scheme.downcase)
+      return fallback if uri.host
+      return url unless uri.scheme
+
+      fallback
+    rescue URI::InvalidURIError
+      fallback
+    end
+
+    def safe_media_url(value, fallback: nil)
+      safe_url(value, fallback: fallback, protocols: SAFE_MEDIA_URL_PROTOCOLS)
+    end
+
     def resolve!(value, table, label)
       key = value.to_sym
       return key if table.key?(key)
+
       raise ArgumentError, "Unknown #{label}: #{value.inspect}. Allowed: #{table.keys.join(', ')}"
     end
 
     def merge_classes(*sources)
-      sources.flatten.map { |s| s.to_s.strip }.reject(&:empty?).join(" ")
+      sources.flatten.map { |s| s.to_s.strip }.reject(&:empty?).join(' ')
     end
   end
 end

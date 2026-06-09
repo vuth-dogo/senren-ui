@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ruby:
+    name: Ruby tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Run test suite
+        run: bundle exec rake test
+
+      - name: Run system tests
+        run: bin/system
+
+      - name: Run performance checks
+        run: bin/performance
+
+      - name: Run RuboCop
+        run: bundle exec rubocop
+
+  javascript:
+    name: JavaScript checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.2.22"
+
+      - name: Install JS dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run controller checks
+        run: bun run controllers:check

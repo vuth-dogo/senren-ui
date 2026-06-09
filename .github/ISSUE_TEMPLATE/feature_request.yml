@@ -1,0 +1,39 @@
+name: Feature request
+description: Propose a new component, generator improvement, or release workflow enhancement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe the concrete developer experience you want. Senren prefers small, composable primitives over broad frameworks.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What workflow or UI need is currently awkward?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the API, output, or generator behavior you want.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: List workarounds or competing approaches you already evaluated.
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example usage
+      description: Share ERB, Ruby, or CLI examples if helpful.
+      render: erb

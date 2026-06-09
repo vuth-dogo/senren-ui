@@ -73,6 +73,7 @@ module Senren
 
             bin/rails senren:add button card badge alert
             bin/rails senren:add dialog dropdown_menu
+            bundle exec rails senren:add form input textarea
             bin/rails senren:agents:sync
             bin/rails senren:doctor
 

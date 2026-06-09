@@ -19,10 +19,10 @@ module Senren
     def normalize_items(items)
       Array(items).map do |item|
         if item.is_a?(Hash)
-          { label: item.fetch(:label) { item.fetch('label') }, href: item[:href] || item['href'] }
+          { label: item.fetch(:label) { item.fetch('label') }, href: safe_url(item[:href] || item['href'], fallback: nil) }
         else
           label, href = item
-          { label: label, href: href }
+          { label: label, href: safe_url(href, fallback: nil) }
         end
       end
     end

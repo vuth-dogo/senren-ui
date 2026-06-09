@@ -41,8 +41,8 @@ components.
    32 forbids over-engineering it.
 4. SaaS blocks compose primitives only. They must not introduce new
    styling tokens or new Stimulus patterns.
-5. Every component, including stubs, must be exercised in
-   `apps/todolist` if its category appears on a Todo page (see
+5. Every component, including stubs, must be exercised in the local
+   preview host if its category appears in the preview surface (see
    sections 14–15 of `master_prompt.md`).
 
 ## Current status

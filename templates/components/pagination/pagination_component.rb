@@ -18,7 +18,8 @@ module Senren
     def page_url(page)
       return '#' unless path
 
-      path.respond_to?(:call) ? path.call(page) : path.to_s.gsub(':page', page.to_s)
+      safe_page = page.to_i.clamp(1, total_pages)
+      safe_url(path.respond_to?(:call) ? path.call(safe_page) : path.to_s.gsub(':page', safe_page.to_s))
     end
   end
 end

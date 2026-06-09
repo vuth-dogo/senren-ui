@@ -50,7 +50,7 @@ module Senren
 
       def render(installed_names)
         if installed_names.empty?
-          return '_No Senren components installed yet. Run `bin/rails senren:add <name>...` to install components._'
+          return '_No Senren components installed yet. Run `bin/rails senren:add button` to install components._'
         end
 
         lines = []

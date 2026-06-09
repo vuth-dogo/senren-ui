@@ -1,0 +1,312 @@
+#!/usr/bin/env ruby
+# Helper script:
+# 1) bootstrap a local Rails app in .local/preview if missing
+# 2) seed the full Senren component set into that app using gem internals
+
+require 'fileutils'
+
+GEM_ROOT      = File.expand_path('..', __dir__)
+HOST_ROOT     = ENV.fetch('SENREN_PREVIEW_ROOT', File.expand_path('.local/preview', GEM_ROOT))
+HOST_GEMFILE  = File.join(HOST_ROOT, 'Gemfile')
+HOST_BIN_RAILS = File.join(HOST_ROOT, 'bin/rails')
+PREVIEW_VIEW = <<~ERB.freeze
+  <main data-testid="kitchen-sink-preview" class="mx-auto max-w-6xl space-y-8 p-8">
+    <header class="space-y-2">
+      <h1 class="text-3xl font-semibold tracking-tight">Senren Components Preview</h1>
+      <p class="text-sm text-[hsl(var(--senren-muted-foreground))]">
+        This page renders every registered component in the local preview app.
+      </p>
+    </header>
+
+    <% preview_component_names.each do |name| %>
+      <section
+        data-preview-component="<%= name %>"
+        class="space-y-4 rounded-2xl border border-[hsl(var(--senren-border))] bg-white/70 p-6 shadow-sm"
+      >
+        <h2 class="text-xl font-medium"><%= name.humanize %></h2>
+        <%= render_component_preview(name) %>
+      </section>
+    <% end %>
+  </main>
+ERB
+PREVIEW_HELPER_SOURCE = File.join(GEM_ROOT, 'test/dummy/app/helpers/component_preview_helper.rb')
+PREVIEW_HELPER_DEST   = File.join(HOST_ROOT, 'app/helpers/component_preview_helper.rb')
+
+$LOAD_PATH.unshift File.join(GEM_ROOT, 'lib')
+
+require 'senren/rails/version'
+require 'senren/rails/registry'
+require 'senren/rails/host_paths'
+require 'senren/rails/component_copier'
+require 'senren/rails/component_installer'
+
+# Re-point gem locators (lib/senren/rails.rb is not loaded - it requires Rails::Engine).
+module Senren
+  module Rails
+    GEM_ROOT_OVERRIDE = ::GEM_ROOT
+    def self.gem_root        = GEM_ROOT_OVERRIDE
+    def self.registry_path   = File.join(GEM_ROOT_OVERRIDE, 'registry/components.yml')
+    def self.groups_path     = File.join(GEM_ROOT_OVERRIDE, 'registry/groups.yml')
+    def self.recipes_path    = File.join(GEM_ROOT_OVERRIDE, 'registry/recipes.yml')
+    def self.templates_root  = File.join(GEM_ROOT_OVERRIDE, 'templates')
+  end
+end
+
+def run!(cmd, chdir: nil)
+  puts "  run   #{cmd.join(' ')}"
+  ok = if chdir
+         system(*cmd, chdir: chdir)
+       else
+         system(*cmd)
+       end
+  raise "Command failed: #{cmd.join(' ')}" unless ok
+end
+
+def bootstrap_host_app_if_missing!
+  return if File.exist?(HOST_BIN_RAILS)
+
+  puts "  host root missing Rails app, bootstrapping: #{HOST_ROOT}"
+  FileUtils.mkdir_p(File.dirname(HOST_ROOT))
+
+  run!(
+    [
+      'bundle', 'exec', 'rails', 'new', HOST_ROOT,
+      '--database=sqlite3',
+      '--skip-javascript',
+      '--skip-hotwire',
+      '--skip-kamal',
+      '--skip-docker',
+      '--skip-ci',
+      '--skip-bundle'
+    ],
+    chdir: GEM_ROOT
+  )
+
+  ensure_host_gemfile_entry!
+
+  begin
+    run!(%w[bundle install], chdir: HOST_ROOT)
+    run!(%w[bin/rails db:setup], chdir: HOST_ROOT)
+  rescue RuntimeError => e
+    warn "  warn  #{e.message}"
+    warn '  warn  continuing without bundle/db setup; run these manually when network is available:'
+    warn "        cd #{HOST_ROOT}"
+    warn '        bundle install'
+    warn '        bin/rails db:setup'
+  end
+end
+
+def ensure_host_gemfile_entry!
+  return unless File.exist?(HOST_GEMFILE)
+
+  entry = %(gem "senren-ui", path: #{GEM_ROOT.dump}, require: "senren/rails")
+  gemfile = File.read(HOST_GEMFILE)
+  next_gemfile = if gemfile.match?(/^\s*gem ['"]senren-ui['"]/)
+                   gemfile.gsub(/^\s*gem ['"]senren-ui['"].*$/, entry)
+                 else
+                   "#{gemfile.rstrip}\n\n#{entry}\n"
+                 end
+
+  return unless next_gemfile != gemfile
+
+  File.write(HOST_GEMFILE, next_gemfile)
+  puts "  wrote #{HOST_GEMFILE}"
+end
+
+def seed_preview_route!
+  routes_path = File.join(HOST_ROOT, 'config/routes.rb')
+  return unless File.exist?(routes_path)
+
+  routes = File.read(routes_path)
+  return if routes.include?('root "components#index"')
+
+  routes.sub!(/^\s*# root "posts#index"\n/, '')
+  routes.sub!(
+    "Rails.application.routes.draw do\n",
+    "Rails.application.routes.draw do\n  root \"components#index\"\n"
+  )
+  File.write(routes_path, routes)
+  puts "  wrote #{routes_path}"
+end
+
+def seed_preview_controller!
+  controller_path = File.join(HOST_ROOT, 'app/controllers/components_controller.rb')
+  FileUtils.mkdir_p(File.dirname(controller_path))
+  File.write(controller_path, <<~RUBY)
+    class ComponentsController < ApplicationController
+      def index; end
+    end
+  RUBY
+  puts "  wrote #{controller_path}"
+end
+
+def configure_preview_styles!
+  stylesheet_path = File.join(HOST_ROOT, 'app/assets/stylesheets/application.css')
+  layout_path = File.join(HOST_ROOT, 'app/views/layouts/application.html.erb')
+
+  if File.exist?(stylesheet_path)
+    stylesheet = File.read(stylesheet_path)
+    if stylesheet.include?('@import "./senren.css";')
+      stylesheet.gsub!("@import \"./senren.css\";\n", '')
+      stylesheet.gsub!('@import "./senren.css";', '')
+      stylesheet.strip!
+      File.write(stylesheet_path, stylesheet)
+      puts "  cleaned @import from #{stylesheet_path}"
+    end
+  end
+
+  return unless File.exist?(layout_path)
+
+  layout = File.read(layout_path)
+  tailwind_browser_script = '    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>'
+  layout.gsub!(%r{\s*<script src="https://cdn\.jsdelivr\.net/npm/@tailwindcss/browser@4"></script>\n*}, "\n")
+
+  unless layout.include?('stylesheet_link_tag "senren"') || layout.include?("stylesheet_link_tag 'senren'")
+    layout.sub!(
+      '<%= stylesheet_link_tag :app %>',
+      "<%= stylesheet_link_tag :app %>\n    <%= stylesheet_link_tag \"senren\" %>"
+    )
+  end
+
+  layout.sub!(
+    /^    <%= stylesheet_link_tag :app %>\n/,
+    "#{tailwind_browser_script}\n\n    <%= stylesheet_link_tag :app %>\n"
+  )
+
+  layout.sub!(
+    '<body>',
+    '<body class="min-h-screen bg-[hsl(var(--senren-background))] text-[hsl(var(--senren-foreground))]">'
+  )
+
+  File.write(layout_path, layout)
+  puts "  wrote #{layout_path}"
+end
+
+def configure_preview_javascript!
+  copy_stimulus_assets!
+  write_application_js!
+  inject_importmap_into_layout!
+end
+
+def copy_stimulus_assets!
+  stimulus_source = File.join(GEM_ROOT, 'test/dummy/app/javascript/vendor/stimulus_lite.js')
+  controllers_source_dir = File.join(HOST_ROOT, 'app/javascript', 'controllers', 'senren')
+  public_dir = File.join(HOST_ROOT, 'public')
+  FileUtils.mkdir_p(public_dir)
+
+  FileUtils.cp(stimulus_source, File.join(public_dir, 'stimulus.js'))
+  puts "  copy  #{public_dir}/stimulus.js"
+
+  dest_controllers = File.join(public_dir, 'controllers', 'senren')
+  FileUtils.mkdir_p(dest_controllers)
+  return unless Dir.exist?(controllers_source_dir)
+
+  Dir.glob(File.join(controllers_source_dir, '*.js')).each do |src|
+    FileUtils.cp(src, File.join(dest_controllers, File.basename(src)))
+  end
+  puts "  copy  #{dest_controllers} (#{Dir.glob(File.join(dest_controllers, '*.js')).size} controllers)"
+end
+
+def write_application_js!
+  public_dir = File.join(HOST_ROOT, 'public')
+  File.write(File.join(public_dir, 'application.js'), <<~JS)
+    import { Application } from "/stimulus.js"
+
+    const application = Application.start()
+    window.Stimulus = application
+    window.SenrenLoadedControllers = []
+
+    function controllerPath(identifier) {
+      const [namespace, name] = identifier.split("--")
+      return `/controllers/${namespace}/${name.replaceAll("-", "_")}_controller.js`
+    }
+
+    async function lazyLoadControllersFrom() {
+      const identifiers = Array.from(document.querySelectorAll("[data-controller]"))
+        .flatMap((el) => el.getAttribute("data-controller").split(/\\s+/))
+        .filter((id) => id.startsWith("senren--"))
+
+      for (const identifier of Array.from(new Set(identifiers)).sort()) {
+        const module = await import(controllerPath(identifier))
+        application.register(identifier, module.default)
+        window.SenrenLoadedControllers.push(identifier)
+      }
+    }
+
+    lazyLoadControllersFrom()
+  JS
+  puts "  wrote #{public_dir}/application.js"
+end
+
+def inject_importmap_into_layout!
+  layout_path = File.join(HOST_ROOT, 'app/views/layouts/application.html.erb')
+  return unless File.exist?(layout_path)
+
+  layout = File.read(layout_path)
+  return if layout.include?('type="importmap"')
+
+  importmap_snippet = <<~HTML
+    <script type="importmap">
+        { "imports": { "@hotwired/stimulus": "/stimulus.js" } }
+      </script>
+      <script type="module" src="/application.js"></script>
+  HTML
+  layout.sub!(
+    /(<%= stylesheet_link_tag "senren" %>\n)/,
+    "\\1    #{importmap_snippet}\n"
+  )
+  File.write(layout_path, layout)
+  puts "  wrote #{layout_path}"
+end
+
+def seed_preview_view!
+  view_path = File.join(HOST_ROOT, 'app/views/components/index.html.erb')
+  FileUtils.mkdir_p(File.dirname(view_path))
+  File.write(view_path, PREVIEW_VIEW)
+  puts "  wrote #{view_path}"
+end
+
+def seed_preview_helper!
+  FileUtils.mkdir_p(File.dirname(PREVIEW_HELPER_DEST))
+  FileUtils.cp(PREVIEW_HELPER_SOURCE, PREVIEW_HELPER_DEST)
+  puts "  copy  #{PREVIEW_HELPER_DEST}"
+end
+
+def seed_preview_page!
+  configure_preview_styles!
+  configure_preview_javascript!
+  seed_preview_route!
+  seed_preview_controller!
+  seed_preview_helper!
+  seed_preview_view!
+end
+
+puts "  host root: #{HOST_ROOT}"
+bootstrap_host_app_if_missing!
+ensure_host_gemfile_entry!
+
+paths = Senren::Rails::HostPaths.new(HOST_ROOT)
+paths.ensure_dirs!
+
+inst_tpl_root = File.join(GEM_ROOT, 'lib/generators/senren/install/templates')
+{
+  'base_component.rb.tt' => paths.base_component_path,
+  'senren.css.tt' => paths.stylesheet_path,
+  'conventions.md.tt' => paths.conventions_file,
+  'installed_components.yml.tt' => paths.installed_components
+}.each do |tpl, dest|
+  FileUtils.mkdir_p(File.dirname(dest))
+  FileUtils.cp(File.join(inst_tpl_root, tpl), dest)
+  puts "  copy  #{dest}"
+end
+
+FileUtils.mkdir_p(paths.registry_mirror.dirname)
+FileUtils.cp(Senren::Rails.registry_path, paths.registry_mirror)
+puts "  copy  #{paths.registry_mirror}"
+
+registry = Senren::Rails::Registry.load!
+installer = Senren::Rails::ComponentInstaller.new(registry: registry, paths: paths)
+installed = installer.install(names: registry.names, force: true)
+puts "  installed components: #{installed.size}"
+
+seed_preview_page!

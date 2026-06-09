@@ -31,12 +31,12 @@ module Senren
         if item.is_a?(Hash)
           {
             label: item[:label] || item['label'],
-            href: item[:href] || item['href'] || '#',
+            href: safe_url(item[:href] || item['href']),
             active: item[:active] || item['active']
           }
         else
           label, href = item
-          { label: label, href: href || '#', active: false }
+          { label: label, href: safe_url(href), active: false }
         end
       end
     end

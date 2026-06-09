@@ -12,23 +12,26 @@ module Senren
       super(variant: :default, size: :md, class_name: class_name, **html)
     end
 
-    class ItemTag < ViewComponent::Base
-      def initialize(href: nil, method: nil, destructive: false, **opts)
+    class ItemTag < BaseComponent
+      VARIANTS = { default: '' }.freeze
+      SIZES = { md: '' }.freeze
+      ITEM_ACTION = 'click->senren--dropdown-menu#close keydown->senren--dropdown-menu#onItemKey'
+
+      def initialize(href: nil, method: nil, destructive: false, class_name: nil, **)
+        super(variant: :default, size: :md, class_name: class_name, **)
         @href = href
         @method = method
         @destructive = destructive
-        @opts = opts
       end
 
       def call
         klass = 'block w-full text-left px-3 py-2 text-sm rounded-sm hover:bg-[hsl(var(--senren-accent))] focus:bg-[hsl(var(--senren-accent))] outline-none cursor-pointer'
+        klass += " #{class_name}" if class_name.present?
         klass += ' text-[hsl(var(--senren-destructive))]' if @destructive
         if @href
-          link_to(content, @href, role: 'menuitem', method: @method, class: klass,
-                                  data: { action: 'click->senren--dropdown-menu#close keydown->senren--dropdown-menu#onItemKey' })
+          link_to(content, safe_url(@href), role: 'menuitem', method: @method, class: klass, data: { action: ITEM_ACTION }, **html_attrs)
         else
-          tag.button(content, type: 'button', role: 'menuitem', class: klass,
-                              data: { action: 'click->senren--dropdown-menu#close keydown->senren--dropdown-menu#onItemKey' }, **@opts)
+          tag.button(content, type: 'button', role: 'menuitem', class: klass, data: { action: ITEM_ACTION }, **html_attrs)
         end
       end
     end

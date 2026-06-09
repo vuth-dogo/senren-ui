@@ -88,5 +88,5 @@ senren-rails/
 - [ ] All directories from section 11 of `master_prompt.md` exist.
 - [ ] Registry is parseable YAML and validated by a registry test.
 - [ ] Removing the gem after install does not break component rendering
-      (verified by booting `apps/todolist` with the gem present at
+      (verified by booting `.local/preview` with the gem present at
       install time but with components already copied).

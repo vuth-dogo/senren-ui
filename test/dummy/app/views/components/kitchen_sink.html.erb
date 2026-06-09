@@ -1,0 +1,10 @@
+<main data-testid="kitchen-sink-preview">
+  <h1>Senren Kitchen Sink</h1>
+
+  <% preview_component_names.each do |name| %>
+    <section data-preview-component="<%= name %>">
+      <h2><%= name %></h2>
+      <%= render_component_preview(name) %>
+    </section>
+  <% end %>
+</main>
