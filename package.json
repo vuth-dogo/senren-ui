@@ -9,6 +9,6 @@
     "controllers:check": "bun run controllers:syntax && bun run controllers:lint"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4"
+    "@biomejs/biome": "^2.5.1"
   }
 }
