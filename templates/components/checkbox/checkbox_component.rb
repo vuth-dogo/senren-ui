@@ -10,7 +10,7 @@ module Senren
       @name = name
       @value = value
       @checked = checked
-      @id = id || "#{name.to_s.parameterize}-#{SecureRandom.hex(2)}"
+      @id = id || senren_dom_id(name, value)
       @label = label
     end
 

@@ -4,7 +4,7 @@
   <% else %>
     <label class="block text-sm font-medium text-[hsl(var(--senren-foreground))]"><%= label %></label>
     <div class="flex flex-col gap-2 sm:flex-row">
-      <input type="password" readonly value="<%= value %>" data-senren--api-key-field-target="input" class="h-10 min-w-0 flex-1 rounded-(--senren-radius) border border-[hsl(var(--senren-input))] bg-[hsl(var(--senren-muted)/0.35)] px-3 font-mono text-sm text-[hsl(var(--senren-foreground))] outline-none focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
+      <input type="password" readonly aria-label="<%= label %>" value="<%= value %>" data-senren--api-key-field-target="input" class="h-10 min-w-0 flex-1 rounded-(--senren-radius) border border-[hsl(var(--senren-input))] bg-[hsl(var(--senren-muted)/0.35)] px-3 font-mono text-sm text-[hsl(var(--senren-foreground))] outline-none focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
       <button type="button" data-senren--api-key-field-target="revealButton" data-action="click->senren--api-key-field#toggle" class="inline-flex h-10 cursor-pointer items-center justify-center rounded-(--senren-radius) border border-[hsl(var(--senren-border))] px-3 text-sm font-medium hover:bg-[hsl(var(--senren-accent))]"><%= reveal_label %></button>
       <button type="button" data-action="click->senren--api-key-field#copy" class="inline-flex h-10 cursor-pointer items-center justify-center rounded-(--senren-radius) bg-[hsl(var(--senren-primary))] px-3 text-sm font-medium text-[hsl(var(--senren-primary-foreground))] hover:opacity-90"><%= copy_label %></button>
     </div>
