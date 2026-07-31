@@ -92,6 +92,54 @@ module Senren
         assert_includes error.message, 'button: invalid file path "app/components/senren/../unsafe.rb"'
       end
 
+      # The per-component file allowlist is built from the component name, so
+      # an unconstrained name would validate a traversal path against itself.
+      def test_validation_rejects_component_names_that_are_not_plain_identifiers
+        [
+          '../../../../tmp/pwn',
+          'Button',
+          'drop down',
+          '_leading',
+          'trailing-dash'
+        ].each do |bad_name|
+          registry = registry_with(bad_name => component_data(bad_name))
+
+          error = assert_raises(RuntimeError) { registry.validate! }
+
+          assert_includes error.message, 'invalid component name',
+                          "#{bad_name.inspect} must be rejected"
+        end
+      end
+
+      # NAME_PATTERN is only checked inside validate!, and validate! is only
+      # reached through load!. A production path that built a Registry directly
+      # would carry unvalidated names into ComponentCopier#source_for, which
+      # interpolates the name into a filesystem path. Tests construct registries
+      # directly on purpose; nothing else may.
+      def test_no_production_code_builds_a_registry_without_validating_it
+        root = File.expand_path('../..', __dir__)
+        offenders = Dir[File.join(root, '{lib,bin,scripts}/**/*')].select do |path|
+          File.file?(path) && File.read(path).match?(/Registry\.new\b/)
+        end
+
+        assert_empty offenders.map { |p| p.delete_prefix("#{root}/") },
+                     'production code must go through Registry.load!, which validates'
+      end
+
+      def test_load_bang_always_validates
+        source = File.read(File.expand_path('../../lib/senren/rails/registry.rb', __dir__))
+        body = source[/def self\.load!.*?^      end/m]
+
+        refute_nil body
+        assert_match(/validate!/, body, 'load! must validate before returning a registry')
+      end
+
+      def test_validation_accepts_conventional_component_names
+        registry = registry_with('dropdown_menu' => component_data('dropdown_menu'))
+
+        registry.validate!
+      end
+
       def test_validation_requires_client_controller_file
         registry = registry_with(
           'dialog' => component_data('dialog').merge(

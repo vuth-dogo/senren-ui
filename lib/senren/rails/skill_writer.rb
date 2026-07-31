@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'yaml'
+require 'senren/rails/marker_block'
 
 module Senren
   module Rails
@@ -34,11 +35,18 @@ module Senren
         existing = paths.skill_file.exist? ? paths.skill_file.read : default_outer_template
 
         new_content = inject(existing, body)
-        paths.skill_file.write(new_content)
+        atomic_write(paths.skill_file, new_content)
         paths.skill_file
       end
 
       private
+
+      # Matches AgentRulesWriter: a killed process must not truncate the file.
+      def atomic_write(path, content)
+        tmp = path.parent.join("#{path.basename}.#{Process.pid}.tmp")
+        File.write(tmp, content)
+        File.rename(tmp, path)
+      end
 
       def installed_names
         path = paths.installed_components
@@ -132,13 +140,10 @@ module Senren
       end
 
       def inject(existing, generated_body)
-        if existing.include?(START_MARKER) && existing.include?(END_MARKER)
-          before = existing.split(START_MARKER, 2).first
-          after  = existing.split(END_MARKER, 2).last
-          "#{before}#{START_MARKER}\n\n#{generated_body}\n\n#{END_MARKER}#{after}"
-        else
-          "#{existing.rstrip}\n\n#{START_MARKER}\n\n#{generated_body}\n\n#{END_MARKER}\n"
-        end
+        MarkerBlock.inject(
+          existing, generated_body,
+          start_marker: START_MARKER, end_marker: END_MARKER, label: paths.skill_file.to_s
+        )
       end
 
       def default_outer_template

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'yaml'
+require 'senren/rails/marker_block'
 
 module Senren
   module Rails
@@ -147,26 +148,20 @@ module Senren
 
       def write_adapter_file(path, generated, prefix: '')
         existing = path.exist? ? path.read : prefix.to_s
-        updated = inject(existing, generated)
+        updated = inject(existing, generated, label: path.to_s)
         atomic_write(path, updated)
         path
       end
 
-      def inject(existing, generated)
-        if existing.include?(START_MARKER) && existing.include?(END_MARKER)
-          before = existing.split(START_MARKER, 2).first
-          tail = existing.split(START_MARKER, 2).last
-          after = tail.split(END_MARKER, 2).last
-          "#{before}#{START_MARKER}\n\n#{generated.rstrip}\n\n#{END_MARKER}#{after}"
-        else
-          body = existing.rstrip
-          prefix = body.empty? ? '' : "#{body}\n\n"
-          "#{prefix}#{START_MARKER}\n\n#{generated.rstrip}\n\n#{END_MARKER}\n"
-        end
+      def inject(existing, generated, label: nil)
+        MarkerBlock.inject(
+          existing, generated,
+          start_marker: START_MARKER, end_marker: END_MARKER, label: label
+        )
       end
 
       def atomic_write(path, content)
-        tmp = "#{path}.tmp"
+        tmp = "#{path}.#{Process.pid}.tmp"
         File.write(tmp, content)
         File.rename(tmp, path)
       end

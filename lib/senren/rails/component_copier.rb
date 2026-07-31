@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 require 'fileutils'
+require 'pathname'
 require 'yaml'
 require 'time'
+require 'senren/rails/base_component_patch'
 
 module Senren
   module Rails
@@ -15,40 +17,7 @@ module Senren
         '../../generators/senren/install/templates', __dir__
       ).freeze
       BASE_COMPONENT_TEMPLATE = File.join(INSTALL_GENERATOR_TEMPLATES, 'base_component.rb.tt').freeze
-      BASE_URL_HELPER_PATCH = <<~RUBY
-
-        # Added by senren:add for compatibility with URL-aware component templates.
-        require 'uri'
-
-        module Senren
-          class BaseComponent
-            SAFE_URL_PROTOCOLS = %w[http https mailto tel].freeze unless const_defined?(:SAFE_URL_PROTOCOLS)
-            SAFE_MEDIA_URL_PROTOCOLS = %w[http https].freeze unless const_defined?(:SAFE_MEDIA_URL_PROTOCOLS)
-
-            private
-
-            def safe_url(value, fallback: '#', protocols: SAFE_URL_PROTOCOLS)
-              url = value.to_s.strip
-              return fallback if url.empty?
-              return url if url.start_with?('#')
-              return url if url.start_with?('/') && !url.start_with?('//')
-
-              uri = URI.parse(url)
-              return url if uri.scheme && Array(protocols).map(&:to_s).include?(uri.scheme.downcase)
-              return fallback if uri.host
-              return url unless uri.scheme
-
-              fallback
-            rescue URI::InvalidURIError
-              fallback
-            end
-
-            def safe_media_url(value, fallback: nil)
-              safe_url(value, fallback: fallback, protocols: SAFE_MEDIA_URL_PROTOCOLS)
-            end
-          end
-        end
-      RUBY
+      BASE_URL_HELPER_PATCH = BaseComponentPatch::URL_HELPERS
 
       attr_reader :registry, :paths, :stdout
 
@@ -62,6 +31,7 @@ module Senren
       # Returns the ordered list of component names actually installed.
       def install(component_names, client_override: nil, force: false)
         wanted = registry.dependencies(*component_names)
+        validate_client_override!(component_names, client_override)
         paths.ensure_dirs!
         ensure_base_component_url_helpers!
 
@@ -77,15 +47,31 @@ module Senren
       private
 
       def ensure_base_component_url_helpers!
-        if paths.base_component_path.exist?
+        dest = paths.base_component_path
+
+        # Checked before #exist?, which follows the link. This append does not
+        # go through copy_file, so without an explicit check it writes straight
+        # through a symlink to its target — escaping the very app root that
+        # assert_inside_host_root! exists to enforce. Path expansion does not
+        # resolve symlinks, so containment alone cannot catch this.
+        return if refuse_symlink?(dest, 'base_component.rb')
+
+        if dest.exist?
           return if base_component_has_url_helpers?
 
-          File.open(paths.base_component_path, 'a') { |file| file.write(BASE_URL_HELPER_PATCH) }
-          stdout.puts "  update #{paths.base_component_path} (url helpers)"
+          File.open(dest, 'a') { |file| file.write(BASE_URL_HELPER_PATCH) }
+          stdout.puts "  update #{dest} (url helpers)"
           return
         end
 
-        copy_file(BASE_COMPONENT_TEMPLATE, paths.base_component_path, force: false, label: 'base_component.rb')
+        copy_file(BASE_COMPONENT_TEMPLATE, dest, force: false, label: 'base_component.rb')
+      end
+
+      def refuse_symlink?(dest, label)
+        return false unless File.symlink?(dest)
+
+        stdout.puts "  skip  #{dest} (symlink; refusing to write through it) [#{label}]"
+        true
       end
 
       def base_component_has_url_helpers?
@@ -106,11 +92,28 @@ module Senren
         end
       end
 
-      def effective_client_for(comp, override)
-        return comp.client? if override.nil?
-        return false unless comp.can_have_client
+      # Only the explicitly requested components are checked: pulling in a
+      # dependency that has no controller must not fail the whole install.
+      def validate_client_override!(requested, override)
+        return unless override
 
-        override
+        offenders = Array(requested).map { |name| registry.fetch(name) }.reject { |comp| controller_file_for(comp) }
+        return if offenders.empty?
+
+        raise ArgumentError,
+              "--client was requested for #{offenders.map(&:name).join(', ')}, but the registry lists no Stimulus " \
+              'controller for them. Drop --client, or add a controller file to the registry entry.'
+      end
+
+      def controller_file_for(comp)
+        comp.files.find { |relative| controller_source_path?(comp, relative) }
+      end
+
+      def effective_client_for(comp, override)
+        desired = override.nil? ? comp.client? : (comp.can_have_client && override)
+
+        # Never record client behavior in the ledger that was not installed.
+        desired && !controller_file_for(comp).nil?
       end
 
       def source_for(comp, relative)
@@ -142,6 +145,9 @@ module Senren
       def copy_file(src, dest, force:, label:)
         raise MissingTemplate, "Missing component template: #{src} (#{label})" unless File.exist?(src)
 
+        dest = assert_inside_host_root!(dest, label)
+        return if refuse_symlink?(dest, label)
+
         if File.exist?(dest) && !force
           stdout.puts "  skip  #{dest} (already exists)"
           return
@@ -149,6 +155,16 @@ module Senren
         FileUtils.mkdir_p(File.dirname(dest))
         FileUtils.cp(src, dest)
         stdout.puts "  copy  #{dest}"
+      end
+
+      # Defense in depth: destinations are registry-derived, but a copier that
+      # can write anywhere is one bad registry entry away from a traversal.
+      def assert_inside_host_root!(dest, label)
+        expanded = Pathname.new(dest).expand_path
+        root = paths.root.expand_path
+        return expanded if expanded.to_s.start_with?("#{root}/")
+
+        raise ArgumentError, "Refusing to write outside the app root: #{expanded} (#{label})"
       end
 
       def update_installed_ledger(names, client_override:)
