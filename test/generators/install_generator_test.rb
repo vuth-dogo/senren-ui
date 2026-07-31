@@ -1,0 +1,115 @@
+# frozen_string_literal: true
+
+require 'test_helper'
+require 'rails/generators'
+require 'rails/generators/test_case'
+require 'generators/senren/install/install_generator'
+
+module Senren
+  module Generators
+    # Asserts what the generator actually writes. Previously the only generator
+    # coverage was an assertion about a Thor option's internal default, which
+    # could not have caught a single defect in generated output.
+    class InstallGeneratorTest < ::Rails::Generators::TestCase
+      tests Senren::Generators::InstallGenerator
+      destination File.expand_path('../../tmp/install_generator', __dir__)
+
+      setup :prepare_destination
+
+      def test_creates_the_expected_directory_layout
+        run_generator
+
+        assert_directory '.senren'
+        assert_directory 'app/components/senren'
+        assert_directory 'app/javascript/controllers/senren'
+        assert_directory 'app/assets/stylesheets'
+      end
+
+      def test_writes_every_managed_file
+        run_generator
+
+        assert_file 'app/components/senren/base_component.rb'
+        assert_file 'app/assets/stylesheets/senren.css'
+        assert_file '.senren/conventions.md'
+        assert_file '.senren/installed_components.yml'
+        assert_file '.senren/registry.yml'
+        assert_file '.senren/skill.md'
+        assert_file '.senren/agent-rules.md'
+      end
+
+      # The template escapes its ERB examples as `<%%=` so Thor emits a literal
+      # `<%=`. A copier that does not evaluate ERB would leave `<%%=` in place,
+      # producing a conventions file whose code samples cannot be pasted.
+      def test_conventions_file_renders_escaped_erb_examples
+        run_generator
+
+        assert_file '.senren/conventions.md' do |content|
+          assert_includes content, '<%= render(Senren::ButtonComponent',
+                          'escaped ERB must render to a usable example'
+          refute_includes content, '<%%', 'no raw ERB escape may survive into the output'
+        end
+      end
+
+      def test_base_component_ships_the_hardened_url_helpers
+        run_generator
+
+        assert_file 'app/components/senren/base_component.rb' do |content|
+          assert_includes content, 'def safe_url'
+          assert_includes content, 'def safe_media_url'
+          assert_includes content, "url.include?('\\\\')",
+                          'the copied helper must reject backslash bypasses'
+          assert_includes content, '[[:cntrl:]]',
+                          'the copied helper must reject control characters'
+        end
+      end
+
+      def test_registry_mirror_matches_the_gem_registry
+        run_generator
+
+        mirrored = YAML.safe_load_file(File.join(destination_root, '.senren/registry.yml'))
+        source = YAML.safe_load_file(Senren::Rails.registry_path)
+
+        assert_equal source, mirrored
+      end
+
+      def test_generated_ledger_starts_empty_and_is_valid_yaml
+        run_generator
+
+        ledger = YAML.safe_load_file(File.join(destination_root, '.senren/installed_components.yml'))
+
+        assert_kind_of Hash, ledger
+        assert_empty Array(ledger['installed'])
+      end
+
+      # Re-running an installer is normal after a gem upgrade. It must not
+      # duplicate marker blocks in the agent-facing files.
+      def test_rerunning_the_generator_does_not_duplicate_marker_blocks
+        run_generator
+        first = read_generated('.senren/skill.md')
+
+        run_generator ['--force']
+        second = read_generated('.senren/skill.md')
+
+        assert_equal 1, second.scan('senren:skill:start').size, 'exactly one start marker'
+        assert_equal 1, second.scan('senren:skill:end').size, 'exactly one end marker'
+        assert_equal first, second, 'a second run must converge, not grow the file'
+      end
+
+      def test_agent_adapter_files_are_marker_managed
+        run_generator
+
+        %w[AGENTS.md CLAUDE.md .github/copilot-instructions.md .cursor/rules/senren.mdc].each do |path|
+          assert_file path do |content|
+            assert_includes content, 'senren:agent', "#{path} should carry the managed marker"
+          end
+        end
+      end
+
+      private
+
+      def read_generated(relative)
+        File.read(File.join(destination_root, relative))
+      end
+    end
+  end
+end

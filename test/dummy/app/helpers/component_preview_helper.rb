@@ -147,14 +147,16 @@ module ComponentPreviewHelper
     when 'filter_bar'
       render(Senren::FilterBarComponent.new) { render(Senren::SearchInputComponent.new(name: 'q')) }
     when 'form'
-      render(Senren::FormComponent.new(url: '#')) { render(Senren::InputComponent.new(name: 'email', value: 'user@example.com')) }
+      render(Senren::FormComponent.new(url: '#')) do
+        render(Senren::InputComponent.new(name: 'email', value: 'user@example.com', 'aria-label': 'Email address'))
+      end
     when 'hover_card'
       render Senren::HoverCardComponent.new do |card|
         card.with_trigger { 'Hover user' }
         card.with_content_panel { 'Hover card content' }
       end
     when 'input'
-      render Senren::InputComponent.new(name: 'title', value: 'Hello Senren')
+      render Senren::InputComponent.new(name: 'title', value: 'Hello Senren', 'aria-label': 'Title')
     when 'invite_member_dialog'
       render Senren::InviteMemberDialogComponent.new(button_label: 'Invite teammate')
     when 'label'
@@ -162,7 +164,7 @@ module ComponentPreviewHelper
     when 'link'
       render(Senren::LinkComponent.new(href: '#')) { 'Documentation link' }
     when 'masked_input'
-      render Senren::MaskedInputComponent.new(mask: '999-999', name: 'code', value: '123456')
+      render Senren::MaskedInputComponent.new(mask: '999-999', name: 'code', value: '123456', 'aria-label': 'Code')
     when 'native_select'
       render Senren::NativeSelectComponent.new(name: 'status', options: status_options, selected: 'published')
     when 'page_header'
@@ -184,7 +186,7 @@ module ComponentPreviewHelper
     when 'rich_text_editor_lite'
       render Senren::RichTextEditorLiteComponent.new(name: 'body', value: '<p>Initial content</p>')
     when 'search_input'
-      render Senren::SearchInputComponent.new(name: 'q', value: 'senren')
+      render Senren::SearchInputComponent.new(name: 'site_search', value: 'senren')
     when 'select'
       render Senren::SelectComponent.new(name: 'priority', options: status_options, selected: 'draft')
     when 'separator'
@@ -221,7 +223,7 @@ module ComponentPreviewHelper
     when 'tabs'
       render Senren::TabsComponent.new(items: [
                                          { id: 'overview', label: 'Overview', content: 'Overview panel' },
-                                         { id: 'details', label: 'Details', content: 'Details panel' }
+                                         { id: 'tab-details', label: 'Details', content: 'Details panel' }
                                        ])
     when 'team_member_list'
       render Senren::TeamMemberListComponent.new(members: [
