@@ -60,6 +60,15 @@ bin/rails senren:agents:sync                # rebuild .senren/agent-rules + adap
 bin/rails senren:doctor                     # check installation health
 ```
 
+### What reloads while you work
+
+Components copied into your app are ordinary Rails code, so editing a
+`*_component.rb` or `*.html.erb` takes effect on the next request with no
+restart. The exception is Stimulus: a controller under
+`app/javascript/controllers/senren/` is a module the browser has already
+fetched, so editing it needs a page reload — the server does not need
+restarting. `docs/hot_reload.md` has the details, including Turbo morphing.
+
 ## Keeping Stimulus JavaScript small
 
 Senren copies only installed client controllers into your Rails app, but an
@@ -196,6 +205,27 @@ This repo ships with a GitHub baseline for safer public maintenance:
 Repository controls such as branch protection, required checks, release
 permissions, and auto-delete branch still need to be enabled in GitHub
 repository settings.
+
+## Acknowledgements
+
+Senren borrows ideas from prior art. No source code from either project is
+included here — the influence is on architecture and developer experience, and
+both are credited because ideas have authors even when licences do not require
+the notice.
+
+- [shadcn/ui](https://github.com/shadcn-ui/ui) (MIT) — the source-copy install
+  model: components are copied into your app so you own and can edit them,
+  rather than being rendered from inside a dependency.
+- [jetrockets/jet_ui](https://github.com/jetrockets/jet_ui) (MIT, © 2026
+  JetRockets) — a Rails/ViewComponent UI library whose published history is a
+  useful record of which decisions hold up. Its documented mistakes shaped
+  `plans/022_jet_ui_lessons.md`, in particular the Tailwind-purge failure mode
+  that source-copy avoids, and the argument for testing the Ruby and Rails
+  versions a gem actually claims to support.
+
+Both are MIT licensed, which permits use, modification, and study. The MIT
+notice requirement attaches to copies of the software; since Senren copies no
+code from either, this section is attribution rather than a licence obligation.
 
 ## License
 
