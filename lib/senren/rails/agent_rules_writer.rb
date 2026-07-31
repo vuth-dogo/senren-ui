@@ -60,6 +60,10 @@ module Senren
           - Use Stimulus only for local behavior.
           - Do not introduce React, Vue, Alpine, or external state frameworks.
           - Use semantic Tailwind tokens; do not hard-code color families.
+          - Never add `app/components` to `config.assets.paths`. Propshaft
+            publishes every file under an asset path, so component `.rb` and
+            `.html.erb` source is precompiled into `public/assets` and served
+            over HTTP. Put sidecar assets in `app/components/assets` instead.
 
           ## Important Files
 

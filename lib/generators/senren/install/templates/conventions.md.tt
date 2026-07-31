@@ -27,6 +27,19 @@ and obey it strictly.
    <%% end %>
    ```
 
+8. **Never put `app/components` on the asset load path.** With Propshaft this
+   publishes the directory: `assets:precompile` copies every component `.rb`
+   and `.html.erb` into `public/assets`, `.manifest.json` maps each logical
+   name to its digested filename, and the web server serves the source with
+   `HTTP 200` without Rails involved. Senren raises at boot in production if it
+   finds this, and warns elsewhere. Sidecar assets belong in their own
+   directory:
+   ```ruby
+   # config/initializers/assets.rb
+   Rails.application.config.assets.paths << Rails.root.join("app/components/assets")
+   # NOT app/components
+   ```
+
 ## File ownership
 
 | Path                                | Owned by         |

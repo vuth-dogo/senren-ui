@@ -97,6 +97,51 @@ passed as long as the paragraph existed. It is now installed and asserted in
 `test/generators/install_generator_test.rb` against the files `rails new`
 actually produces.
 
+## Component source in production
+
+Senren copies editable ViewComponent, ERB and Stimulus source into your app.
+That is the point of the design, and it means minification and source maps are
+your app's decision, not the gem's — Senren ships readable source and gets out
+of the way.
+
+Readable in your repo is not the same as readable over HTTP, and there is one
+configuration that turns the first into the second:
+
+```ruby
+# config/initializers/assets.rb — do NOT do this
+Rails.application.config.assets.paths << Rails.root.join("app/components")
+```
+
+That line appears in guidance about ViewComponent sidecar assets, and under
+Propshaft it publishes the whole directory. Reproduced against Propshaft 1.3.2:
+every `.rb` and `.html.erb` under `app/components` was resolved as an asset,
+`RAILS_ENV=production rails assets:precompile` copied them into `public/assets`,
+`public/assets/.manifest.json` listed each one next to its digested filename —
+so the digest is not a secret — and requesting the digested URL returned the
+Ruby source with `HTTP 200`, served by the web server without Rails involved.
+
+Senren refuses to let this ship. A boot check runs after your initializers:
+
+- **production** — raises, so the app does not boot and `assets:precompile`
+  fails. A failed deploy is recoverable; published source is not.
+- **anywhere else** — prints a warning and carries on, because development is a
+  different risk calculation.
+
+It only objects when component source actually sits under an asset path, so
+sidecar assets remain available — put them in their own directory:
+
+```ruby
+Rails.application.config.assets.paths << Rails.root.join("app/components/assets")
+```
+
+The default configuration is unaffected: with no such line, every component
+path returns `404`. The gem itself adds no production request-path code, and
+this check is the sole exception.
+
+See `test/asset_path_guard_test.rb` and
+`test/integration/asset_path_guard_boot_test.rb`, which boot a real Rails app
+with a real Propshaft and assert that precompile cannot publish source.
+
 ## Using a component
 
 ```erb
