@@ -14,8 +14,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ruby:
-    name: Ruby tests
+  # Proves the versions the gemspec actually claims: required_ruby_version
+  # >= 3.2 and rails >= 7.1. Before this matrix existed, CI tested exactly one
+  # combination, so both claims were advertised and never exercised.
+  matrix:
+    name: Ruby ${{ matrix.ruby }} / Rails ${{ matrix.rails }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Report every broken combination in one run, not just the first.
+      fail-fast: false
+      matrix:
+        ruby: ["3.2", "3.3", "3.4"]
+        rails: ["7.1", "7.2", "8.0", "8.1"]
+
+    env:
+      BUNDLE_GEMFILE: gemfiles/rails_${{ matrix.rails }}.gemfile
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      # Unit tests only. The browser, lint, and audit gates are version
+      # independent and run once in the `checks` job rather than 12 times.
+      - name: Run test suite
+        run: bundle exec rake test
+
+      # Renders all 62 components through the dummy app. Rendering is the
+      # part that depends on the Rails version, so it belongs in the matrix.
+      - name: Run integration tests
+        run: bundle exec rake test:integration
+
+  checks:
+    name: Browser, lint, and audit
     runs-on: ubuntu-latest
 
     steps:
@@ -28,9 +65,6 @@ jobs:
           ruby-version: "3.4"
           bundler-cache: true
 
-      - name: Run test suite
-        run: bundle exec rake test
-
       - name: Run system tests
         run: bin/system
 
@@ -39,6 +73,10 @@ jobs:
 
       - name: Run RuboCop
         run: bundle exec rubocop
+
+      # Dependabot opens PRs but cannot fail a build. This gate does.
+      - name: Audit dependencies for known CVEs
+        run: bundle exec bundle-audit check --update
 
   javascript:
     name: JavaScript checks

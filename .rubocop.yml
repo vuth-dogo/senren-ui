@@ -22,6 +22,10 @@ Metrics/AbcSize:
 
 Metrics/ClassLength:
   Max: 150
+  Exclude:
+    # A test class is a list of independent cases, not a cohesive unit; its
+    # length says nothing about its complexity.
+    - 'test/**/*_test.rb'
 
 Metrics/CyclomaticComplexity:
   Max: 10

@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Runs the unit suite against every supported Rails version using the gemfiles
+# in gemfiles/. CI also varies Ruby; this script uses whatever Ruby is active,
+# so it proves the Rails axis only.
+set -uo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+RAILS_VERSIONS=("7.1" "7.2" "8.0" "8.1")
+failed=()
+
+for version in "${RAILS_VERSIONS[@]}"; do
+  gemfile="gemfiles/rails_${version}.gemfile"
+  echo "==> Rails ${version} (${gemfile})"
+
+  if ! BUNDLE_GEMFILE="$gemfile" bundle check >/dev/null 2>&1; then
+    echo "    installing..."
+    if ! BUNDLE_GEMFILE="$gemfile" bundle install >/dev/null 2>&1; then
+      echo "    FAIL: bundle install"
+      failed+=("${version} (install)")
+      continue
+    fi
+  fi
+
+  resolved="$(BUNDLE_GEMFILE="$gemfile" bundle list 2>/dev/null | grep -E '^  \* rails \(' || true)"
+  echo "    ${resolved:-rails (unresolved)}"
+
+  # Both suites, because they prove different things. `test` covers the library
+  # code; `test:integration` renders all 62 components through the dummy app.
+  # Rendering is the part that actually depends on the Rails version, and until
+  # this ran here the matrix could go green having rendered nothing.
+  for task in test test:integration; do
+    log="/tmp/senren-matrix-${version}-${task//:/-}.log"
+
+    if BUNDLE_GEMFILE="$gemfile" bundle exec rake "$task" >"$log" 2>&1; then
+      printf '    %-18s %s\n' "$task" "$(grep -E '^[0-9]+ runs,' "$log" | tail -1)"
+    else
+      echo "    FAIL: $task — see $log"
+      failed+=("${version} (${task})")
+    fi
+  done
+done
+
+echo
+if [ ${#failed[@]} -eq 0 ]; then
+  echo "==> Matrix passed on all ${#RAILS_VERSIONS[@]} Rails versions"
+else
+  echo "==> Matrix FAILED: ${failed[*]}"
+  exit 1
+fi

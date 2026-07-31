@@ -1,0 +1,12 @@
+# frozen_string_literal: true
+
+# Matrix gemfile: proves the gemspec's `rails >= 7.1` claim on Rails 7.2.
+# Select with BUNDLE_GEMFILE=gemfiles/rails_7.2.gemfile.
+
+source 'https://rubygems.org'
+
+gem 'rails', '~> 7.2.0'
+
+eval_gemfile File.expand_path('common.rb', __dir__)
+
+gemspec path: '..'

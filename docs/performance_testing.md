@@ -16,9 +16,13 @@ bin/ci
 `bin/performance` reads `config/performance_budgets.yml`.
 `bin/system` runs headless browser tests against `test/dummy`.
 
-`bin/system` uses Selenium with local Chromium/ChromeDriver by default.
-Override paths with `SENREN_CHROME_BIN` and `SENREN_CHROMEDRIVER` if your
-machine installs them somewhere else.
+`bin/system` runs Selenium against headless Chrome. It uses a system
+Chrome/Chromium and `/usr/bin/chromedriver` when they are present (the Linux CI
+image), and otherwise lets Selenium Manager resolve and download a matching
+driver — so macOS and other local machines need no setup.
+
+Set `SENREN_CHROME_BIN` or `SENREN_CHROMEDRIVER` only to force a specific
+binary; leaving them unset is the supported path.
 
 ## Benchmark Model
 
