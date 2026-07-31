@@ -31,6 +31,7 @@ class ComponentVariantsTest < ViewComponent::TestCase
     'date_picker' => { name: 'field' },
     'select' => { name: 'field', options: [%w[one One]] },
     'form' => { url: '/components/static' },
+    'product_card' => { title: 'Mug', price: '$14.50', url: '/cart/items' },
     'masked_input' => { mask: '###-###', name: 'field' }
   }.freeze
 

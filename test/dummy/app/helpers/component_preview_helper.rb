@@ -185,6 +185,22 @@ module ComponentPreviewHelper
       render Senren::RadioButtonComponent.new(name: 'plan', value: 'team', label: 'Team plan', checked: true)
     when 'rich_text_editor_lite'
       render Senren::RichTextEditorLiteComponent.new(name: 'body', value: '<p>Initial content</p>')
+    when 'cart'
+      render Senren::CartComponent.new(
+        checkout_url: '/checkout',
+        items: [
+          { id: 'sku-1', name: 'Spring Garden Mug', price_cents: 1_450, quantity: 2 },
+          { id: 'sku-2', name: 'Pond Blue Notebook', price_cents: 890, quantity: 1 }
+        ]
+      )
+    when 'product_card'
+      render Senren::ProductCardComponent.new(
+        title: 'Spring Garden Mug',
+        price: '$14.50',
+        url: '/cart/items',
+        description: 'Glazed stoneware, 350ml.',
+        badge: 'New'
+      )
     when 'search_input'
       render Senren::SearchInputComponent.new(name: 'site_search', value: 'senren')
     when 'select'

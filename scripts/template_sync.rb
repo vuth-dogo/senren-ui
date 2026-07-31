@@ -23,12 +23,18 @@ class TemplateSync
     @gem_root = File.expand_path(gem_root)
   end
 
+  # bin/seed_preview copies this into the preview app, so a component added
+  # after seeding rendered "Missing preview" until the app was re-seeded. It is
+  # the one preview-app file that lives outside templates/.
+  PREVIEW_HELPER = 'test/dummy/app/helpers/component_preview_helper.rb'
+
   # Every path the watcher should poll.
   def watched_files
     Dir[
       File.join(gem_root, 'templates', '**', '*'),
       File.join(gem_root, 'registry', '*.yml'),
-      File.join(gem_root, 'lib', 'generators', 'senren', 'install', 'templates', '*.tt')
+      File.join(gem_root, 'lib', 'generators', 'senren', 'install', 'templates', '*.tt'),
+      File.join(gem_root, PREVIEW_HELPER)
     ].select { |path| File.file?(path) }
   end
 
@@ -39,6 +45,7 @@ class TemplateSync
     return nil unless relative
 
     case relative
+    when PREVIEW_HELPER then 'app/helpers/component_preview_helper.rb'
     when %r{\Aregistry/} then FULL_REINSTALL
     when %r{\Atemplates/controllers/(.+_controller\.js)\z}
       "app/javascript/controllers/senren/#{Regexp.last_match(1)}"

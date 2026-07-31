@@ -1051,3 +1051,48 @@ components:
     ai:
       use_for: [light formatting (bold/italic/links/lists) only]
       avoid:   [tables, embeds, media - out of scope for v0.1]
+
+  product_card:
+    category: saas
+    client: false
+    can_have_client: false
+    files:
+      - app/components/senren/product_card_component.rb
+      - app/components/senren/product_card_component.html.erb
+    depends_on: []
+    pairs_with: [cart, badge, button, card]
+    variants: [default, featured]
+    accessibility:
+      - Image alt text repeats the product title; decorative placeholder is aria-hidden.
+      - Out of stock disables the submit button rather than hiding it.
+    ai:
+      use_for:
+        - product listings
+        - catalogue grids
+        - storefront search results
+      avoid:
+        - carrying cart state; adding to a cart is a form submission the server owns
+
+  cart:
+    category: saas
+    client: true
+    can_have_client: true
+    controller: senren--cart
+    files:
+      - app/components/senren/cart_component.rb
+      - app/components/senren/cart_component.html.erb
+      - app/javascript/controllers/senren/cart_controller.js
+    depends_on: []
+    pairs_with: [product_card, button, separator, empty_state]
+    variants: [default, flush]
+    accessibility:
+      - Quantity steppers are grouped with an accessible name per line.
+      - Subtotal is text, not an image, so it is announced on change.
+    ai:
+      use_for:
+        - cart summary panels
+        - checkout side panels
+        - order review before payment
+      avoid:
+        - persisting quantities; the controller is display-only and the server is authoritative
+        - formatting currency in the component; pass price_cents and a formatted price

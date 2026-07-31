@@ -84,6 +84,17 @@ export class Controller {
     if (type === Number) return Number(value)
     return value
   }
+
+  // Real Stimulus namespaces the event with the controller identifier, so
+  // dispatch("changed") from senren--cart emits "senren--cart:changed". Seven
+  // controllers announce state this way and a host app is expected to listen,
+  // so the preview app has to emit the same names or the contract is untested.
+  dispatch(eventName, { target = this.element, detail = {}, prefix = this.identifier, bubbles = true, cancelable = true } = {}) {
+    const type = prefix ? `${prefix}:${eventName}` : eventName
+    const event = new CustomEvent(type, { detail, bubbles, cancelable })
+    target.dispatchEvent(event)
+    return event
+  }
 }
 
 export class Application {

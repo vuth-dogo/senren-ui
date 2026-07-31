@@ -1,5 +1,11 @@
 controllers:
-  total_bytes: 50000
+  # Raised from 50000 in plans/024. The set was 49962B — 38 bytes under — before
+  # the cart controller, so component #64 could not land without a decision.
+  # This caps how much JavaScript the *gem* carries, not what a host ships:
+  # source-copy means an app installs only the controllers it uses, and the
+  # per-file cap plus lazy loading are what bound a real page. Recorded rather
+  # than nudged, because a budget raised quietly is a budget that does nothing.
+  total_bytes: 56000
   total_gzip_bytes: 14000
   # Raised from 18000 in plans/019: the rich text editor now rebuilds pasted
   # markup against an allowlist (+4.2KB) because the browser's contenteditable
