@@ -71,30 +71,31 @@ restarting. `docs/hot_reload.md` has the details, including Turbo morphing.
 
 ## Keeping Stimulus JavaScript small
 
-Senren copies only installed client controllers into your Rails app, but an
-Importmap app can still download every controller on initial page load if it
-keeps the default eager Stimulus loader and preload configuration. Once your
-app has several interactive components, switch Stimulus to lazy loading:
+`bin/rails generate senren:install` wires on-demand controller loading for
+you. It switches `app/javascript/controllers/index.js` from Rails' default
+`eagerLoadControllersFrom` to `lazyLoadControllersFrom`, and adds
+`preload: false` to the controllers pin in `config/importmap.rb`.
 
-```javascript
-// app/javascript/controllers/index.js
-import { application } from "controllers/application"
-import { lazyLoadControllersFrom } from "@hotwired/stimulus-loading"
+Without it, an Importmap app downloads **every** controller on **every** page.
+`pin_all_from "app/javascript/controllers"` is recursive, so it covers
+`app/javascript/controllers/senren` too — a static marketing page paid for the
+rich text editor. With it, a module is fetched the first time its
+`data-controller` identifier appears, including markup Turbo inserts later.
 
-lazyLoadControllersFrom("controllers", application)
-```
+Two things worth knowing:
 
-Disable import-map preloading for those on-demand controller modules:
+- It changes loading for **your** controllers as well, because it uses the
+  official `stimulus-loading` helper rather than a Senren-specific loader.
+  Lazy loading is the better default for almost every app, but it is your
+  call — the generator only edits the file while it still carries the
+  untouched Rails default, and reports what it did.
+- If you have already customised `index.js`, or you bundle with esbuild or
+  Vite instead of Importmap, the generator leaves it alone and says so.
 
-```ruby
-# config/importmap.rb
-pin_all_from "app/javascript/controllers", under: "controllers", preload: false
-```
-
-This keeps controllers mapped and usable while loading each module only when
-its `data-controller` identifier appears in the page. Minification or source
-maps are an application build/deployment decision; Senren deliberately ships
-editable source controllers into the host app.
+This used to be a paragraph asking you to do it by hand, and a CI check that
+passed as long as the paragraph existed. It is now installed and asserted in
+`test/generators/install_generator_test.rb` against the files `rails new`
+actually produces.
 
 ## Using a component
 

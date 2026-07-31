@@ -105,7 +105,83 @@ module Senren
         end
       end
 
+      # The lazy-loading contract, asserted against the files Rails actually
+      # generates. It used to be a README paragraph plus a bin/performance check
+      # that grepped that README, so every host shipped every controller on
+      # every page while CI reported PASS.
+      def test_switches_the_default_eager_loader_to_lazy
+        seed_default_importmap_app
+        run_generator
+
+        assert_file 'app/javascript/controllers/index.js' do |content|
+          assert_includes content, 'lazyLoadControllersFrom("controllers", application)'
+          refute_includes content, 'eagerLoadControllersFrom'
+        end
+      end
+
+      def test_disables_modulepreload_for_controllers
+        seed_default_importmap_app
+        run_generator
+
+        assert_file 'config/importmap.rb' do |content|
+          assert_match(%r{pin_all_from "app/javascript/controllers".*preload: false}, content)
+        end
+      end
+
+      # Running install again after a gem upgrade must not double-edit.
+      def test_stimulus_wiring_is_idempotent
+        seed_default_importmap_app
+        run_generator
+        first_index = read_generated('app/javascript/controllers/index.js')
+        first_map = read_generated('config/importmap.rb')
+
+        run_generator ['--force']
+
+        assert_equal first_index, read_generated('app/javascript/controllers/index.js')
+        assert_equal first_map, read_generated('config/importmap.rb')
+        assert_equal 1, first_map.scan('preload: false').size
+      end
+
+      # An app that already chose its own loading strategy is left alone.
+      def test_a_custom_loader_is_not_rewritten
+        seed_default_importmap_app
+        write_host_file 'app/javascript/controllers/index.js', "// hand rolled\nregisterEverything()\n"
+
+        run_generator
+
+        assert_file 'app/javascript/controllers/index.js' do |content|
+          assert_includes content, 'registerEverything()'
+          refute_includes content, 'lazyLoadControllersFrom'
+        end
+      end
+
+      def test_an_app_without_importmap_is_reported_not_crashed
+        run_generator
+
+        assert_file 'app/components/senren/base_component.rb'
+      end
+
       private
+
+      # Mirrors what `rails new` produces for an importmap application.
+      def seed_default_importmap_app
+        write_host_file 'config/importmap.rb', <<~RUBY
+          pin "application"
+          pin_all_from "app/javascript/controllers", under: "controllers"
+        RUBY
+
+        write_host_file 'app/javascript/controllers/index.js', <<~JS
+          import { application } from "controllers/application"
+          import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"
+          eagerLoadControllersFrom("controllers", application)
+        JS
+      end
+
+      def write_host_file(relative, content)
+        path = File.join(destination_root, relative)
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, content)
+      end
 
       def read_generated(relative)
         File.read(File.join(destination_root, relative))

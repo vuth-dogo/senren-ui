@@ -41,7 +41,7 @@ class PerformanceCheck
       check_component_template_payload,
       check_controller_patterns,
       check_timer_cleanup,
-      check_importmap_guidance
+      check_importmap_wiring
     ]
 
     print_results(results)
@@ -142,19 +142,23 @@ class PerformanceCheck
     )
   end
 
-  def check_importmap_guidance
-    readme = File.read(root_path('README.md'))
-    ok = readme.include?('lazyLoadControllersFrom') && readme.include?('preload: false')
+  # This used to read README.md and pass if the prose mentioned
+  # lazyLoadControllersFrom. It therefore reported PASS while every host app
+  # shipped every controller on every page, because nobody had run the
+  # instruction. It now checks the installer that performs it; the behaviour
+  # itself is proved in test/generators/install_generator_test.rb against the
+  # files `rails new` actually produces.
+  def check_importmap_wiring
+    generator = File.read(root_path('lib/generators/senren/install/install_generator.rb'))
+    missing = []
+    missing << 'switch eagerLoadControllersFrom to lazy' unless generator.include?('lazyLoadControllersFrom')
+    missing << 'set preload: false' unless generator.include?('preload: false')
 
     Result.new(
-      label: 'Importmap lazy-loading guidance',
-      ok: ok,
-      details: [ok ? 'README documents lazy controller loading' : lazy_loading_guidance_message]
+      label: 'Importmap lazy-loading is installed, not documented',
+      ok: missing.empty?,
+      details: missing.empty? ? ['senren:install wires on-demand controller loading'] : missing
     )
-  end
-
-  def lazy_loading_guidance_message
-    'README must mention lazyLoadControllersFrom and preload: false'
   end
 
   def print_results(results)
