@@ -1,0 +1,128 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Watches the gem's source tree and syncs edits into the seeded preview app,
+# so a component change is visible without re-running bin/seed_preview.
+#
+# Usage:
+#   bin/seed_preview            # once
+#   cd .local/preview && bin/rails server
+#   bin/watch                   # in another terminal
+#
+# Override the target app with SENREN_PREVIEW_ROOT, matching bin/seed_preview.
+
+require 'fileutils'
+
+GEM_ROOT  = File.expand_path('..', __dir__)
+HOST_ROOT = ENV.fetch('SENREN_PREVIEW_ROOT', File.expand_path('.local/preview', GEM_ROOT))
+INTERVAL  = Float(ENV.fetch('SENREN_WATCH_INTERVAL', '0.5'))
+RELOAD_TOKEN = File.join(HOST_ROOT, 'tmp/senren-reload.txt')
+
+abort "No preview app at #{HOST_ROOT}.\nRun bin/seed_preview first." unless Dir.exist?(HOST_ROOT)
+
+$LOAD_PATH.unshift File.join(GEM_ROOT, 'lib')
+
+require 'senren/rails/version'
+require 'senren/rails/registry'
+require 'senren/rails/host_paths'
+require 'senren/rails/component_copier'
+require 'senren/rails/component_installer'
+require_relative '../scripts/template_sync'
+
+# Re-point gem locators: lib/senren/rails.rb requires Rails::Engine, which is
+# not loaded here. Mirrors the same shim in bin/seed_preview.
+module Senren
+  module Rails
+    GEM_ROOT_OVERRIDE = ::GEM_ROOT
+    def self.gem_root      = GEM_ROOT_OVERRIDE
+    def self.registry_path = File.join(GEM_ROOT_OVERRIDE, 'registry/components.yml')
+    def self.groups_path   = File.join(GEM_ROOT_OVERRIDE, 'registry/groups.yml')
+    def self.recipes_path  = File.join(GEM_ROOT_OVERRIDE, 'registry/recipes.yml')
+    def self.templates_root = File.join(GEM_ROOT_OVERRIDE, 'templates')
+  end
+end
+
+sync  = TemplateSync.new(gem_root: GEM_ROOT)
+paths = Senren::Rails::HostPaths.new(HOST_ROOT)
+
+def signal_reload!(token_path)
+  FileUtils.mkdir_p(File.dirname(token_path))
+  File.write(token_path, Time.now.to_f.to_s)
+end
+
+def snapshot(files)
+  files.each_with_object({}) do |path, acc|
+    acc[path] = File.mtime(path)
+  rescue Errno::ENOENT
+    # Deleted between listing and stat: treated as changed on the next tick.
+  end
+end
+
+def reinstall_everything!(paths)
+  registry = Senren::Rails::Registry.load!
+  paths.ensure_dirs!
+  FileUtils.cp(Senren::Rails.registry_path, paths.registry_mirror)
+  installer = Senren::Rails::ComponentInstaller.new(registry: registry, paths: paths)
+  installed = installer.install(names: registry.names, force: true)
+  puts "  reinstalled #{installed.size} component(s)"
+rescue StandardError => e
+  warn "  registry error: #{e.message}"
+end
+
+def sync_one!(path, destination, sync, paths)
+  dest =
+    if sync.host_path_key?(destination)
+      sync.host_path_for(destination, paths)
+    else
+      File.join(paths.root, destination)
+    end
+
+  FileUtils.mkdir_p(File.dirname(dest))
+  FileUtils.cp(path, dest)
+  puts "  copy  #{destination.is_a?(Symbol) ? dest : destination}"
+rescue Errno::ENOENT
+  warn "  gone  #{path} (skipped)"
+end
+
+puts 'Senren watch'
+puts "  gem root:  #{GEM_ROOT}"
+puts "  preview:   #{HOST_ROOT}"
+puts "  interval:  #{INTERVAL}s"
+puts '  Ctrl-C to stop.'
+
+previous = snapshot(sync.watched_files)
+signal_reload!(RELOAD_TOKEN)
+
+trap('INT') do
+  puts "\nStopped."
+  exit 0
+end
+
+loop do
+  sleep INTERVAL
+
+  current = snapshot(sync.watched_files)
+  changed = current.reject { |path, mtime| previous[path] == mtime }.keys
+  removed = previous.keys - current.keys
+  previous = current
+
+  next if changed.empty? && removed.empty?
+
+  removed.each { |path| puts "  gone  #{path.delete_prefix("#{GEM_ROOT}/")}" }
+
+  full_reinstall = false
+  changed.each do |path|
+    destination = sync.destination_for(path)
+    next unless destination
+
+    if sync.full_reinstall?(destination)
+      full_reinstall = true
+      next
+    end
+
+    sync_one!(path, destination, sync, paths)
+  end
+
+  reinstall_everything!(paths) if full_reinstall
+  signal_reload!(RELOAD_TOKEN)
+end
