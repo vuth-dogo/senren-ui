@@ -46,6 +46,38 @@ class PerformanceCheckTest < Minitest::Test
     end
   end
 
+  def test_fails_when_a_controller_schedules_a_timer_it_never_clears
+    with_performance_fixture do |root|
+      write_file(root, 'templates/controllers/leaky_controller.js', <<~JS)
+        export default class {
+          connect() { setTimeout(() => this.panelTarget.hidden = true, 200) }
+        }
+      JS
+
+      output = StringIO.new
+
+      refute PerformanceCheck.new(root: root, io: output).call
+      assert_includes output.string, 'FAIL Stimulus timer cleanup'
+      assert_includes output.string, 'leaky_controller.js'
+    end
+  end
+
+  def test_accepts_a_timer_that_is_cleared_on_disconnect
+    with_performance_fixture do |root|
+      write_file(root, 'templates/controllers/tidy_controller.js', <<~JS)
+        export default class {
+          connect() { this._t = window.setTimeout(() => {}, 200) }
+          disconnect() { clearTimeout(this._t) }
+        }
+      JS
+
+      output = StringIO.new
+
+      assert PerformanceCheck.new(root: root, io: output).call
+      assert_includes output.string, 'PASS Stimulus timer cleanup'
+    end
+  end
+
   def test_fails_without_importmap_lazy_loading_guidance
     with_performance_fixture do |root|
       write_file(root, 'README.md', "# Docs\n")

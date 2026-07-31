@@ -43,10 +43,9 @@ export default class extends Controller {
   }
 
   choose(event) {
-    this.element.dispatchEvent(new CustomEvent("senren:command-select", {
-      bubbles: true,
+    this.dispatch("select", {
       detail: { label: event.currentTarget.textContent.trim(), href: event.currentTarget.getAttribute("href") }
-    }))
+    })
   }
 
   move(delta) {
@@ -59,7 +58,7 @@ export default class extends Controller {
   updateActive() {
     const options = this.visibleOptions
     this.emptyTarget.hidden = options.length > 0
-    this.optionTargets.forEach((option) => option.setAttribute("aria-selected", "false"))
+    this.optionTargets.forEach((option) => { option.setAttribute("aria-selected", "false") })
     const active = options[this.activeIndex]
     if (!active) {
       this.inputTarget.removeAttribute("aria-activedescendant")

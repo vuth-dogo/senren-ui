@@ -40,6 +40,7 @@ class PerformanceCheck
       check_controller_payload,
       check_component_template_payload,
       check_controller_patterns,
+      check_timer_cleanup,
       check_importmap_guidance
     ]
 
@@ -118,6 +119,26 @@ class PerformanceCheck
       label: 'Stimulus runtime boundaries',
       ok: offenses.empty?,
       details: offenses.empty? ? ['no network calls or external UI framework imports'] : offenses
+    )
+  end
+
+  # A timer that outlives its controller fires against a detached element. At
+  # best that retains the subtree until it runs; at worst the callback touches a
+  # Stimulus target that no longer exists and throws. Turbo navigations make
+  # this routine rather than exotic, so it is a gate rather than a review note.
+  def check_timer_cleanup
+    offenses = controller_files.filter_map do |path|
+      source = File.read(path)
+      next unless source.match?(/\b(?:window\.)?set(?:Timeout|Interval)\s*\(/)
+      next if source.include?('disconnect(') && source.match?(/clear(?:Timeout|Interval)\s*\(/)
+
+      "#{relative(path)} schedules a timer that disconnect() never clears"
+    end
+
+    Result.new(
+      label: 'Stimulus timer cleanup',
+      ok: offenses.empty?,
+      details: offenses.empty? ? ['every scheduled timer is cleared on disconnect'] : offenses
     )
   end
 

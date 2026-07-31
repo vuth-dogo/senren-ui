@@ -10,7 +10,14 @@ export default class extends Controller {
   static values = { mask: String }
 
   connect() {
-    this.element.addEventListener("input", this._onInput.bind(this))
+    // Keep the bound reference: Stimulus re-connects on Turbo morph/restore,
+    // and an unremovable listener would stack up one mask pass per cycle.
+    this._boundOnInput = this._onInput.bind(this)
+    this.element.addEventListener("input", this._boundOnInput)
+  }
+
+  disconnect() {
+    this.element.removeEventListener("input", this._boundOnInput)
   }
 
   _onInput(event) {

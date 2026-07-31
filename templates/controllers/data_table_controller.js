@@ -15,9 +15,14 @@ export default class extends Controller {
     const direction = this.directions[key] === "asc" ? "desc" : "asc"
     this.directions[key] = direction
 
-    const rows = [...this.rowTargets]
-    rows.sort((a, b) => this.compare(this.valueFor(a, key), this.valueFor(b, key), direction))
-    rows.forEach((row) => this.bodyTarget.appendChild(row))
+    // Read each cell once (O(n)) rather than once per comparison (O(n log n)),
+    // then move the rows in a single batched write.
+    const decorated = this.rowTargets.map((row) => ({ row, value: this.valueFor(row, key) }))
+    decorated.sort((a, b) => this.compare(a.value, b.value, direction))
+
+    const fragment = document.createDocumentFragment()
+    decorated.forEach((entry) => { fragment.appendChild(entry.row) })
+    this.bodyTarget.appendChild(fragment)
   }
 
   valueFor(row, key) {
