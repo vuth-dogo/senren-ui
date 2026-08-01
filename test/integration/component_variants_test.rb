@@ -2,6 +2,7 @@
 
 require_relative '../application_integration_test_case'
 require 'view_component/test_case'
+require 'nokogiri'
 
 # Renders every variant and size the registry declares, for every component.
 #
@@ -111,6 +112,53 @@ class ComponentVariantsTest < ViewComponent::TestCase
     assert_empty failures, "components that cannot be built with defaults:\n#{failures.join("\n")}"
   end
 
+  # `class:` is a legal kwarg on every Rails tag helper, so it is the first
+  # thing a developer types — and it landed in **html_attrs, which was splatted
+  # after the computed class and replaced it outright. Passing it erased the
+  # component's variant and size styling with no warning. `data:` had the
+  # identical defect and was fixed; `class:` was not.
+  #
+  # Asserted across the whole library, because the bug lived in BaseComponent,
+  # and on rendered markup rather than on root_attrs, so it also covers select
+  # and masked_input -- pure delegating wrappers that never call root_attrs.
+  def test_a_caller_supplied_class_never_erases_component_styling
+    losses = registry.names.filter_map do |name|
+      baseline = root_classes(render_component(component_class(name), name))
+      merged = root_classes(render_component(component_class(name), name, class: 'sentinel-class'))
+      lost = baseline - merged
+
+      "#{name}: lost #{lost.to_a.sort.inspect}" unless lost.empty?
+    rescue StandardError => e
+      "#{name}: #{e.class}: #{e.message.lines.first.to_s.strip}"
+    end
+
+    assert_empty losses, "components whose styling a caller `class:` erased:\n#{losses.join("\n")}"
+  end
+
+  # A separate defect from the one above, and a pre-existing one: these eight
+  # write their root element by hand instead of through root_attrs, so a caller
+  # `class:` (and `class_name:`) is not substituted — it is dropped entirely and
+  # never reaches the DOM. Found by the test above, which is why it is recorded
+  # here rather than quietly excluded from it.
+  #
+  # Pinned as an exact list so the set can only shrink. Fixing one means
+  # deleting its name here; the assertion fails if a new component joins them.
+  DROPS_CALLER_CLASS = %w[
+    alert_dialog context_menu dialog dropdown_menu hover_card popover sheet tooltip
+  ].freeze
+
+  def test_only_the_known_hand_written_roots_ignore_a_caller_class
+    ignoring = registry.names.reject do |name|
+      root_classes(render_component(component_class(name), name, class: 'sentinel-class'))
+        .include?('sentinel-class')
+    rescue StandardError
+      true
+    end
+
+    assert_equal DROPS_CALLER_CLASS, ignoring.sort,
+                 'this list must only shrink; a new component ignoring `class:` is a regression'
+  end
+
   # An unknown variant must be refused loudly rather than silently rendering the
   # default, or a typo ships as a styling bug.
   def test_unknown_variants_raise
@@ -126,6 +174,12 @@ class ComponentVariantsTest < ViewComponent::TestCase
   end
 
   private
+
+  # The class list on the element carrying the component marker.
+  def root_classes(html)
+    root = Nokogiri::HTML5.fragment(html).at_css('[data-senren-component]')
+    Set.new(root ? root['class'].to_s.split : [])
+  end
 
   def component_class(name)
     Senren.const_get("#{name.split('_').map { |word| word[0].upcase + word[1..] }.join}Component")

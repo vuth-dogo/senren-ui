@@ -37,14 +37,22 @@ module Senren
       data = (html_attrs[:data] || {})
              .merge(extra.delete(:data) || {})
              .merge(senren_component: senren_component_name)
+
+      # `class` had exactly the same defect and it was never fixed alongside
+      # `data`. Every Rails tag helper accepts `class:`, so it is the first
+      # thing anyone types — and splatting html_attrs replaced the computed
+      # value outright, erasing the component's variant and size styling with
+      # no warning. It is merged like any other caller-supplied class instead,
+      # last so it still wins where the two genuinely conflict.
       tag_class = merge_classes(
         classes,
         self.class::VARIANTS[@variant],
         self.class::SIZES[@size],
         @class_name,
-        extra.delete(:class)
+        extra.delete(:class),
+        html_attrs[:class]
       )
-      { class: tag_class, data: data, **html_attrs.except(:data), **extra }
+      { class: tag_class, data: data, **html_attrs.except(:data, :class), **extra }
     end
 
     def senren_component_name
