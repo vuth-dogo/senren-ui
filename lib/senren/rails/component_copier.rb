@@ -64,17 +64,20 @@ module Senren
       def ensure_base_component_url_helpers!
         dest = paths.base_component_path
 
-        # Checked before #exist?, which follows the link. This append does not
-        # go through copy_file, so without an explicit check it writes straight
-        # through a symlink to its target — escaping the very app root that
-        # assert_inside_host_root! exists to enforce. Path expansion does not
-        # resolve symlinks, so containment alone cannot catch this.
+        # Checked before #exist?, which follows the link, so a destination
+        # resolving outside the app root is refused before it is read.
         return if refuse_symlink?(dest, 'base_component.rb')
 
         if dest.exist?
           return if base_component_has_url_helpers?
 
-          File.open(dest, 'a') { |file| file.write(BASE_URL_HELPER_PATCH) }
+          # Read-modify-write through SafeWrite rather than File.open(dest, 'a').
+          # The append was the one non-atomic write left in the gem: a process
+          # killed partway through left base_component.rb holding half a method,
+          # and an app that will not boot. This is the migration path onto the
+          # hardened URL helpers, so it runs on apps that already have code
+          # worth not corrupting.
+          SafeWrite.write!(dest, dest.read + BASE_URL_HELPER_PATCH, paths.root, 'base_component.rb')
           stdout.puts "  update #{dest} (url helpers)"
           return
         end

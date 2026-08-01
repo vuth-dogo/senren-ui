@@ -23,6 +23,7 @@ module Senren
       end
 
       def sync!
+        assert_distinct_adapters!
         paths.ensure_agent_dirs!
         files = []
         files << write_full_file(paths.agent_rules_file, render_source_rules)
@@ -33,7 +34,45 @@ module Senren
         files
       end
 
+      # Each adapter gets different content, so two of them resolving to the
+      # same file means the last write silently wins.
+      #
+      # `ln -s AGENTS.md CLAUDE.md` is a normal way to keep one set of agent
+      # instructions, and now that in-repo symlinks are allowed it reaches here
+      # rather than being refused as an escape.
+      #
+      # Public so ComponentInstaller can run it as a preflight. The first
+      # version of this check lived inside sync!, which runs after the copier,
+      # so `senren:add` failed with components already on disk and the ledger
+      # already written.
+      def assert_distinct_adapters!
+        collisions = adapter_targets.group_by { |path, _| SafeWrite.real_target(path) }
+                                    .select { |_, group| group.size > 1 }
+        return if collisions.empty?
+
+        raise ArgumentError, collision_message(collisions)
+      end
+
       private
+
+      def adapter_targets
+        {
+          paths.codex_agents_md => 'AGENTS.md',
+          paths.claude_md => 'CLAUDE.md',
+          paths.copilot_instructions => '.github/copilot-instructions.md',
+          paths.cursor_rule_file => '.cursor/rules/senren.mdc'
+        }
+      end
+
+      def collision_message(collisions)
+        detail = collisions.map do |target, group|
+          "#{group.map(&:last).join(' and ')} both resolve to #{target}"
+        end.join('; ')
+
+        'Senren writes different instructions to each agent adapter, so these cannot share a file: ' \
+          "#{detail}. Replace the link with a real file, or have one adapter reference the other " \
+          'by path instead of linking to it.'
+      end
 
       def installed_names
         path = paths.installed_components

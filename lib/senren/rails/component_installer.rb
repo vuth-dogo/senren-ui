@@ -34,6 +34,12 @@ module Senren
         normalized_names = self.class.normalize_names(names)
         raise ArgumentError, USAGE if normalized_names.empty?
 
+        # Preflight. Everything below writes to disk, and a failure partway
+        # through leaves components copied, the ledger updated and the guidance
+        # files stale -- which is exactly what the first version of the adapter
+        # collision check did.
+        AgentRulesWriter.new(registry: registry, paths: paths).assert_distinct_adapters!
+
         installed = ComponentCopier.new(registry: registry, paths: paths, stdout: stdout)
                                    .install(normalized_names, client_override: client_override, force: force)
 

@@ -106,7 +106,12 @@ module Senren
 
         assert_equal "# outside the app root\n", victim.read,
                      'nothing may be written through the symlink'
-        assert_includes @stdout.string, 'symlink'
+        # Asserted on the outcome and on the path named, not on the word
+        # "symlink": the policy is containment, and a link that stays inside the
+        # repo is legitimate, so the message now reports where the write would
+        # have landed rather than that a link exists.
+        assert_includes @stdout.string, 'skip'
+        assert_includes @stdout.string, victim.to_s
       ensure
         FileUtils.remove_entry(outside) if outside && Dir.exist?(outside)
       end

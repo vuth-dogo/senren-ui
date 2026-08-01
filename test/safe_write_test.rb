@@ -57,22 +57,56 @@ module Senren
         refute SafeWrite.inside?(sibling.join('x.rb'), @root)
       end
 
-      def test_symlinked_segment_finds_an_intermediate_link
-        @root.join('app').mkpath
-        link = @root.join('app/components')
-        File.symlink(@outside.to_s, link.to_s)
+      # The property is containment, not the absence of symlinks. Refusing
+      # every link regardless of where it pointed broke `ln -s AGENTS.md
+      # CLAUDE.md` -- an ordinary way to keep one set of agent instructions --
+      # and took the whole senren:add command down with it. Every symlink test
+      # above this used a link pointing OUTSIDE, so the in-repo direction had
+      # never been exercised.
+      def test_a_symlink_that_stays_inside_the_root_is_allowed
+        @root.join('docs').mkpath
+        @root.join('docs/NOTES.md').write("# notes\n")
+        File.symlink('docs/NOTES.md', @root.join('CLAUDE.md').to_s)
 
-        assert_equal link.to_s,
-                     SafeWrite.symlinked_segment(@root.join('app/components/senren/x.rb'), @root).to_s
+        assert SafeWrite.inside?(@root.join('CLAUDE.md'), @root)
       end
 
-      def test_mkdir_p_refuses_to_build_through_a_symlink
+      def test_a_symlinked_directory_that_stays_inside_the_root_is_allowed
+        @root.join('config/senren').mkpath
+        File.symlink('config/senren', @root.join('.senren').to_s)
+
+        assert SafeWrite.inside?(@root.join('.senren/registry.yml'), @root)
+      end
+
+      # Writing to what the link points at, rather than replacing the link,
+      # is what lets a deliberate in-repo link survive an install.
+      def test_writing_through_an_in_repo_link_preserves_it
+        @root.join('docs').mkpath
+        @root.join('docs/NOTES.md').write("old\n")
+        File.symlink('docs/NOTES.md', @root.join('CLAUDE.md').to_s)
+
+        SafeWrite.write!(@root.join('CLAUDE.md'), "new\n", @root, 'test')
+
+        assert_predicate @root.join('CLAUDE.md'), :symlink?
+        assert_equal "new\n", @root.join('docs/NOTES.md').read
+      end
+
+      def test_mkdir_p_refuses_to_build_through_a_symlink_pointing_outside
         @root.join('app').mkpath
         File.symlink(@outside.to_s, @root.join('app/components').to_s)
 
         assert_raises(SafeWrite::Escape) do
           SafeWrite.mkdir_p!(@root.join('app/components/senren'), @root, 'test')
         end
+      end
+
+      def test_mkdir_p_accepts_a_symlink_pointing_inside
+        @root.join('real').mkpath
+        File.symlink('real', @root.join('linked').to_s)
+
+        SafeWrite.mkdir_p!(@root.join('linked/nested'), @root, 'test')
+
+        assert_predicate @root.join('real/nested'), :directory?
       end
 
       def test_mkdir_p_creates_an_ordinary_directory
@@ -125,16 +159,46 @@ module Senren
         end
       end
 
-      # A dangling link is skipped by File.exist?, so containment clears the
-      # parent directory and the write still lands on the link's target.
-      # symlinked_segment uses File.symlink?, which does not follow.
-      def test_a_dangling_symlink_is_refused_too
+      # A dangling link is skipped by File.exist?, so a check that resolved only
+      # existing ancestors would clear the parent directory and let the write
+      # land on the link's target. real_target reads the DECLARED target with
+      # File.readlink, which works whether or not it exists.
+      def test_a_dangling_symlink_pointing_outside_is_refused
         ghost = @outside.join('ghost.yml')
         @root.join('.senren').mkpath
         File.symlink(ghost.to_s, @root.join('.senren/registry.yml').to_s)
 
         assert_raises(SafeWrite::Escape) { install }
         refute_path_exists ghost, 'a dangling symlink must not become a file outside the root'
+      end
+
+      # Two adapters sharing one file is a real conflict -- they get different
+      # content, so the last write silently wins -- but it is not an escape, and
+      # it must be reported as what it is. It also has to be caught before the
+      # copier runs: the first version failed with components already on disk.
+      def test_two_agent_adapters_sharing_a_file_fail_before_anything_is_written
+        @root.join('AGENTS.md').write("# my notes\n")
+        File.symlink('AGENTS.md', @root.join('CLAUDE.md').to_s)
+
+        error = assert_raises(ArgumentError) { install }
+
+        assert_match(/cannot share a file/, error.message)
+        assert_match(/AGENTS\.md and CLAUDE\.md/, error.message)
+        refute_path_exists @root.join('app/components/senren/button_component.rb'),
+                           'nothing may be copied before the preflight fails'
+        refute_path_exists @root.join('.senren/installed_components.yml'),
+                           'the ledger must not be written before the preflight fails'
+      end
+
+      def test_an_install_into_a_repo_with_a_harmless_symlink_succeeds
+        @root.join('docs').mkpath
+        @root.join('docs/NOTES.md').write("# notes\n")
+        File.symlink('docs/NOTES.md', @root.join('CLAUDE.md').to_s)
+
+        install
+
+        assert_predicate @root.join('app/components/senren/button_component.rb'), :exist?
+        assert_empty Dir.children(@outside)
       end
 
       # A guard nobody can satisfy gets deleted, so the legitimate case is
