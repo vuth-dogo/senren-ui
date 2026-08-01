@@ -2,6 +2,7 @@
 
 require 'yaml'
 require 'senren/rails/marker_block'
+require 'senren/rails/safe_write'
 
 module Senren
   module Rails
@@ -31,7 +32,7 @@ module Senren
         installed = installed_names
         body = render(installed)
 
-        paths.senren_dir.mkpath
+        SafeWrite.mkdir_p!(paths.senren_dir, paths.root, 'skill.md')
         existing = paths.skill_file.exist? ? paths.skill_file.read : default_outer_template
 
         new_content = inject(existing, body)
@@ -41,8 +42,10 @@ module Senren
 
       private
 
-      # Matches AgentRulesWriter: a killed process must not truncate the file.
+      # Matches AgentRulesWriter: a killed process must not truncate the file,
+      # and a symlinked .senren must not redirect the write outside the app.
       def atomic_write(path, content)
+        SafeWrite.assert_inside!(path, paths.root, path.to_s)
         tmp = path.parent.join("#{path.basename}.#{Process.pid}.tmp")
         File.write(tmp, content)
         File.rename(tmp, path)

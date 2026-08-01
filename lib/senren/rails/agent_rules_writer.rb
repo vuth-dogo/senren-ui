@@ -2,6 +2,7 @@
 
 require 'yaml'
 require 'senren/rails/marker_block'
+require 'senren/rails/safe_write'
 
 module Senren
   module Rails
@@ -164,7 +165,12 @@ module Senren
         )
       end
 
+      # write_adapter_file reads its destination before rewriting it, so a
+      # symlinked .senren, .github or .cursor/rules did not merely redirect the
+      # write — it pulled outside content in and wrote it back out. Containment
+      # is asserted on the real path before either half of that happens.
       def atomic_write(path, content)
+        SafeWrite.assert_inside!(path, paths.root, path.to_s)
         tmp = "#{path}.#{Process.pid}.tmp"
         File.write(tmp, content)
         File.rename(tmp, path)

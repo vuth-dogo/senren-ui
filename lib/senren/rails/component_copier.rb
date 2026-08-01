@@ -5,6 +5,7 @@ require 'pathname'
 require 'yaml'
 require 'time'
 require 'senren/rails/base_component_patch'
+require 'senren/rails/safe_write'
 
 module Senren
   module Rails
@@ -67,11 +68,11 @@ module Senren
         copy_file(BASE_COMPONENT_TEMPLATE, dest, force: false, label: 'base_component.rb')
       end
 
+      # Delegates to SafeWrite so an intermediate symlinked directory is caught,
+      # not just a symlinked leaf. `app/components/senren -> /elsewhere` used to
+      # pass every check here.
       def refuse_symlink?(dest, label)
-        return false unless File.symlink?(dest)
-
-        stdout.puts "  skip  #{dest} (symlink; refusing to write through it) [#{label}]"
-        true
+        SafeWrite.resolve(dest, paths.root, label, io: stdout).nil?
       end
 
       def base_component_has_url_helpers?
@@ -159,12 +160,13 @@ module Senren
 
       # Defense in depth: destinations are registry-derived, but a copier that
       # can write anywhere is one bad registry entry away from a traversal.
+      #
+      # This used to compare expand_path, which normalises lexically and does
+      # not resolve symlinks, so a symlinked ancestor escaped it entirely.
       def assert_inside_host_root!(dest, label)
-        expanded = Pathname.new(dest).expand_path
-        root = paths.root.expand_path
-        return expanded if expanded.to_s.start_with?("#{root}/")
-
-        raise ArgumentError, "Refusing to write outside the app root: #{expanded} (#{label})"
+        SafeWrite.assert_inside!(dest, paths.root, label)
+      rescue SafeWrite::Escape => e
+        raise ArgumentError, e.message
       end
 
       def update_installed_ledger(names, client_override:)
