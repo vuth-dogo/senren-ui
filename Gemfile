@@ -4,4 +4,4 @@ source 'https://rubygems.org'
 
 gemspec
 
-eval_gemfile File.expand_path('gemfiles/common.rb', __dir__)
+eval_gemfile 'gemfiles/common.rb'
