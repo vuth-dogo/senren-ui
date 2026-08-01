@@ -19,7 +19,7 @@
         <%= content %>
       <% else %>
         <label class="block text-sm font-medium text-[hsl(var(--senren-foreground))]" for="<%= dom_id %>-email">Email</label>
-        <input id="<%= dom_id %>-email" name="<%= email_name %>" type="email" placeholder="teammate@company.com" class="h-10 w-full rounded-(--senren-radius) border border-[hsl(var(--senren-input))] bg-[hsl(var(--senren-background))] px-3 text-sm outline-none focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
+        <input id="<%= dom_id %>-email" name="<%= email_name %>" type="email" autocomplete="email" placeholder="teammate@company.com" class="h-10 w-full rounded-(--senren-radius) border border-[hsl(var(--senren-input))] bg-[hsl(var(--senren-background))] px-3 text-sm outline-none focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
         <label class="block text-sm font-medium text-[hsl(var(--senren-foreground))]" for="<%= dom_id %>-role">Role</label>
         <select id="<%= dom_id %>-role" name="<%= role_name %>" class="h-10 w-full rounded-(--senren-radius) border border-[hsl(var(--senren-input))] bg-[hsl(var(--senren-background))] px-3 text-sm outline-none focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
           <% roles.each do |role| %><option><%= role %></option><% end %>

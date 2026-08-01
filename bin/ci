@@ -62,6 +62,7 @@ step "tests"             bin/test
 step "integration tests" bundle exec rake test:integration
 step "system tests"      bin/system
 step "RuboCop"           bundle exec rubocop --cache false
+step "ERB lint"          bundle exec erblint --lint-all
 step "JavaScript checks" bun run controllers:check
 step "performance"       bin/performance
 # Dependabot opens PRs but cannot fail a build. This gate does.

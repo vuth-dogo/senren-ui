@@ -7,6 +7,9 @@
 group :development, :test do
   gem 'bundler-audit', require: false
   gem 'capybara'
+  # ERB was the only layer with no linter, while being what 62 of the 64
+  # components are actually written in.
+  gem 'erb_lint', require: false
   gem 'minitest'
   # Used only by component tests to parse rendered HTML. Not a runtime
   # dependency: the gem itself never parses HTML.

@@ -1,0 +1,46 @@
+---
+# ERB is where 62 of the 64 components live, and it was the one layer with no
+# linter at all -- RuboCop covers the .rb half, Biome covers the controllers,
+# and the markup in between was unchecked.
+#
+# Structural rules only. Formatting rules fight the long Tailwind class strings
+# that make up most of a component template, and would generate churn rather
+# than findings.
+linters:
+  ErbSafety:
+    enabled: true
+  ParserErrors:
+    enabled: true
+  ExtraNewline:
+    enabled: false
+  FinalNewline:
+    enabled: true
+  TrailingWhitespace:
+    enabled: true
+  DeprecatedClasses:
+    enabled: false
+  Rubocop:
+    enabled: false
+  SpaceInHtmlTag:
+    enabled: false
+  RequireScriptNonce:
+    enabled: false
+  # Kept on, but taught about importmap: javascript_importmap_tags emits
+  # type="importmap" and type="module", and the default allow-list predates
+  # both. Widening it beats disabling the linter.
+  AllowedScriptType:
+    enabled: true
+    allowed_types:
+      - text/javascript
+      - application/ld+json
+      - module
+      - importmap
+exclude:
+  # better_html's parser -- not a linter, so it cannot be configured off --
+  # rejects type="importmap", which is what javascript_importmap_tags emits.
+  # This is the preview harness's layout, not something the gem ships, and
+  # ParserErrors stays on for all 68 templates that are.
+  - 'test/dummy/app/views/layouts/application.html.erb'
+  - 'tmp/**/*'
+  - '.local/**/*'
+  - 'node_modules/**/*'
