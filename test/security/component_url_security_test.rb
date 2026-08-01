@@ -134,6 +134,32 @@ module Senren
       assert_equal '#', PaginationComponent.new(path: 'javascript:alert(:page)').page_url(2)
     end
 
+    # A property over every component in the library, rather than a list of the
+    # ones someone remembered.
+    #
+    # COMPONENTS above is an allowlist, so a component added later was missed by
+    # construction — and two were: FormComponent#url reached form_with's action,
+    # where `//evil.example` POSTs every field plus the CSRF token off-origin,
+    # and AvatarComponent#src reached image_tag on user-controlled profile data.
+    # Both had shipped. This scans all of them instead, so the next one cannot
+    # slip through by being new.
+    URL_KEYWORDS = %w[url href src].freeze
+    SANITIZERS = %w[safe_url safe_media_url].freeze
+
+    def test_every_component_taking_a_url_routes_it_through_a_sanitizer
+      unguarded = Dir.children(TEMPLATE_ROOT).sort.reject do |name|
+        source = component_sources(name)
+        next true if source.empty?
+        next true unless takes_url_argument?(source)
+
+        SANITIZERS.any? { |helper| source.include?(helper) }
+      end
+
+      assert_empty unguarded,
+                   'these components accept a URL-ish argument but never call ' \
+                   "safe_url or safe_media_url: #{unguarded.join(', ')}"
+    end
+
     def test_href_templates_use_safe_url_helper
       {
         'billing_plan_card' => 'safe_url(cta_href)',
@@ -151,6 +177,23 @@ module Senren
     end
 
     private
+
+    def component_sources(name)
+      dir = File.join(TEMPLATE_ROOT, name)
+      return '' unless File.directory?(dir)
+
+      Dir.glob(File.join(dir, '*')).select { |f| File.file?(f) }.map { |f| File.read(f) }.join("\n")
+    end
+
+    # A keyword argument whose name is url/href/src, or a hash entry read out of
+    # one — `item[:href]`, `slide[:image_url]`. Deliberately broad: a false
+    # positive costs one `safe_url` call, a false negative ships an open
+    # redirect.
+    def takes_url_argument?(source)
+      URL_KEYWORDS.any? do |word|
+        source.match?(/\b\w*#{word}:\s/) || source.match?(/\[:\w*#{word}\]/)
+      end
+    end
 
     def extract_safe_url(source)
       body = source[/def safe_url.*?^\s*end\s*$/m]
