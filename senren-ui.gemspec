@@ -38,7 +38,6 @@ Gem::Specification.new do |spec|
 
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'nokogiri', '>= 1.19.3'
   spec.add_dependency 'rails', '>= 7.1'
   spec.add_dependency 'view_component', '>= 4.9.0'
 end

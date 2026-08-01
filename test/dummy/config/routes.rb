@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   get 'components/static', to: 'components#static'
   get 'components/interactive', to: 'components#interactive'
   get 'components/kitchen_sink', to: 'components#kitchen_sink'
+  get 'components/red_team', to: 'components#red_team'
 
   get 'favicon.ico', to: ->(_env) { [204, {}, []] }
   get 'assets/application.js', to: 'assets#application', defaults: { format: :js }

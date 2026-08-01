@@ -1,0 +1,45 @@
+<main data-testid="red-team-preview">
+  <h1>Senren Red Team Preview</h1>
+
+  <%#
+    Every href below is a protocol-relative bypass that a naive
+    start_with?("//") check lets through. safe_url must neutralize each one,
+    so the browser must resolve them back to this origin.
+  %>
+  <section id="hostile-links">
+    <%= render(Senren::LinkComponent.new(id: "link-backslash", href: "/\\evil.example")) { "backslash" } %>
+    <%= render(Senren::LinkComponent.new(id: "link-backslash-slash", href: "/\\/evil.example")) { "backslash slash" } %>
+    <%= render(Senren::LinkComponent.new(id: "link-tab", href: "/\t/evil.example")) { "embedded tab" } %>
+    <%= render(Senren::LinkComponent.new(id: "link-newline", href: "/\n/evil.example")) { "embedded newline" } %>
+    <%= render(Senren::LinkComponent.new(id: "link-protocol-relative", href: "//evil.example/path")) { "protocol relative" } %>
+    <%= render(Senren::LinkComponent.new(id: "link-javascript", href: "javascript:alert(1)")) { "javascript" } %>
+    <%= render(Senren::LinkComponent.new(id: "link-safe", href: "/components/static")) { "safe relative" } %>
+  </section>
+
+  <section id="editor">
+    <%= render Senren::RichTextEditorLiteComponent.new(name: "body", value: "<p>Initial content</p>") %>
+  </section>
+
+  <section id="table">
+    <%= render Senren::DataTableComponent.new(
+      columns: [
+        { key: "name", label: "Name" },
+        { key: "score", label: "Score" }
+      ],
+      rows: [
+        { "name" => "delta", "score" => 30 },
+        { "name" => "alpha", "score" => 10 },
+        { "name" => "charlie", "score" => 20 },
+        { "name" => "bravo", "score" => 40 }
+      ]
+    ) %>
+  </section>
+
+  <section id="invite">
+    <%= render Senren::InviteMemberDialogComponent.new(id: "system-invite") %>
+  </section>
+
+  <section id="mask">
+    <%= render Senren::MaskedInputComponent.new(mask: "###-###", name: "code", id: "masked-code") %>
+  </section>
+</main>

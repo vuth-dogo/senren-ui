@@ -28,14 +28,17 @@ module Senren
       private
 
       def check(label)
-        ok = false
         detail = nil
-        begin
-          ok = !yield.nil?
+        result = begin
+          yield
         rescue StandardError => e
           detail = e.message
+          nil
         end
-        Result.new(label, ok, detail)
+
+        # Checks return either a boolean (File#exist?) or nil/truthy (defined?).
+        # Only a truthy result passes: `false` must fail, not slip through.
+        Result.new(label, result ? true : false, detail)
       end
 
       def gem_loadable?(name)

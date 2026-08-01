@@ -14,7 +14,7 @@ module Senren
     def initialize(open: false, id: nil, class_name: nil, **html)
       super(variant: :default, size: :md, class_name: class_name, **html)
       @open = open
-      @dom_id = id || "senren-dialog-#{SecureRandom.hex(3)}"
+      @dom_id = id || senren_dom_id
     end
 
     attr_reader :open, :dom_id

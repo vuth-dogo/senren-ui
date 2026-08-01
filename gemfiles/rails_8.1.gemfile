@@ -1,0 +1,12 @@
+# frozen_string_literal: true
+
+# Matrix gemfile: proves the gemspec's `rails >= 7.1` claim on Rails 8.1.
+# Select with BUNDLE_GEMFILE=gemfiles/rails_8.1.gemfile.
+
+source 'https://rubygems.org'
+
+gem 'rails', '~> 8.1.0'
+
+eval_gemfile 'common.rb'
+
+gemspec path: '..'

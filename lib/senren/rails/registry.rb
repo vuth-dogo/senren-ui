@@ -10,15 +10,12 @@ module Senren
       OPTIONAL_KEYS = %w[controller stub].freeze
       ALLOWED_KEYS = (REQUIRED_KEYS + OPTIONAL_KEYS).freeze
       VALID_CATEGORIES = %w[actions forms overlays navigation layout data saas rich].freeze
+      NAME_PATTERN = /\A[a-z][a-z0-9_]*\z/
 
       Component = Struct.new(:name, :category, :client, :can_have_client, :controller, :stub, :files, :depends_on,
                              :pairs_with, :variants, :accessibility, :use_for, :avoid, keyword_init: true) do
         def stub? = stub == true
         def client? = client == true
-
-        def to_h_full
-          to_h.merge(stub: stub?, client: client?)
-        end
       end
 
       attr_reader :components, :groups, :recipes
@@ -107,11 +104,20 @@ module Senren
       end
 
       def validate_component(name, comp, errors)
+        validate_component_name(name, errors)
         validate_component_keys(name, errors)
         validate_component_category(name, comp, errors)
         validate_component_dependencies(name, comp, errors)
         validate_component_client_contract(name, comp, errors)
         validate_component_file_paths(name, comp, errors)
+      end
+
+      # The file-path allowlist is derived from the component name, so an
+      # unconstrained name would validate a traversal path against itself.
+      def validate_component_name(name, errors)
+        return if NAME_PATTERN.match?(name)
+
+        errors << "#{name.inspect}: invalid component name (expected #{NAME_PATTERN.source})"
       end
 
       def validate_component_keys(name, errors)

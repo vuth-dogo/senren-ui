@@ -17,7 +17,14 @@ module Senren
       @fallback = fallback.presence || initials.presence || initials_from_alt
     end
 
-    attr_reader :src, :alt, :fallback
+    attr_reader :alt, :fallback
+
+    # Avatar sources are user-controlled by nature — a profile URL is the
+    # canonical example — and this one reaches image_tag. Rails' asset_path
+    # incidentally neutralises `javascript:`, so this is not XSS, but an
+    # off-origin `//tracker.example/x.gif` is a beacon that fires for every
+    # viewer of the page. safe_media_url is the media-specific policy.
+    def src = @src && safe_media_url(@src)
 
     private
 

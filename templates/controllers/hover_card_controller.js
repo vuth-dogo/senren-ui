@@ -14,4 +14,12 @@ export default class extends Controller {
     clearTimeout(this._showTimer)
     this._hideTimer = setTimeout(() => { if (this.hasPanelTarget) this.panelTarget.hidden = true }, 120)
   }
+
+  // Either timer can still be pending when a Turbo navigation removes the
+  // element, which retains this controller and its detached subtree until it
+  // fires.
+  disconnect() {
+    clearTimeout(this._showTimer)
+    clearTimeout(this._hideTimer)
+  }
 }

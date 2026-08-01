@@ -1,0 +1,61 @@
+<%= tag.section(**root_attrs("flex flex-col rounded-(--senren-radius) border bg-[hsl(var(--senren-card))] shadow-sm", id: dom_id, "aria-label": title, data: { controller: "senren--cart", "senren--cart-currency-value": currency, "senren--cart-subtotal-cents-value": subtotal_cents })) do %>
+  <header class="flex items-center justify-between border-b border-[hsl(var(--senren-border))] px-4 py-3">
+    <h2 class="text-sm font-semibold text-[hsl(var(--senren-foreground))]"><%= title %></h2>
+    <span class="text-sm text-[hsl(var(--senren-muted-foreground))]" data-senren--cart-target="count"><%= total_quantity %></span>
+  </header>
+
+  <% if empty? %>
+    <p class="px-4 py-8 text-center text-sm text-[hsl(var(--senren-muted-foreground))]"><%= empty_text %></p>
+  <% else %>
+    <ul class="divide-y divide-[hsl(var(--senren-border))]">
+      <% items.each do |item| %>
+        <li class="flex items-center gap-3 px-4 py-3"
+            data-senren--cart-target="line"
+            data-line-id="<%= item[:id] %>"
+            data-price-cents="<%= item[:price_cents] %>">
+          <% if (image = safe_media_url(item[:image_url])) %>
+            <img src="<%= image %>" alt="" loading="lazy" class="h-12 w-12 shrink-0 rounded-(--senren-radius) object-cover">
+          <% else %>
+            <div class="h-12 w-12 shrink-0 rounded-(--senren-radius) bg-[hsl(var(--senren-muted)/0.5)]" aria-hidden="true"></div>
+          <% end %>
+
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-medium text-[hsl(var(--senren-foreground))]"><%= item[:name] %></p>
+            <p class="text-sm text-[hsl(var(--senren-muted-foreground))]" data-senren--cart-target="lineTotal"><%= line_total(item) %></p>
+          </div>
+
+          <div class="flex items-center gap-1" role="group" aria-label="<%= item[:name] %> quantity">
+            <button type="button"
+                    data-action="click->senren--cart#decrement"
+                    aria-label="Decrease <%= item[:name] %> quantity"
+                    class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-(--senren-radius) border border-[hsl(var(--senren-border))] text-sm hover:bg-[hsl(var(--senren-accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]">&minus;</button>
+
+            <output class="w-8 text-center text-sm tabular-nums text-[hsl(var(--senren-foreground))]"
+                    data-senren--cart-target="quantity"><%= item[:quantity] %></output>
+
+            <button type="button"
+                    data-action="click->senren--cart#increment"
+                    aria-label="Increase <%= item[:name] %> quantity"
+                    class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-(--senren-radius) border border-[hsl(var(--senren-border))] text-sm hover:bg-[hsl(var(--senren-accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]">+</button>
+          </div>
+
+          <button type="button"
+                  data-action="click->senren--cart#remove"
+                  aria-label="Remove <%= item[:name] %>"
+                  class="inline-flex h-8 cursor-pointer items-center rounded-(--senren-radius) px-2 text-sm text-[hsl(var(--senren-muted-foreground))] hover:bg-[hsl(var(--senren-accent))] hover:text-[hsl(var(--senren-destructive))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]">Remove</button>
+        </li>
+      <% end %>
+    </ul>
+
+    <footer class="flex items-center justify-between gap-3 border-t border-[hsl(var(--senren-border))] px-4 py-3">
+      <div class="text-sm text-[hsl(var(--senren-muted-foreground))]">
+        Subtotal
+        <span class="ml-1 font-semibold text-[hsl(var(--senren-foreground))]" data-senren--cart-target="subtotal"><%= subtotal %></span>
+      </div>
+
+      <% if safe_checkout_url %>
+        <a href="<%= safe_checkout_url %>" class="inline-flex h-10 cursor-pointer items-center rounded-(--senren-radius) bg-[hsl(var(--senren-primary))] px-4 text-sm font-medium text-[hsl(var(--senren-primary-foreground))] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]"><%= checkout_label %></a>
+      <% end %>
+    </footer>
+  <% end %>
+<% end %>

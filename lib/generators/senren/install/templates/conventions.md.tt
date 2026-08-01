@@ -8,7 +8,9 @@ and obey it strictly.
 1. Use Senren components before writing custom HTML for the same purpose.
 2. Server-render via ViewComponent. Stimulus only for **local** behavior.
 3. Turbo handles server state. Controllers do not fetch/XHR from JS.
-4. No React, Vue, Alpine, lit, or external state framework. Ever.
+4. Interactivity stays in Stimulus. These components render on the server, so
+   introducing a client-side framework alongside them puts two systems in
+   charge of the same state.
 5. Tailwind classes must use **semantic tokens** (`bg-background`,
    `text-foreground`, `bg-primary`, `text-muted-foreground`,
    `border-border`, `bg-destructive`). Do not hard-code `gray-*`,
@@ -25,6 +27,19 @@ and obey it strictly.
    <%%= render Senren::ButtonComponent.new(variant: :primary) do %>
      Save
    <%% end %>
+   ```
+
+8. **Never put `app/components` on the asset load path.** With Propshaft this
+   publishes the directory: `assets:precompile` copies every component `.rb`
+   and `.html.erb` into `public/assets`, `.manifest.json` maps each logical
+   name to its digested filename, and the web server serves the source with
+   `HTTP 200` without Rails involved. Senren raises at boot in production if it
+   finds this, and warns elsewhere. Sidecar assets belong in their own
+   directory:
+   ```ruby
+   # config/initializers/assets.rb
+   Rails.application.config.assets.paths << Rails.root.join("app/components/assets")
+   # NOT app/components
    ```
 
 ## File ownership

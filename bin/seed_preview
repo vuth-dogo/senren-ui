@@ -29,6 +29,22 @@ PREVIEW_VIEW = <<~ERB.freeze
     <% end %>
   </main>
 ERB
+# Polls the token bin/watch bumps and reloads when it changes. Dev-only: it is
+# written into the gitignored .local/preview app and never into the gem.
+RELOAD_SNIPPET = <<~HTML.freeze
+  <script>
+        (() => {
+          let current = null
+          setInterval(async () => {
+            try {
+              const token = await (await fetch("/senren/reload_token", { cache: "no-store" })).text()
+              if (current !== null && token !== current) location.reload()
+              current = token
+            } catch (_) { /* server restarting */ }
+          }, 500)
+        })()
+      </script>
+HTML
 PREVIEW_HELPER_SOURCE = File.join(GEM_ROOT, 'test/dummy/app/helpers/component_preview_helper.rb')
 PREVIEW_HELPER_DEST   = File.join(HOST_ROOT, 'app/helpers/component_preview_helper.rb')
 
@@ -121,10 +137,18 @@ def seed_preview_route!
   return if routes.include?('root "components#index"')
 
   routes.sub!(/^\s*# root "posts#index"\n/, '')
-  routes.sub!(
-    "Rails.application.routes.draw do\n",
-    "Rails.application.routes.draw do\n  root \"components#index\"\n"
-  )
+  # The reload endpoint exists only for bin/watch. Drawing it behind an env
+  # check keeps it out of a production route table even if someone deploys this
+  # scratch app, which is the whole point of a preview harness being honest
+  # about what is development-only.
+  preview_routes = <<~ROUTES
+    Rails.application.routes.draw do
+      root "components#index"
+      if Rails.env.development?
+        get "senren/reload_token", to: "components#reload_token"
+      end
+  ROUTES
+  routes.sub!("Rails.application.routes.draw do\n", preview_routes)
   File.write(routes_path, routes)
   puts "  wrote #{routes_path}"
 end
@@ -135,6 +159,20 @@ def seed_preview_controller!
   File.write(controller_path, <<~RUBY)
     class ComponentsController < ApplicationController
       def index; end
+
+      # Polled by the snippet bin/watch relies on. bin/watch bumps this file on
+      # every sync; the page reloads when the value changes. Ruby and ERB edits
+      # are picked up by Rails on the next request, but a Stimulus controller
+      # edit is only evaluated after a reload -- that is what this signals.
+      #
+      # The route is already development-only; this is the second lock, so the
+      # action cannot answer even if someone re-draws the route.
+      def reload_token
+        return head(:not_found) unless Rails.env.development?
+
+        path = Rails.root.join("tmp/senren-reload.txt")
+        render plain: (File.exist?(path) ? File.read(path) : "0")
+      end
     end
   RUBY
   puts "  wrote #{controller_path}"
@@ -250,6 +288,7 @@ def inject_importmap_into_layout!
         { "imports": { "@hotwired/stimulus": "/stimulus.js" } }
       </script>
       <script type="module" src="/application.js"></script>
+      #{RELOAD_SNIPPET.strip}
   HTML
   layout.sub!(
     /(<%= stylesheet_link_tag "senren" %>\n)/,

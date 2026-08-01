@@ -1,4 +1,5 @@
 require 'pathname'
+require 'senren/rails/safe_write'
 
 module Senren
   module Rails
@@ -32,13 +33,21 @@ module Senren
       def claude_md             = root.join('CLAUDE.md')
       def codex_agents_md       = root.join('AGENTS.md')
 
+      # Pathname#mkpath stops at File.directory?, which follows symlinks, so a
+      # checkout shipping app/components/senren as a link to somewhere outside
+      # the project had that link preserved and every later write redirected
+      # through it. SafeWrite refuses instead of silently accepting it.
       def ensure_dirs!
         [senren_dir, components_dir, stimulus_dir,
-         stylesheet_path.dirname, github_dir, cursor_rules_dir].each(&:mkpath)
+         stylesheet_path.dirname, github_dir, cursor_rules_dir].each do |dir|
+          SafeWrite.mkdir_p!(dir, root, 'ensure_dirs!')
+        end
       end
 
       def ensure_agent_dirs!
-        [senren_dir, github_dir, cursor_rules_dir].each(&:mkpath)
+        [senren_dir, github_dir, cursor_rules_dir].each do |dir|
+          SafeWrite.mkdir_p!(dir, root, 'ensure_agent_dirs!')
+        end
       end
     end
   end

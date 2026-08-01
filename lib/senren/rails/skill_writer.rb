@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'yaml'
+require 'senren/rails/marker_block'
+require 'senren/rails/safe_write'
 
 module Senren
   module Rails
@@ -30,15 +32,22 @@ module Senren
         installed = installed_names
         body = render(installed)
 
-        paths.senren_dir.mkpath
+        SafeWrite.mkdir_p!(paths.senren_dir, paths.root, 'skill.md')
         existing = paths.skill_file.exist? ? paths.skill_file.read : default_outer_template
 
         new_content = inject(existing, body)
-        paths.skill_file.write(new_content)
+        atomic_write(paths.skill_file, new_content)
         paths.skill_file
       end
 
       private
+
+      # Routed through SafeWrite rather than hand-rolled. assert_inside! plus
+      # rename was already safe for an existing symlink, but not for a dangling
+      # one, and two other writers proved that hand-rolled writes drift.
+      def atomic_write(path, content)
+        SafeWrite.write!(path, content, paths.root, path.to_s)
+      end
 
       def installed_names
         path = paths.installed_components
@@ -110,11 +119,37 @@ module Senren
         end
       end
 
+      # Describes what is installed, not what the registry offers.
+      #
+      # This rendered the registry default, so after `senren:add select
+      # --no-client` the skill file told agents to use
+      # `senren--select` and named a controller file that is not on disk. The
+      # copier computes the truth and writes it to the ledger — with a comment
+      # saying "never record client behavior in the ledger that was not
+      # installed" — and nothing read it back. The gem's flagship feature was
+      # wrong for precisely the installs where the flag was exercised.
       def client_summary(comp)
         return 'none' unless comp.client?
+        return 'none (installed without its Stimulus controller)' unless installed_with_client?(comp.name)
 
         path = "app/javascript/controllers/senren/#{comp.name}_controller.js"
         "Stimulus `#{comp.controller}` (`#{path}`)"
+      end
+
+      # nil when the ledger predates this field, in which case the registry
+      # default is the best available answer.
+      def installed_with_client?(name)
+        entry = ledger_entries.find { |e| e['name'] == name }
+        return true if entry.nil? || !entry.key?('client')
+
+        entry['client']
+      end
+
+      def ledger_entries
+        @ledger_entries ||= begin
+          path = paths.installed_components
+          path.exist? ? Array((YAML.safe_load_file(path) || {})['installed']) : []
+        end
       end
 
       def format_list(items)
@@ -123,8 +158,12 @@ module Senren
         items.map { |i| "`#{i}`" }.join(', ')
       end
 
+      # NAME_PATTERN accepts consecutive underscores, and "foo__bar".split("_")
+      # yields an empty segment, so w[0] was nil and this raised NoMethodError —
+      # after the files were copied and the ledger written, leaving a
+      # half-completed install. Empty segments are dropped instead.
       def humanize(name)
-        name.split('_').map { |w| w[0].upcase + w[1..] }.join
+        name.split('_').reject(&:empty?).map { |w| w[0].upcase + w[1..] }.join
       end
 
       def ruby_class_for(name)
@@ -132,13 +171,10 @@ module Senren
       end
 
       def inject(existing, generated_body)
-        if existing.include?(START_MARKER) && existing.include?(END_MARKER)
-          before = existing.split(START_MARKER, 2).first
-          after  = existing.split(END_MARKER, 2).last
-          "#{before}#{START_MARKER}\n\n#{generated_body}\n\n#{END_MARKER}#{after}"
-        else
-          "#{existing.rstrip}\n\n#{START_MARKER}\n\n#{generated_body}\n\n#{END_MARKER}\n"
-        end
+        MarkerBlock.inject(
+          existing, generated_body,
+          start_marker: START_MARKER, end_marker: END_MARKER, label: paths.skill_file.to_s
+        )
       end
 
       def default_outer_template
@@ -151,7 +187,7 @@ module Senren
 
           - Use Senren components before writing custom HTML.
           - Use ViewComponent for reusable UI; Turbo for server state; Stimulus for local behavior only.
-          - Do not introduce React, Vue, Alpine, or any external state framework.
+          - Keep interactivity in Stimulus rather than a client-side framework.
           - Do not hard-code colors; use semantic Tailwind tokens like `bg-background`, `text-foreground`, `bg-primary`.
 
           ## Installed Components

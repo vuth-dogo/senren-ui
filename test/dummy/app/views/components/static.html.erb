@@ -6,7 +6,9 @@
     <% card.with_header { "Card header" } %>
     <% card.with_body { "Static card body" } %>
   <% end %>
+  <%= render(Senren::LabelComponent.new(for_field: "title")) { "Title" } %>
   <%= render(Senren::InputComponent.new(name: :title, value: "Hello")) %>
+  <%= render(Senren::LabelComponent.new(for_field: "notes")) { "Notes" } %>
   <%= render(Senren::TextareaComponent.new(name: :notes, value: "Notes")) %>
   <%= render(Senren::NativeSelectComponent.new(name: :status, options: [%w[draft Draft], %w[published Published]], selected: "draft")) %>
   <%= render(Senren::AlertComponent.new(variant: :info)) do |alert| %>

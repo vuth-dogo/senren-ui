@@ -40,7 +40,8 @@ class PerformanceCheck
       check_controller_payload,
       check_component_template_payload,
       check_controller_patterns,
-      check_importmap_guidance
+      check_timer_cleanup,
+      check_importmap_wiring
     ]
 
     print_results(results)
@@ -121,19 +122,43 @@ class PerformanceCheck
     )
   end
 
-  def check_importmap_guidance
-    readme = File.read(root_path('README.md'))
-    ok = readme.include?('lazyLoadControllersFrom') && readme.include?('preload: false')
+  # A timer that outlives its controller fires against a detached element. At
+  # best that retains the subtree until it runs; at worst the callback touches a
+  # Stimulus target that no longer exists and throws. Turbo navigations make
+  # this routine rather than exotic, so it is a gate rather than a review note.
+  def check_timer_cleanup
+    offenses = controller_files.filter_map do |path|
+      source = File.read(path)
+      next unless source.match?(/\b(?:window\.)?set(?:Timeout|Interval)\s*\(/)
+      next if source.include?('disconnect(') && source.match?(/clear(?:Timeout|Interval)\s*\(/)
+
+      "#{relative(path)} schedules a timer that disconnect() never clears"
+    end
 
     Result.new(
-      label: 'Importmap lazy-loading guidance',
-      ok: ok,
-      details: [ok ? 'README documents lazy controller loading' : lazy_loading_guidance_message]
+      label: 'Stimulus timer cleanup',
+      ok: offenses.empty?,
+      details: offenses.empty? ? ['every scheduled timer is cleared on disconnect'] : offenses
     )
   end
 
-  def lazy_loading_guidance_message
-    'README must mention lazyLoadControllersFrom and preload: false'
+  # This used to read README.md and pass if the prose mentioned
+  # lazyLoadControllersFrom. It therefore reported PASS while every host app
+  # shipped every controller on every page, because nobody had run the
+  # instruction. It now checks the installer that performs it; the behaviour
+  # itself is proved in test/generators/install_generator_test.rb against the
+  # files `rails new` actually produces.
+  def check_importmap_wiring
+    generator = File.read(root_path('lib/generators/senren/install/install_generator.rb'))
+    missing = []
+    missing << 'switch eagerLoadControllersFrom to lazy' unless generator.include?('lazyLoadControllersFrom')
+    missing << 'set preload: false' unless generator.include?('preload: false')
+
+    Result.new(
+      label: 'Importmap lazy-loading is installed, not documented',
+      ok: missing.empty?,
+      details: missing.empty? ? ['senren:install wires on-demand controller loading'] : missing
+    )
   end
 
   def print_results(results)

@@ -1,0 +1,85 @@
+# Single source of truth for Senren's link-URL policy.
+#
+# The same policy is implemented twice — `safe_url` in
+# lib/generators/senren/install/templates/base_component.rb.tt (mirrored in
+# lib/senren/rails/base_component_patch.rb) and `normalizeHref` in
+# templates/controllers/rich_text_editor_lite_controller.js. They have already
+# drifted once: a fix landed on the server while the client kept rewriting
+# "///evil.example" into https://evil.example/.
+#
+# Both sides are asserted against this file:
+#   test/security/component_url_security_test.rb   - the Ruby helper
+#   test/system/url_policy_test.rb                 - the browser helper, via a
+#                                                    real paste into the editor
+#
+# `expect: ~` means the value must be rejected. Otherwise the helper must return
+# the given string unchanged — relative references stay relative, because in
+# HTML `href="settings"` means "relative to this page", not "the host settings".
+#
+# Every off-origin claim below was verified by resolving the value in headless
+# Chrome, not inferred from the URL specification.
+
+allowed:
+  - input: "/settings"
+    why: ordinary absolute path
+  - input: "/a?q=1&r=2"
+    why: path with a query string
+  - input: "#section"
+    why: fragment
+  - input: "?page=2"
+    why: query-only reference, common in pagination links
+  - input: "./rel"
+    why: explicit relative reference
+  - input: "settings"
+    why: bare relative reference; must NOT be promoted to https://settings/
+  - input: "example.com"
+    why: looks like a host but in an href it is a relative path
+  - input: "https://ok.example/docs"
+    why: absolute https
+  - input: "http://ok.example"
+    why: absolute http
+  - input: "mailto:a@b.co"
+    why: allowed scheme
+  - input: "tel:+15551234567"
+    why: allowed scheme
+  - input: "https://good.example@evil.example"
+    why: >
+      off-origin, and allowed on purpose. This is a protocol allowlist, not an
+      origin allowlist; absolute https URLs to any host have always been
+      permitted. The rules below exist so values that LOOK relative cannot
+      resolve off-origin.
+
+rejected:
+  - input: ""
+    why: empty
+  - input: "ftp://example.com/f"
+    why: scheme outside the allowlist
+  - input: "javascript:alert(1)"
+    why: script execution
+  - input: "JaVaScRiPt:alert(1)"
+    why: scheme matching must be case-insensitive
+  - input: "data:text/html,x"
+    why: data URLs run in a null origin
+  - input: "//evil.example"
+    why: protocol-relative; Chrome resolves to https://evil.example/
+  - input: "///evil.example"
+    why: >
+      three slashes skip a two-slash-only guard, match no scheme, and were
+      rewritten to https://evil.example/. This is the drift that motivated the
+      fixture.
+  - input: "////evil.example"
+    why: same shape, more slashes
+  - input: "/\\evil.example"
+    why: browsers normalise backslash to slash for special schemes
+  - input: "/\\/evil.example"
+    why: backslash followed by slash
+  - input: "\\\\evil.example"
+    why: leading backslashes
+  - input: "\\/evil.example"
+    why: backslash then slash
+  - input: "/\tevil.example"
+    why: TAB is stripped by the URL parser before the authority is read
+  - input: "/\nevil.example"
+    why: LF is stripped by the URL parser
+  - input: "/\revil.example"
+    why: CR is stripped by the URL parser

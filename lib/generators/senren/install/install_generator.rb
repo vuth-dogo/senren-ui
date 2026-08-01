@@ -38,6 +38,27 @@ module Senren
         copy_file Senren::Rails.registry_path, '.senren/registry.yml'
       end
 
+      # Switches Stimulus to on-demand loading instead of documenting it.
+      #
+      # Rails' default is `eagerLoadControllersFrom("controllers", application)`,
+      # which imports every controller in the importmap on every page. Because
+      # `pin_all_from "app/javascript/controllers"` is recursive it also covers
+      # app/javascript/controllers/senren, so a static page paid for every
+      # interactive component the app had installed.
+      #
+      # This was a README instruction the developer had to follow by hand, and a
+      # "PASS" in bin/performance that only grepped that README. An instruction
+      # nobody runs is not a feature.
+      #
+      # It uses the official stimulus-loading helper rather than a Senren-specific
+      # loader, and therefore changes loading for the app's own controllers too.
+      # That is the trade the README already asked for; the generator only acts
+      # when the file still carries the untouched Rails default, and says so.
+      def configure_stimulus_loading
+        enable_lazy_controller_loading
+        disable_controller_preloading
+      end
+
       def write_skill_file
         say_status :senren, 'writing .senren/skill.md'
         Senren::Rails::SkillWriter.new(paths: host_paths).sync!
@@ -55,6 +76,59 @@ module Senren
       end
 
       private
+
+      def enable_lazy_controller_loading
+        index = 'app/javascript/controllers/index.js'
+        unless host_file?(index)
+          return say_status(:skip,
+                            "#{index} not found; switch to lazyLoadControllersFrom by hand")
+        end
+
+        source = File.read(File.join(destination_root, index))
+        if source.include?('lazyLoadControllersFrom')
+          return say_status(:senren,
+                            'controllers already load on demand')
+        end
+
+        unless source.include?('eagerLoadControllersFrom')
+          return say_status(:skip, "#{index} has a custom loader; left alone")
+        end
+
+        gsub_file index, 'eagerLoadControllersFrom', 'lazyLoadControllersFrom'
+        say_status :senren, 'Stimulus controllers now load when their data-controller appears'
+      end
+
+      # Only strips the modulepreload tags. On its own it does not stop eager
+      # importing, which is why it is paired with the change above.
+      def disable_controller_preloading
+        importmap = 'config/importmap.rb'
+        unless host_file?(importmap)
+          return say_status(:skip,
+                            "#{importmap} not found; add preload: false by hand")
+        end
+
+        source = File.read(File.join(destination_root, importmap))
+        if source.match?(/under:\s*["']controllers["'].*preload:\s*false/)
+          return say_status(:senren,
+                            'controller preloading already disabled')
+        end
+
+        if source.match?(%r{pin_all_from\s+["']app/javascript/controllers["']})
+          # A backreference rather than a block: Thor forwards the block to
+          # String#gsub across several frames, where $~ is no longer the match.
+          # The lookahead makes a second run a no-op.
+          gsub_file importmap,
+                    %r{(pin_all_from\s+["']app/javascript/controllers["'](?![^\n]*preload:)[^\n]*)},
+                    '\1, preload: false'
+        else
+          append_to_file importmap,
+                         %(\npin_all_from "app/javascript/controllers", under: "controllers", preload: false\n)
+        end
+      end
+
+      def host_file?(relative)
+        File.exist?(File.join(destination_root, relative))
+      end
 
       def host_paths
         @host_paths ||= Senren::Rails::HostPaths.new(destination_root)

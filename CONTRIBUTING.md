@@ -20,12 +20,31 @@ git clone <repo>
 cd senren-ui
 bundle install
 bun install
-bundle exec rake test
-bin/system
-bin/performance
+bin/ci             # every gate, reports all failures rather than the first
+bin/ci --matrix    # additionally run the Rails 7.1-8.1 matrix (slow)
+```
+
+Individual gates, if you want to run one in isolation:
+
+```bash
+bin/test                              # unit tests (no Rails app booted)
+bundle exec rake test:integration     # renders all 62 components via test/dummy
+bin/system                            # headless browser tests
+bin/performance                       # payload and runtime budgets
+bin/matrix                            # unit tests on every supported Rails
 bundle exec rubocop
+bundle exec bundle-audit check --update
 bun run controllers:check
 ```
+
+`bin/system` needs no setup: it uses a system Chrome and
+`/usr/bin/chromedriver` when present, and otherwise lets Selenium Manager
+fetch a matching driver.
+
+Supported versions are proved, not asserted. `gemfiles/rails_*.gemfile` drive
+the matrix via `BUNDLE_GEMFILE`, CI runs Ruby 3.2-3.4 × Rails 7.1-8.1 with
+`fail-fast: false`, and `test/gem_packaging_test.rb` fails if the gemspec's
+floors drift out of that matrix.
 
 To exercise the gem against a local host app inside this repo:
 
@@ -37,6 +56,17 @@ bin/rails server
 # optional custom path:
 # SENREN_PREVIEW_ROOT=/abs/path/to/your/preview-app bin/seed_preview
 ```
+
+While the server runs, start the watcher from the gem root in another
+terminal so template edits appear without re-seeding:
+
+```bash
+bin/watch
+```
+
+It copies changed files from `templates/` and `registry/` into the preview
+app and reloads the browser. See `docs/hot_reload.md` for what does and does
+not reload.
 
 The local preview uses Tailwind's browser runtime for convenience. The
 real documentation/reference app is maintained separately in
@@ -61,6 +91,10 @@ real documentation/reference app is maintained separately in
   (`app/javascript/controllers/senren/<name>_controller.js`).
 - Component test in `test/components/`.
 - System test in `test/system/` if interactive.
+- Nothing extra is needed for render coverage: `test/integration/` renders
+  every registered component in every declared variant and size, driven
+  from the registry, so a new component is covered as soon as it has a
+  preview in `ComponentPreviewHelper`.
 - Registry entry in `registry/components.yml` (full schema).
 - Skill block produced by `SkillWriter`.
 - Demo usage in `.local/preview` if relevant to the local preview UI.
@@ -69,6 +103,9 @@ real documentation/reference app is maintained separately in
 
 - One logical change per commit.
 - Mention the affected plan and history files in the commit body.
+- Run `bin/ci` before pushing.
+- Run `bin/ci --matrix` if you touched the gemspec, the Gemfile, or anything
+  version sensitive.
 - Run `bundle exec rake test` before pushing.
 - Run `bin/system` before pushing if you touched component templates,
   Stimulus controllers, or the dummy preview app.

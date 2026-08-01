@@ -15,6 +15,14 @@ module Senren
       @multipart = multipart
     end
 
-    attr_reader :model, :url, :method, :multipart
+    attr_reader :model, :method, :multipart
+
+    # This one reaches form_with's `action`, which makes it the highest-value
+    # URL sink in the library: `//evil.example` is a protocol-relative absolute
+    # URL, so a form built from user-controlled input POSTs every field —
+    # including the CSRF token — off-origin. Same policy as every other href in
+    # the library; it was simply missed because the security test enumerated
+    # known components rather than asserting a property over all of them.
+    def url = @url && safe_url(@url)
   end
 end

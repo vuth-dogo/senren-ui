@@ -1,22 +1,106 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# Local mirror of .github/workflows/ci.yml.
+#
+# Runs every gate and reports all failures, rather than stopping at the first.
+# This matches the workflow's `fail-fast: false`: one broken step should not
+# hide the state of the others.
+#
+#   bin/ci              # the gates CI runs on every push
+#   bin/ci --matrix     # additionally run the Rails version matrix (slow)
+#
+# Note: `set -e` is deliberately NOT used. Steps are run through `step`, which
+# records failures so the summary at the end is complete.
+set -uo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "==> CI step: tests"
-bin/test
+RUN_MATRIX=0
+for arg in "$@"; do
+  case "$arg" in
+    --matrix) RUN_MATRIX=1 ;;
+    -h|--help) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "unknown option: $arg" >&2; exit 2 ;;
+  esac
+done
 
-echo "==> CI step: system tests"
-bin/system
+passed=()
+failed=()
 
-echo "==> CI step: RuboCop"
-bundle exec rubocop --cache false
+step() {
+  local name="$1"; shift
+  echo
+  echo "==> CI step: ${name}"
+  if "$@"; then
+    passed+=("$name")
+  else
+    failed+=("$name")
+    echo "    FAILED: ${name}"
+  fi
+}
 
-echo "==> CI step: JavaScript checks"
-bun run controllers:check
+# Refreshing the advisory database needs the network, and a build that fails
+# because GitHub was unreachable is not the same signal as one that fails
+# because a new advisory landed. Refresh when we can, check always, and say so
+# when the data might be stale. CI keeps the strict `--update` form, where no
+# network genuinely is a failure.
+audit_dependencies() {
+  local db="${HOME}/.local/share/ruby-advisory-db"
 
-echo "==> CI step: performance checks"
-bin/performance
+  if ! bundle exec bundle-audit update >/dev/null 2>&1; then
+    if [ ! -d "$db" ]; then
+      echo "    no advisory database and no network to fetch one"
+      return 1
+    fi
+    echo "    warning: could not refresh the advisory database; checking the local copy"
+  fi
+
+  bundle exec bundle-audit check
+}
+
+step "tests"             bin/test
+step "integration tests" bundle exec rake test:integration
+step "system tests"      bin/system
+step "RuboCop"           bundle exec rubocop --cache false
+step "JavaScript checks" bun run controllers:check
+step "performance"       bin/performance
+# Dependabot opens PRs but cannot fail a build. This gate does.
+step "dependency audit"  audit_dependencies
+
+if [ "$RUN_MATRIX" -eq 1 ]; then
+  step "Rails matrix" bin/matrix
+fi
+
+echo
+echo "================ summary ================"
+
+# Guarded by length rather than expanded directly: bash 3.2, which is what
+# /bin/bash is on macOS, treats "${arr[@]}" on an EMPTY array as an unbound
+# variable under `set -u`. So the all-green case — the common one — aborted the
+# script right here and made a fully passing run report failure.
+if [ ${#passed[@]} -ne 0 ]; then
+  for name in "${passed[@]}"; do
+    echo "  PASS  ${name}"
+  done
+fi
+
+if [ ${#failed[@]} -ne 0 ]; then
+  for name in "${failed[@]}"; do
+    echo "  FAIL  ${name}"
+  done
+fi
+
+if [ "$RUN_MATRIX" -eq 0 ]; then
+  echo
+  echo "  note: Rails version matrix not run (bin/ci --matrix)."
+  echo "        CI runs Ruby 3.2-3.4 x Rails 7.1-8.1 on every push."
+fi
+
+echo "========================================="
+
+if [ ${#failed[@]} -ne 0 ]; then
+  echo "==> CI failed: ${#failed[@]} of $(( ${#passed[@]} + ${#failed[@]} )) steps"
+  exit 1
+fi
 
 echo "==> CI passed"

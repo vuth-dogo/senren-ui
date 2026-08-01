@@ -11,7 +11,7 @@ module Senren
       @placeholder = placeholder
       @label = label
       @empty_text = empty_text
-      @dom_id = id || "senren-command-#{SecureRandom.hex(3)}"
+      @dom_id = id || senren_dom_id(label)
       @items = normalize_items(items)
     end
 

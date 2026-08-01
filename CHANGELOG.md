@@ -7,6 +7,110 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 v0.x is a pre-stable line: minor bumps may break things; patch bumps are
 bug fixes only.
 
+## [0.2.0] — 2026-08-02
+
+A hardening release. Most of it came out of an adversarial review of the whole
+library; each item below was reproduced by running it before being fixed, and
+pinned by a test that was watched failing first.
+
+### Upgrading
+
+Four changes alter existing behaviour. None requires a code change in your app,
+but read these before upgrading:
+
+- **`class:` now merges instead of replacing.** Previously
+  `ButtonComponent.new(variant: :primary, class: "mt-2")` rendered
+  `class="mt-2"` and dropped the variant and size styling entirely. It now
+  renders both. If you worked around the old behaviour by re-specifying every
+  utility, you can stop.
+- **DOM ids are derived from component arguments, not random.** Ids are now
+  stable across renders, which is what makes Turbo morphing, fragment caching,
+  and ETags work. If you hard-coded a generated id in a test or a stylesheet,
+  it will have changed.
+- **Booting with `app/components` on the asset load path now fails in
+  production.** See *Security* below. If you added that line for sidecar
+  assets, point it at `app/components/assets` instead.
+- **`Senren::Rails::Installer` was removed.** It had no callers, and copying
+  `.tt` templates without rendering them would have written raw ERB into a host
+  app. `senren:install` is the supported path.
+
+### Added
+
+- `CartComponent` and `ProductCardComponent`, plus a `storefront` recipe.
+  The cart keeps a live subtotal and quantity steppers client-side and
+  announces changes with `senren--cart:changed`; the product tile submits a
+  form and ships no JavaScript, so listing pages stay light.
+- `lib/senren-ui.rb`, so `gem "senren-ui"` loads the engine without a
+  `require:` option. Previously that form silently loaded nothing — no engine,
+  no rake tasks, and no asset guard — while the generator kept working.
+- On-demand Stimulus loading, installed rather than documented.
+  `senren:install` switches `controllers/index.js` to `lazyLoadControllersFrom`
+  and adds `preload: false` to the controllers pin. It leaves a customised
+  `index.js` or a non-importmap app alone and reports what it did.
+- `bin/watch`, which syncs template edits into the local preview app and
+  reloads the browser. Development-only; nothing ships to host apps.
+- A Ruby 3.2–3.4 × Rails 7.1–8.1 test matrix, so the versions the gemspec
+  claims are the versions that are proved.
+
+### Changed
+
+- Overlay components (dialog, sheet, popover, dropdown, context menu, alert
+  dialog) drive their state through Stimulus values instead of writing to the
+  DOM directly, so state survives Turbo morphs.
+- `--client` / `--no-client` applies only to the components you name.
+  It used to apply to the whole dependency closure, so
+  `senren:add context_menu --no-client` also stripped `dropdown_menu`'s
+  controller and the installed menu silently never opened.
+- `.senren/skill.md` describes what was actually installed. It previously
+  reported the registry default, naming controller files that were not on disk.
+- `.senren/registry.yml` refreshes on every install instead of drifting from
+  the gem after the first one.
+- Rake helpers live in `SenrenRakeArgs` rather than as top-level methods on
+  `Object`, and argument scanning stops at the next rake task —
+  `rake 'senren:add[button]' db:seed` no longer tries to install `db:seed`.
+- Documentation states the library's scope without characterising other
+  ecosystems.
+
+### Security
+
+- **Component source could be published in production.** With
+  `config.assets.paths << Rails.root.join("app/components")` — a line that
+  circulates as ViewComponent sidecar-asset guidance — Propshaft resolved every
+  component `.rb` and `.html.erb` as an asset, `assets:precompile` copied them
+  into `public/assets`, `.manifest.json` listed each by name, and the digested
+  URL returned Ruby source with `HTTP 200`. A boot check now raises in any
+  deployed environment and warns in development. Sidecar assets in their own
+  directory are unaffected.
+- **The installer could write outside the application root.** A checkout
+  shipping `app/components/senren` as a symlink redirected copied files, and
+  the agent-adapter writers read their destination before rewriting it, so
+  content outside the checkout was modified too. All writes now go through one
+  containment layer that resolves symlinks, covers dangling links, and refuses
+  only paths that leave the root — an in-repo symlink such as
+  `ln -s AGENTS.md CLAUDE.md` keeps working.
+- **`FormComponent#url` and `AvatarComponent#src` were unsanitised.** The first
+  reaches `form_with`'s action, where a protocol-relative URL sends every field
+  and the CSRF token off-origin. Both now use the same URL policy as the rest
+  of the library, and a property test covers every component rather than a list
+  of known ones.
+- Rich-text paste is sanitised, and the two URL policies (markup versus typed
+  input) are separated so neither can promote a relative path to another origin.
+- Five dependency advisories resolved, and `bundler-audit` is now a CI gate.
+
+### Fixed
+
+- `senren:doctor` reported success unconditionally.
+- Marker-managed files could be corrupted by generated content containing
+  regexp backreferences, and could inject their own markers.
+- `TypographyComponent`, `SeparatorComponent`, and `AspectRatioComponent`
+  raised on `.new` without an explicit variant.
+- `data:` passed to any component dropped its `data-senren-component` marker.
+- Eight components produced a new DOM id on every render.
+- `date_picker` lost its height to a fused CSS class.
+- Stimulus controllers no longer leak timers or document-level listeners across
+  Turbo navigations.
+- Checkbox, radio, and switch controls are reachable by their accessible name.
+
 ## [0.1.6] — 2026-06-09
 
 ### Added
