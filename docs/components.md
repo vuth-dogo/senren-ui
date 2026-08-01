@@ -51,20 +51,20 @@ Wraps `form_with` with Senren semantic tokens and consistent spacing.
 <% end %>
 ```
 
-> **Warning**: Do NOT pass `method: :post` on edit forms for persisted models.
-> Rails needs `method:` to be nil to infer PATCH, otherwise you'll get
-> `No route matches [POST] "/resource/:id"`.
+Leave `method:` unset on edit forms for persisted models. Rails needs it to be
+`nil` to infer `PATCH`; passing `method: :post` produces
+`No route matches [POST] "/resource/:id"`.
 
 ---
 
 ## InputComponent
 
-### ⚠️ InputComponent vs `form.text_field`
+### InputComponent vs `form.text_field`
 
 **`InputComponent` renders its own `<input>` tag.** It is a **replacement** for
 `form.text_field`, not an add-on. Do not combine them.
 
-#### ✅ Do
+#### Use one or the other
 
 ```erb
 <%# Option A: Use InputComponent standalone %>
@@ -74,10 +74,10 @@ Wraps `form_with` with Senren semantic tokens and consistent spacing.
 <%= f.text_field :email, class: "your-input-classes" %>
 ```
 
-#### ❌ Do NOT
+#### Not both together
 
 ```erb
-<%# WRONG: This renders two inputs %>
+<%# This renders two inputs %>
 <%= render(Senren::InputComponent.new(name: "email")) do %>
   <%= f.text_field :email %>
 <% end %>
@@ -209,14 +209,14 @@ dedicated `FormFieldComponent` ships, use this pattern:
 Always use **parentheses** around `render` when passing an inline content block:
 
 ```erb
-<%# ✅ Correct: parens around render %>
+<%# Correct: parens around render %>
 <%= render(Senren::ButtonComponent.new(variant: :primary)) { "Save" } %>
 
-<%# ✅ Correct: do/end block %>
+<%# Correct: do/end block %>
 <%= render Senren::ButtonComponent.new(variant: :primary) do %>
   Save
 <% end %>
 
-<%# ❌ Wrong: block attaches to .new, not render %>
+<%# Wrong: the block attaches to .new, not to render %>
 <%= render Senren::ButtonComponent.new(variant: :primary) { "Save" } %>
 ```

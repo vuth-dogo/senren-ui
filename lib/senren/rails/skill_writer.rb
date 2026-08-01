@@ -187,7 +187,7 @@ module Senren
 
           - Use Senren components before writing custom HTML.
           - Use ViewComponent for reusable UI; Turbo for server state; Stimulus for local behavior only.
-          - Do not introduce React, Vue, Alpine, or any external state framework.
+          - Keep interactivity in Stimulus rather than a client-side framework.
           - Do not hard-code colors; use semantic Tailwind tokens like `bg-background`, `text-foreground`, `bg-primary`.
 
           ## Installed Components

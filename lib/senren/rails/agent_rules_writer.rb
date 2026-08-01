@@ -98,7 +98,9 @@ module Senren
           - Use ViewComponent for reusable UI.
           - Use Turbo for server state.
           - Use Stimulus only for local behavior.
-          - Do not introduce React, Vue, Alpine, or external state frameworks.
+          - Keep interactivity in Stimulus. These components render on the server,
+            so a client-side framework alongside them means two systems own the
+            same state.
           - Use semantic Tailwind tokens; do not hard-code color families.
           - Never add `app/components` to `config.assets.paths`. Propshaft
             publishes every file under an asset path, so component `.rb` and
@@ -127,7 +129,7 @@ module Senren
           - Prefer Senren components before custom HTML.
           - Keep reusable UI in ViewComponent.
           - Use Turbo for server state, Stimulus for local behavior.
-          - Do not add React, Vue, Alpine, or external state frameworks.
+          - Keep interactivity in Stimulus rather than a client-side framework.
           - Use semantic Tailwind tokens.
         MD
       end
@@ -151,7 +153,7 @@ module Senren
           - Prefer Senren components before custom HTML.
           - Reusable UI must use ViewComponent.
           - Turbo handles server state; Stimulus handles local behavior.
-          - Do not introduce React, Vue, Alpine, or external state frameworks.
+          - Keep interactivity in Stimulus rather than a client-side framework.
           - Use semantic Tailwind tokens.
         MD
       end
@@ -165,7 +167,7 @@ module Senren
           - Prefer Senren components before custom HTML.
           - Reusable UI uses ViewComponent.
           - Turbo for server state, Stimulus for local behavior.
-          - No React/Vue/Alpine/external state frameworks.
+          - Keep interactivity in Stimulus rather than a client-side framework.
           - Use semantic Tailwind tokens.
         MD
       end

@@ -1,6 +1,6 @@
 # Senren UI (`senren-ui`)
 
-> 洗練 — refined, polished, sophisticated.
+> 洗練 *(senren)* — Japanese for "refinement".
 
 **[Live Docs & Component Reference → senren-ui.dev](https://www.senren-ui.dev)**
 
@@ -16,12 +16,19 @@ skill system and a source-copy install model inspired by shadcn/ui.
   every installed component, its dependencies, and its anti-patterns.
 - A multi-agent instruction sync for Codex, Claude, Copilot, and Cursor.
 
-## What Senren is not
+## Scope
 
-- Not React, Vue, Alpine, or any external state framework.
-- Not a CSS-only kit — components ship Ruby + ERB + (optional) Stimulus.
-- Not an opaque dependency — installed components live in your app
-  under `app/components/senren/` and you own them.
+Senren renders on the server. Components are ViewComponent classes with ERB
+templates, interactivity is Stimulus, and server state is Turbo's job. It is
+not a client-side rendering layer: if your app is built around React, Vue, or
+another client framework, a component library from that ecosystem will fit it
+better than this one.
+
+Two other things worth knowing up front:
+
+- Components ship as Ruby + ERB + optional Stimulus, not as a CSS-only kit.
+- They are copied into your app under `app/components/senren/`, so they are
+  yours to read and edit rather than an opaque dependency.
 
 ## Installation
 
@@ -205,7 +212,7 @@ generated block and preserves your existing instructions outside that block.
 
 ## Component list
 
-See `registry/components.yml` for the canonical list. v0.1 ships:
+See `registry/components.yml` for the canonical list. Currently shipping:
 
 - **Phase 1 — Foundation** (full): Button, Link, Badge, Typography,
   Separator, Skeleton, Avatar, Alert, Card, AspectRatio.
@@ -238,23 +245,17 @@ See `CONTRIBUTING.md`. Two rules to know up front:
 2. Architectural decisions are captured in `plans/` before code is
    written.
 
-## Open source maintenance baseline
+## Project health
 
-This repo ships with a GitHub baseline for safer public maintenance:
+Every push runs the test suite, RuboCop, and the JavaScript checks against
+Ruby 3.2–3.4 × Rails 7.1–8.1. CodeQL scans Ruby and JavaScript, and Dependabot
+tracks Bundler, JS tooling, and Actions.
 
-- CI on pull requests and `main` pushes for tests, RuboCop, and JS checks.
-- CodeQL analysis for Ruby and JavaScript.
-- Dependabot updates for Bundler, JS tooling, and GitHub Actions.
-- PR and issue templates, `CODEOWNERS`, `CODE_OF_CONDUCT.md`, and
-  `SECURITY.md`.
-
-Repository controls such as branch protection, required checks, release
-permissions, and auto-delete branch still need to be enabled in GitHub
-repository settings.
+Security reports go to `SECURITY.md`.
 
 ## Acknowledgements
 
-Senren borrows ideas from prior art. No source code from either project is
+Senren builds on ideas from prior art. No source code from either project is
 included here — the influence is on architecture and developer experience, and
 both are credited because ideas have authors even when licences do not require
 the notice.
@@ -263,11 +264,11 @@ the notice.
   model: components are copied into your app so you own and can edit them,
   rather than being rendered from inside a dependency.
 - [jetrockets/jet_ui](https://github.com/jetrockets/jet_ui) (MIT, © 2026
-  JetRockets) — a Rails/ViewComponent UI library whose published history is a
-  useful record of which decisions hold up. Its documented mistakes shaped
-  `plans/022_jet_ui_lessons.md`, in particular the Tailwind-purge failure mode
-  that source-copy avoids, and the argument for testing the Ruby and Rails
-  versions a gem actually claims to support.
+  JetRockets) — a Rails/ViewComponent UI library whose maintainers write openly
+  about the trade-offs they worked through. That writing informed
+  `plans/022_jet_ui_lessons.md`: how Tailwind's content scanning interacts with
+  components shipped from inside a gem, and the case for testing every Ruby and
+  Rails version a gem claims to support. Both points made this library better.
 
 Both are MIT licensed, which permits use, modification, and study. The MIT
 notice requirement attaches to copies of the software; since Senren copies no

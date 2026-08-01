@@ -8,7 +8,9 @@ and obey it strictly.
 1. Use Senren components before writing custom HTML for the same purpose.
 2. Server-render via ViewComponent. Stimulus only for **local** behavior.
 3. Turbo handles server state. Controllers do not fetch/XHR from JS.
-4. No React, Vue, Alpine, lit, or external state framework. Ever.
+4. Interactivity stays in Stimulus. These components render on the server, so
+   introducing a client-side framework alongside them puts two systems in
+   charge of the same state.
 5. Tailwind classes must use **semantic tokens** (`bg-background`,
    `text-foreground`, `bg-primary`, `text-muted-foreground`,
    `border-border`, `bg-destructive`). Do not hard-code `gray-*`,
