@@ -1,0 +1,339 @@
+/*
+ * Senren UI - optional palette presets.
+ *
+ * Link this after senren.css and set data-senren-theme on <html> to switch:
+ *
+ *   <%%= stylesheet_link_tag "senren" %>
+ *   <%%= stylesheet_link_tag "senren_themes" %>
+ *
+ *   <html data-senren-theme="slate">
+ *
+ * Leave the attribute off for the default Spring Garden palette, which
+ * senren.css declares in :root.
+ *
+ * Every theme below is nothing but a re-declaration of the same token set that
+ * senren.css defines. No component is aware that themes exist: components read
+ * hsl(var(--senren-*)) and inherit whatever is in scope. Adding your own theme
+ * means copying one of these blocks and changing the values — there is no
+ * component to touch and no build step to run.
+ *
+ * Scoping: [data-senren-theme] on <html>, so it composes with the existing
+ * .dark class rather than replacing it. Each theme therefore ships a light and
+ * a dark block, and light/dark stays orthogonal to the palette choice.
+ *
+ * `senren` is the default and needs no block: it is what senren.css already
+ * declares in :root and .dark.
+ *
+ * test/themes_test.rb asserts every theme here declares the complete token set,
+ * so a palette cannot ship with a variable quietly missing.
+ */
+
+/* ── slate ────────────────────────────────────────────────────────────────
+   Cool neutrals, near-black primary, tight radius. The restrained look most
+   developer tools converge on. */
+[data-senren-theme="slate"] {
+  --senren-background: 0 0% 100%;
+  --senren-foreground: 222 47% 11%;
+  --senren-muted: 210 40% 96%;
+  --senren-muted-foreground: 215 16% 47%;
+  --senren-card: 0 0% 100%;
+  --senren-card-foreground: 222 47% 11%;
+  --senren-popover: 0 0% 100%;
+  --senren-popover-foreground: 222 47% 11%;
+  --senren-border: 214 32% 91%;
+  --senren-input: 214 32% 91%;
+  --senren-ring: 222 47% 11%;
+  --senren-primary: 222 47% 11%;
+  --senren-primary-foreground: 210 40% 98%;
+  --senren-secondary: 210 40% 96%;
+  --senren-secondary-foreground: 222 47% 11%;
+  --senren-accent: 210 40% 94%;
+  --senren-accent-foreground: 222 47% 11%;
+  --senren-destructive: 0 72% 51%;
+  --senren-destructive-foreground: 210 40% 98%;
+  --senren-success: 142 71% 36%;
+  --senren-success-foreground: 210 40% 98%;
+  --senren-warning: 38 92% 50%;
+  --senren-warning-foreground: 222 47% 11%;
+  --senren-radius: 0.375rem;
+  --senren-palette-sky: 217 91% 60%;
+  --senren-palette-sakura: 330 81% 60%;
+  --senren-palette-pond: 199 89% 48%;
+  --senren-palette-leaf: 142 71% 45%;
+  --senren-palette-iris: 258 90% 66%;
+  --senren-palette-paper: 210 40% 98%;
+}
+
+.dark[data-senren-theme="slate"] {
+  --senren-background: 222 47% 7%;
+  --senren-foreground: 210 40% 98%;
+  --senren-muted: 217 33% 17%;
+  --senren-muted-foreground: 215 20% 65%;
+  --senren-card: 222 47% 9%;
+  --senren-card-foreground: 210 40% 98%;
+  --senren-popover: 222 47% 9%;
+  --senren-popover-foreground: 210 40% 98%;
+  --senren-border: 217 33% 20%;
+  --senren-input: 217 33% 20%;
+  --senren-ring: 213 27% 84%;
+  --senren-primary: 210 40% 98%;
+  --senren-primary-foreground: 222 47% 11%;
+  --senren-secondary: 217 33% 17%;
+  --senren-secondary-foreground: 210 40% 98%;
+  --senren-accent: 217 33% 20%;
+  --senren-accent-foreground: 210 40% 98%;
+  --senren-destructive: 0 63% 46%;
+  --senren-destructive-foreground: 210 40% 98%;
+  --senren-success: 142 60% 40%;
+  --senren-success-foreground: 210 40% 98%;
+  --senren-warning: 38 85% 52%;
+  --senren-warning-foreground: 222 47% 11%;
+}
+
+/* ── indigo ───────────────────────────────────────────────────────────────
+   The default of a great many B2B products: white surfaces, indigo action
+   colour, cool grey text. */
+[data-senren-theme="indigo"] {
+  --senren-background: 0 0% 100%;
+  --senren-foreground: 224 71% 4%;
+  --senren-muted: 220 14% 96%;
+  --senren-muted-foreground: 220 9% 46%;
+  --senren-card: 0 0% 100%;
+  --senren-card-foreground: 224 71% 4%;
+  --senren-popover: 0 0% 100%;
+  --senren-popover-foreground: 224 71% 4%;
+  --senren-border: 220 13% 91%;
+  --senren-input: 220 13% 91%;
+  --senren-ring: 239 84% 67%;
+  --senren-primary: 243 75% 59%;
+  --senren-primary-foreground: 0 0% 100%;
+  --senren-secondary: 226 100% 97%;
+  --senren-secondary-foreground: 243 75% 40%;
+  --senren-accent: 226 100% 94%;
+  --senren-accent-foreground: 243 75% 40%;
+  --senren-destructive: 0 84% 60%;
+  --senren-destructive-foreground: 0 0% 100%;
+  --senren-success: 160 84% 32%;
+  --senren-success-foreground: 0 0% 100%;
+  --senren-warning: 32 95% 52%;
+  --senren-warning-foreground: 224 71% 4%;
+  --senren-radius: 0.5rem;
+  --senren-palette-sky: 217 91% 60%;
+  --senren-palette-sakura: 330 81% 70%;
+  --senren-palette-pond: 199 89% 60%;
+  --senren-palette-leaf: 160 84% 39%;
+  --senren-palette-iris: 243 75% 59%;
+  --senren-palette-paper: 220 14% 96%;
+}
+
+.dark[data-senren-theme="indigo"] {
+  --senren-background: 229 42% 8%;
+  --senren-foreground: 220 14% 96%;
+  --senren-muted: 229 30% 16%;
+  --senren-muted-foreground: 218 11% 65%;
+  --senren-card: 229 40% 11%;
+  --senren-card-foreground: 220 14% 96%;
+  --senren-popover: 229 40% 11%;
+  --senren-popover-foreground: 220 14% 96%;
+  --senren-border: 229 25% 22%;
+  --senren-input: 229 25% 22%;
+  --senren-ring: 239 84% 72%;
+  --senren-primary: 239 84% 70%;
+  --senren-primary-foreground: 229 42% 8%;
+  --senren-secondary: 229 30% 18%;
+  --senren-secondary-foreground: 226 100% 88%;
+  --senren-accent: 229 30% 22%;
+  --senren-accent-foreground: 226 100% 92%;
+  --senren-destructive: 0 72% 55%;
+  --senren-destructive-foreground: 0 0% 100%;
+  --senren-success: 160 70% 42%;
+  --senren-success-foreground: 229 42% 8%;
+  --senren-warning: 32 90% 58%;
+  --senren-warning-foreground: 229 42% 8%;
+}
+
+/* ── emerald ──────────────────────────────────────────────────────────────
+   Green action colour on soft neutrals, with a generous radius. Common in
+   finance, health, and sustainability products. */
+[data-senren-theme="emerald"] {
+  --senren-background: 150 20% 99%;
+  --senren-foreground: 160 40% 10%;
+  --senren-muted: 150 24% 95%;
+  --senren-muted-foreground: 160 12% 42%;
+  --senren-card: 0 0% 100%;
+  --senren-card-foreground: 160 40% 10%;
+  --senren-popover: 0 0% 100%;
+  --senren-popover-foreground: 160 40% 10%;
+  --senren-border: 152 22% 88%;
+  --senren-input: 152 22% 88%;
+  --senren-ring: 160 84% 39%;
+  --senren-primary: 160 84% 30%;
+  --senren-primary-foreground: 150 30% 98%;
+  --senren-secondary: 152 45% 92%;
+  --senren-secondary-foreground: 160 60% 20%;
+  --senren-accent: 168 60% 90%;
+  --senren-accent-foreground: 168 70% 18%;
+  --senren-destructive: 0 74% 50%;
+  --senren-destructive-foreground: 150 30% 98%;
+  --senren-success: 160 84% 32%;
+  --senren-success-foreground: 150 30% 98%;
+  --senren-warning: 40 95% 50%;
+  --senren-warning-foreground: 160 40% 10%;
+  --senren-radius: 0.75rem;
+  --senren-palette-sky: 190 80% 45%;
+  --senren-palette-sakura: 340 70% 82%;
+  --senren-palette-pond: 172 66% 78%;
+  --senren-palette-leaf: 145 63% 49%;
+  --senren-palette-iris: 250 60% 78%;
+  --senren-palette-paper: 150 24% 95%;
+}
+
+.dark[data-senren-theme="emerald"] {
+  --senren-background: 165 40% 6%;
+  --senren-foreground: 150 24% 95%;
+  --senren-muted: 165 28% 14%;
+  --senren-muted-foreground: 152 14% 62%;
+  --senren-card: 165 38% 9%;
+  --senren-card-foreground: 150 24% 95%;
+  --senren-popover: 165 38% 9%;
+  --senren-popover-foreground: 150 24% 95%;
+  --senren-border: 165 22% 20%;
+  --senren-input: 165 22% 20%;
+  --senren-ring: 160 84% 45%;
+  --senren-primary: 158 74% 44%;
+  --senren-primary-foreground: 165 40% 6%;
+  --senren-secondary: 165 28% 16%;
+  --senren-secondary-foreground: 152 45% 88%;
+  --senren-accent: 168 40% 20%;
+  --senren-accent-foreground: 168 60% 88%;
+  --senren-destructive: 0 66% 52%;
+  --senren-destructive-foreground: 150 30% 98%;
+  --senren-success: 158 70% 42%;
+  --senren-success-foreground: 165 40% 6%;
+  --senren-warning: 40 88% 56%;
+  --senren-warning-foreground: 165 40% 6%;
+}
+
+/* ── rose ─────────────────────────────────────────────────────────────────
+   Warm neutrals and a soft pink action colour, with the roundest corners of
+   the set. The consumer-facing end of SaaS. */
+[data-senren-theme="rose"] {
+  --senren-background: 20 40% 99%;
+  --senren-foreground: 340 30% 12%;
+  --senren-muted: 20 30% 96%;
+  --senren-muted-foreground: 340 8% 46%;
+  --senren-card: 0 0% 100%;
+  --senren-card-foreground: 340 30% 12%;
+  --senren-popover: 0 0% 100%;
+  --senren-popover-foreground: 340 30% 12%;
+  --senren-border: 20 25% 90%;
+  --senren-input: 20 25% 90%;
+  --senren-ring: 347 77% 60%;
+  --senren-primary: 347 77% 50%;
+  --senren-primary-foreground: 20 40% 99%;
+  --senren-secondary: 350 80% 95%;
+  --senren-secondary-foreground: 347 70% 32%;
+  --senren-accent: 350 80% 92%;
+  --senren-accent-foreground: 347 70% 30%;
+  --senren-destructive: 0 78% 52%;
+  --senren-destructive-foreground: 20 40% 99%;
+  --senren-success: 150 62% 36%;
+  --senren-success-foreground: 20 40% 99%;
+  --senren-warning: 35 95% 55%;
+  --senren-warning-foreground: 340 30% 12%;
+  --senren-radius: 1rem;
+  --senren-palette-sky: 205 85% 58%;
+  --senren-palette-sakura: 350 85% 84%;
+  --senren-palette-pond: 190 70% 82%;
+  --senren-palette-leaf: 140 55% 55%;
+  --senren-palette-iris: 280 70% 78%;
+  --senren-palette-paper: 20 30% 96%;
+}
+
+.dark[data-senren-theme="rose"] {
+  --senren-background: 340 22% 8%;
+  --senren-foreground: 20 30% 96%;
+  --senren-muted: 340 16% 16%;
+  --senren-muted-foreground: 340 8% 64%;
+  --senren-card: 340 20% 11%;
+  --senren-card-foreground: 20 30% 96%;
+  --senren-popover: 340 20% 11%;
+  --senren-popover-foreground: 20 30% 96%;
+  --senren-border: 340 14% 22%;
+  --senren-input: 340 14% 22%;
+  --senren-ring: 347 77% 66%;
+  --senren-primary: 347 82% 62%;
+  --senren-primary-foreground: 340 22% 8%;
+  --senren-secondary: 340 16% 18%;
+  --senren-secondary-foreground: 350 80% 90%;
+  --senren-accent: 340 20% 24%;
+  --senren-accent-foreground: 350 80% 90%;
+  --senren-destructive: 0 70% 55%;
+  --senren-destructive-foreground: 20 40% 99%;
+  --senren-success: 150 55% 44%;
+  --senren-success-foreground: 340 22% 8%;
+  --senren-warning: 35 90% 60%;
+  --senren-warning-foreground: 340 22% 8%;
+}
+
+/* ── amber ────────────────────────────────────────────────────────────────
+   Sand-toned neutrals, amber action colour, near-square corners. The
+   document-and-workspace look. */
+[data-senren-theme="amber"] {
+  --senren-background: 40 30% 98%;
+  --senren-foreground: 30 25% 12%;
+  --senren-muted: 40 24% 94%;
+  --senren-muted-foreground: 32 10% 44%;
+  --senren-card: 40 40% 99%;
+  --senren-card-foreground: 30 25% 12%;
+  --senren-popover: 40 40% 99%;
+  --senren-popover-foreground: 30 25% 12%;
+  --senren-border: 36 20% 87%;
+  --senren-input: 36 20% 87%;
+  --senren-ring: 32 95% 44%;
+  --senren-primary: 30 30% 16%;
+  --senren-primary-foreground: 40 30% 98%;
+  --senren-secondary: 40 60% 90%;
+  --senren-secondary-foreground: 30 40% 20%;
+  --senren-accent: 38 80% 88%;
+  --senren-accent-foreground: 30 45% 20%;
+  --senren-destructive: 4 74% 48%;
+  --senren-destructive-foreground: 40 30% 98%;
+  --senren-success: 140 55% 34%;
+  --senren-success-foreground: 40 30% 98%;
+  --senren-warning: 32 95% 46%;
+  --senren-warning-foreground: 40 30% 98%;
+  --senren-radius: 0.25rem;
+  --senren-palette-sky: 200 75% 50%;
+  --senren-palette-sakura: 20 80% 82%;
+  --senren-palette-pond: 190 60% 80%;
+  --senren-palette-leaf: 100 45% 50%;
+  --senren-palette-iris: 265 55% 74%;
+  --senren-palette-paper: 40 24% 94%;
+}
+
+.dark[data-senren-theme="amber"] {
+  --senren-background: 30 18% 8%;
+  --senren-foreground: 40 24% 94%;
+  --senren-muted: 30 14% 15%;
+  --senren-muted-foreground: 36 10% 62%;
+  --senren-card: 30 16% 11%;
+  --senren-card-foreground: 40 24% 94%;
+  --senren-popover: 30 16% 11%;
+  --senren-popover-foreground: 40 24% 94%;
+  --senren-border: 30 12% 21%;
+  --senren-input: 30 12% 21%;
+  --senren-ring: 32 95% 55%;
+  --senren-primary: 36 90% 58%;
+  --senren-primary-foreground: 30 25% 10%;
+  --senren-secondary: 30 14% 17%;
+  --senren-secondary-foreground: 40 60% 86%;
+  --senren-accent: 32 30% 22%;
+  --senren-accent-foreground: 38 80% 86%;
+  --senren-destructive: 4 68% 52%;
+  --senren-destructive-foreground: 40 30% 98%;
+  --senren-success: 140 50% 42%;
+  --senren-success-foreground: 30 18% 8%;
+  --senren-warning: 32 90% 56%;
+  --senren-warning-foreground: 30 18% 8%;
+}

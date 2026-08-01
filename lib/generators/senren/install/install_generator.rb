@@ -30,6 +30,9 @@ module Senren
       def copy_base_files
         template 'base_component.rb.tt', 'app/components/senren/base_component.rb'
         template 'senren.css.tt',                'app/assets/stylesheets/senren.css'
+        # Optional: link it only if you want the palette presets. senren.css
+        # alone gives you the default, so this file costs nothing until used.
+        template 'senren_themes.css.tt',         'app/assets/stylesheets/senren_themes.css'
         template 'conventions.md.tt',            '.senren/conventions.md'
         template 'installed_components.yml.tt',  '.senren/installed_components.yml'
       end
