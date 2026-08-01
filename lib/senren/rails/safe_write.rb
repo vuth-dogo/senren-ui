@@ -91,6 +91,48 @@ module Senren
 
         assert_inside!(dest, root, label)
       end
+
+      # Contained and not reached through a link, anywhere in the chain.
+      #
+      # assert_inside! alone is not enough for a file that is itself a symlink:
+      # it resolves the deepest EXISTING ancestor, and a *dangling* symlink is
+      # skipped by `exist?`, so the check would clear the parent directory and
+      # the write would still land on the link's target. symlinked_segment uses
+      # File.symlink?, which does not follow, and covers the leaf.
+      def assert_writable!(path, root, label)
+        if (link = symlinked_segment(path, root))
+          raise Escape, "Refusing to write #{path}: #{link} is a symlink (#{label})"
+        end
+
+        assert_inside!(path, root, label)
+      end
+
+      # Every write this gem performs goes through here or #copy!.
+      #
+      # Hand-rolled File.write / FileUtils.cp is what let component source
+      # escape twice: once through a symlinked directory, and once -- after
+      # that was fixed -- through a symlinked destination *file*, because
+      # containment had been applied to the parent only. Writing via a
+      # temporary and renaming also means a killed process cannot truncate the
+      # file: rename is atomic and does not follow a symlink at the target.
+      def write!(path, content, root, label)
+        target = assert_writable!(path, root, label)
+        atomically(target) { |tmp| File.write(tmp, content) }
+      end
+
+      def copy!(source, path, root, label)
+        target = assert_writable!(path, root, label)
+        atomically(target) { |tmp| FileUtils.cp(source, tmp) }
+      end
+
+      def atomically(target)
+        tmp = Pathname.new("#{target}.#{Process.pid}.tmp")
+        yield tmp
+        File.rename(tmp, target)
+        target
+      ensure
+        FileUtils.rm_f(tmp) if tmp&.exist?
+      end
     end
   end
 end

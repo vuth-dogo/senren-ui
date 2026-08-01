@@ -167,13 +167,10 @@ module Senren
 
       # write_adapter_file reads its destination before rewriting it, so a
       # symlinked .senren, .github or .cursor/rules did not merely redirect the
-      # write — it pulled outside content in and wrote it back out. Containment
-      # is asserted on the real path before either half of that happens.
+      # write — it pulled outside content in and wrote it back out. SafeWrite
+      # refuses on the real path before either half of that happens.
       def atomic_write(path, content)
-        SafeWrite.assert_inside!(path, paths.root, path.to_s)
-        tmp = "#{path}.#{Process.pid}.tmp"
-        File.write(tmp, content)
-        File.rename(tmp, path)
+        SafeWrite.write!(path, content, paths.root, path.to_s)
       end
     end
   end

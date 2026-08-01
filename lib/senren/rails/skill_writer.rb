@@ -42,13 +42,11 @@ module Senren
 
       private
 
-      # Matches AgentRulesWriter: a killed process must not truncate the file,
-      # and a symlinked .senren must not redirect the write outside the app.
+      # Routed through SafeWrite rather than hand-rolled. assert_inside! plus
+      # rename was already safe for an existing symlink, but not for a dangling
+      # one, and two other writers proved that hand-rolled writes drift.
       def atomic_write(path, content)
-        SafeWrite.assert_inside!(path, paths.root, path.to_s)
-        tmp = path.parent.join("#{path.basename}.#{Process.pid}.tmp")
-        File.write(tmp, content)
-        File.rename(tmp, path)
+        SafeWrite.write!(path, content, paths.root, path.to_s)
       end
 
       def installed_names

@@ -167,8 +167,8 @@ module Senren
           stdout.puts "  skip  #{dest} (already exists)"
           return
         end
-        FileUtils.mkdir_p(File.dirname(dest))
-        FileUtils.cp(src, dest)
+        SafeWrite.mkdir_p!(File.dirname(dest), paths.root, label)
+        SafeWrite.copy!(src, dest, paths.root, label)
         stdout.puts "  copy  #{dest}"
       end
 
@@ -183,9 +183,23 @@ module Senren
         raise ArgumentError, e.message
       end
 
+      # A ledger holding anything but a mapping used to reach `ledger['installed']
+      # ||= []` and raise `IndexError: string not matched` from String#[]=, which
+      # tells the user nothing about which file is wrong or why.
+      def load_ledger(path)
+        return {} unless path.exist?
+
+        content = YAML.safe_load_file(path) || {}
+        return content if content.is_a?(Hash)
+
+        raise ArgumentError,
+              "#{path} is not a Senren ledger: expected a YAML mapping, got #{content.class}. " \
+              'Fix or delete the file and run the command again.'
+      end
+
       def update_installed_ledger(names, requested:, client_override:)
         ledger_path = paths.installed_components
-        ledger = ledger_path.exist? ? (YAML.safe_load_file(ledger_path) || {}) : {}
+        ledger = load_ledger(ledger_path)
         installed = ledger['installed'] ||= []
 
         names.each do |name|
@@ -206,8 +220,8 @@ module Senren
         end
 
         installed.sort_by! { |e| e['name'] }
-        ledger_path.parent.mkpath
-        File.write(ledger_path, YAML.dump(ledger))
+        SafeWrite.mkdir_p!(ledger_path.parent, paths.root, 'ledger')
+        SafeWrite.write!(ledger_path, YAML.dump(ledger), paths.root, 'ledger')
       end
     end
   end

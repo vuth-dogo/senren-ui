@@ -51,10 +51,16 @@ module Senren
       # from the gem on every upgrade while the generated agent rules kept
       # advertising it as the authoritative "component registry mirror". Agents
       # read stale component metadata and had no way to tell.
+      # The FileUtils.cp here was lifted from the Installer#mirror_registry that
+      # this same review deleted, and it carried that method's defect with it:
+      # containment was applied to the directory, so a symlinked
+      # .senren/registry.yml was followed and a file outside the app root was
+      # overwritten. Moving a bug is not fixing it. SafeWrite.copy! checks the
+      # destination file itself.
       def refresh_registry_mirror
         dest = paths.registry_mirror
         SafeWrite.mkdir_p!(dest.dirname, paths.root, 'registry mirror')
-        FileUtils.cp(Senren::Rails.registry_path, dest)
+        SafeWrite.copy!(Senren::Rails.registry_path, dest, paths.root, 'registry mirror')
       end
     end
   end
