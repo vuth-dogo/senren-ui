@@ -38,8 +38,17 @@ module Senren
         false
       end
 
+      # Fails closed. `Rails.env.production?` let a conventional
+      # RAILS_ENV=staging deploy print one line of stderr and precompile the
+      # source anyway, and the same held for review apps and any custom
+      # environment name. `local?` is true only for development and test — the
+      # two environments where exposure is acceptable — so everything else is
+      # treated as deployed. Available since Rails 7.1, which is the floor.
       def production_env?
-        defined?(::Rails) && ::Rails.respond_to?(:env) && ::Rails.env.production?
+        return false unless defined?(::Rails) && ::Rails.respond_to?(:env)
+        return !::Rails.env.local? if ::Rails.env.respond_to?(:local?)
+
+        !%w[development test].include?(::Rails.env.to_s)
       end
 
       # An asset path is only a problem when component source actually sits
@@ -48,9 +57,24 @@ module Senren
       def offending_paths(app)
         components = components_dir(app)
         return [] unless components&.directory?
-        return [] unless source_files?(components)
 
-        asset_paths(app).select { |path| covers?(path, components) }
+        asset_paths(app).select { |path| publishes_source?(path, components) }
+      end
+
+      # Whether serving this asset path would serve component source.
+      #
+      # `source_files?` used to be asked once about app/components as a whole,
+      # which is the wrong question for a descendant path: with that shape,
+      # app/components/assets holding nothing but CSS looked identical to
+      # app/components/senren holding every component. Only the overlapping
+      # subtree can publish anything, and that subtree is the deeper of the two
+      # paths.
+      def publishes_source?(asset_path, components)
+        asset = Pathname.new(asset_path.to_s).expand_path
+        components = components.expand_path
+        return false unless overlap?(asset, components)
+
+        source_files?(asset.to_s.length >= components.to_s.length ? asset : components)
       end
 
       def components_dir(app)
@@ -69,9 +93,22 @@ module Senren
         []
       end
 
-      def covers?(asset_path, components)
-        asset = Pathname.new(asset_path.to_s).expand_path
-        components.expand_path.to_s.start_with?(asset.to_s)
+      # Two paths overlap when one contains the other, in EITHER direction, and
+      # the test has to be separator-aware:
+      #
+      #   app/components         is an ancestor  -> publishes everything
+      #   app/components/senren  is a descendant -> publishes the components
+      #   app/comp               shares a prefix -> publishes nothing
+      #
+      # The first version tested only the ancestor direction with a bare
+      # start_with?, so it missed the descendant case — which is what a
+      # developer writes after reading this module's own remediation text — and
+      # it blocked production boots over an unrelated app/comp directory.
+      def overlap?(one, other)
+        a = "#{one}#{File::SEPARATOR}"
+        b = "#{other}#{File::SEPARATOR}"
+
+        a.start_with?(b) || b.start_with?(a)
       end
 
       def message_for(offenders)
