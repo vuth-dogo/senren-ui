@@ -14,6 +14,13 @@ module Senren
 
     SIZES = { md: '' }.freeze
 
+    # BaseComponent defaults to `variant: :default`, which this component does
+    # not define, so `.new` with no variant raised instead of rendering. The
+    # default is :p (body text).
+    def initialize(variant: :p, **args)
+      super
+    end
+
     TAG_FOR = {
       h1: :h1, h2: :h2, h3: :h3, h4: :h4,
       p: :p, lead: :p, large: :p, small: :small, muted: :p

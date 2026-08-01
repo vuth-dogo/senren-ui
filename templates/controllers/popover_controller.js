@@ -2,8 +2,13 @@ import { Controller } from "@hotwired/stimulus"
 
 // senren--popover
 // Toggles a small panel; closes on outside click and Escape.
+//
+// State lives in `openValue`. Actions assign it; openValueChanged performs
+// every DOM change and owns the document listeners, so the open state is
+// server-renderable and survives a Turbo morph.
 export default class extends Controller {
   static targets = ["trigger", "panel"]
+  static values = { open: Boolean }
 
   connect() {
     this._onDocClick = this._onDocClick.bind(this)
@@ -11,25 +16,35 @@ export default class extends Controller {
   }
 
   disconnect() {
-    document.removeEventListener("click", this._onDocClick)
-    document.removeEventListener("keydown", this._onKey)
+    this._stopListening()
   }
 
   toggle(event) {
     event?.preventDefault()
-    this.panelTarget.hidden ? this._show() : this.close()
+    this.openValue = !this.openValue
   }
 
   close() {
-    this.panelTarget.hidden = true
-    document.removeEventListener("click", this._onDocClick)
-    document.removeEventListener("keydown", this._onKey)
+    this.openValue = false
   }
 
-  _show() {
-    this.panelTarget.hidden = false
-    document.addEventListener("click", this._onDocClick)
-    document.addEventListener("keydown", this._onKey)
+  openValueChanged(isOpen) {
+    if (this.hasPanelTarget) this.panelTarget.hidden = !isOpen
+    if (this.hasTriggerTarget) this.triggerTarget.setAttribute("aria-expanded", isOpen ? "true" : "false")
+
+    if (isOpen) {
+      document.addEventListener("click", this._onDocClick)
+      document.addEventListener("keydown", this._onKey)
+      this.dispatch("opened")
+      return
+    }
+
+    this._stopListening()
+  }
+
+  _stopListening() {
+    document.removeEventListener("click", this._onDocClick)
+    document.removeEventListener("keydown", this._onKey)
   }
 
   _onDocClick(event) {

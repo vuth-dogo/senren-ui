@@ -2,6 +2,16 @@ import { Controller } from "@hotwired/stimulus"
 
 const ALLOWED_LINK_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"])
 
+// Mirrors the server-side sanitize() allowlist in
+// rich_text_editor_lite_component.html.erb, so both ends agree on what the
+// stored value may contain.
+const ALLOWED_PASTE_TAGS = new Set([
+  "P", "BR", "STRONG", "B", "EM", "I", "A", "UL", "OL", "LI", "H1", "H2", "H3"
+])
+const ALLOWED_PASTE_ATTRIBUTES = new Set(["href", "rel", "target", "data-align"])
+// Dropped whole rather than unwrapped: their text content is code, not prose.
+const DROPPED_PASTE_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "IFRAME", "OBJECT", "EMBED"])
+
 // senren--rich-text-editor-lite
 // Local UI: tiny contenteditable toolbar synced to a hidden textarea.
 export default class extends Controller {
@@ -17,7 +27,7 @@ export default class extends Controller {
     this.sync()
     this.rememberSelection()
     this.updateToolbar()
-    this.debug("connect", this.snapshot())
+    this.debug("connect", () => (this.snapshot()))
   }
 
   keepSelection(event) {
@@ -33,7 +43,12 @@ export default class extends Controller {
     if (!event.metaKey && !event.ctrlKey) return
 
     event.preventDefault()
-    window.open(link.href, "_blank", "noopener,noreferrer")
+    // Anchors can arrive from a paste, so gate the protocol here too rather
+    // than trusting the browser to refuse javascript:/data: in window.open.
+    const href = this.normalizeHref(link.getAttribute("href"))
+    if (!href) return
+
+    window.open(href, "_blank", "noopener,noreferrer")
   }
 
   format(event) {
@@ -41,11 +56,11 @@ export default class extends Controller {
     const command = event.currentTarget.dataset.command
     if (!command) return
 
-    this.debug("format:start", { command, before: this.snapshot() })
+    this.debug("format:start", () => ({ command, before: this.snapshot() }))
     this.restoreSelection()
     if (command === "createLink") {
       const url = window.prompt("Paste a URL")
-      this.debug("createLink:prompt", { url, afterPrompt: this.snapshot() })
+      this.debug("createLink:prompt", () => ({ url, afterPrompt: this.snapshot() }))
       if (!url) return
       this.restoreSelection()
       this.insertLink(url)
@@ -65,7 +80,7 @@ export default class extends Controller {
     this.sync()
     this.updateToolbar()
     this.rememberSelection()
-    this.debug("format:done", { command, after: this.snapshot() })
+    this.debug("format:done", () => ({ command, after: this.snapshot() }))
   }
 
   sync() {
@@ -75,6 +90,96 @@ export default class extends Controller {
 
   syncSoon() {
     requestAnimationFrame(() => this.sync())
+  }
+
+  // Handles both paste and drop. The browser's own contenteditable paste path
+  // keeps on* handler attributes, so pasted markup must be rebuilt against an
+  // allowlist before it reaches the document.
+  paste(event) {
+    const transfer = event.clipboardData || event.dataTransfer
+    if (!transfer) return
+
+    event.preventDefault()
+    const html = transfer.getData("text/html")
+    const text = transfer.getData("text/plain")
+
+    if (html) {
+      this.insertSanitized(this.sanitizeToFragment(html))
+    } else if (text) {
+      document.execCommand("insertText", false, text)
+    }
+
+    this.sync()
+    this.rememberSelection()
+    this.updateToolbar()
+  }
+
+  insertSanitized(fragment) {
+    if (fragment.childNodes.length === 0) return
+
+    const range = this.activeRange()
+    if (!range) {
+      this.editorTarget.appendChild(fragment)
+      return
+    }
+
+    const last = fragment.lastChild
+    range.deleteContents()
+    range.insertNode(fragment)
+    if (last) {
+      range.setStartAfter(last)
+      range.collapse(true)
+      const selection = window.getSelection()
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+  }
+
+  // DOMParser builds an inert document: no scripts run and no resources load,
+  // so onerror/onload never fire while we walk the tree.
+  sanitizeToFragment(html) {
+    const parsed = new DOMParser().parseFromString(html, "text/html")
+    return this.sanitizeChildren(parsed.body)
+  }
+
+  sanitizeChildren(node) {
+    const fragment = document.createDocumentFragment()
+    Array.from(node.childNodes).forEach((child) => {
+      const clean = this.sanitizeNode(child)
+      if (clean) fragment.appendChild(clean)
+    })
+    return fragment
+  }
+
+  sanitizeNode(node) {
+    if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.nodeValue)
+    if (node.nodeType !== Node.ELEMENT_NODE) return null
+
+    const tag = node.tagName.toUpperCase()
+    if (DROPPED_PASTE_TAGS.has(tag)) return null
+    // Other disallowed elements are unwrapped, not dropped: keep their text.
+    if (!ALLOWED_PASTE_TAGS.has(tag)) return this.sanitizeChildren(node)
+
+    const element = document.createElement(tag.toLowerCase())
+    Array.from(node.attributes).forEach((attr) => {
+      const name = attr.name.toLowerCase()
+      if (!ALLOWED_PASTE_ATTRIBUTES.has(name)) return
+
+      if (name === "href") {
+        const href = this.normalizeHref(attr.value)
+        if (href) element.setAttribute("href", href)
+        return
+      }
+
+      element.setAttribute(name, attr.value)
+    })
+
+    if (tag === "A" && element.hasAttribute("target")) {
+      element.setAttribute("rel", "noopener noreferrer")
+    }
+
+    element.appendChild(this.sanitizeChildren(node))
+    return element
   }
 
   updateToolbar() {
@@ -122,9 +227,9 @@ export default class extends Controller {
     const range = selection.getRangeAt(0)
     if (this.rangeInsideEditor(range)) {
       this.savedRange = range.cloneRange()
-      this.debug("rememberSelection:saved", this.describeRange(this.savedRange))
+      this.debug("rememberSelection:saved", () => (this.describeRange(this.savedRange)))
     } else {
-      this.debug("rememberSelection:outside", this.describeRange(range))
+      this.debug("rememberSelection:outside", () => (this.describeRange(range)))
     }
   }
 
@@ -134,17 +239,17 @@ export default class extends Controller {
       const selection = window.getSelection()
       selection.removeAllRanges()
       selection.addRange(this.savedRange)
-      this.debug("restoreSelection:saved", this.describeRange(this.savedRange))
+      this.debug("restoreSelection:saved", () => (this.describeRange(this.savedRange)))
       return
     }
 
-    this.debug("restoreSelection:endFallback", this.snapshot())
+    this.debug("restoreSelection:endFallback", () => (this.snapshot()))
     this.placeCaretAtEnd()
   }
 
   insertLink(rawUrl) {
     const url = this.normalizeUrl(rawUrl)
-    this.debug("insertLink:start", { rawUrl, url, before: this.snapshot() })
+    this.debug("insertLink:start", () => ({ rawUrl, url, before: this.snapshot() }))
     if (!url) return
 
     const range = this.activeRange()
@@ -157,7 +262,7 @@ export default class extends Controller {
     anchor.href = url
     anchor.rel = "noopener noreferrer"
     anchor.target = "_blank"
-    this.debug("insertLink:range", this.describeRange(range))
+    this.debug("insertLink:range", () => (this.describeRange(range)))
 
     if (range.collapsed) {
       anchor.textContent = url
@@ -172,12 +277,12 @@ export default class extends Controller {
     const selection = window.getSelection()
     selection.removeAllRanges()
     selection.addRange(range)
-    this.debug("insertLink:done", { anchor: anchor.outerHTML, after: this.snapshot() })
+    this.debug("insertLink:done", () => ({ anchor: anchor.outerHTML, after: this.snapshot() }))
   }
 
   toggleList(tagName) {
     const range = this.activeRange()
-    this.debug("toggleList:start", { tagName, range: this.describeRange(range), before: this.snapshot() })
+    this.debug("toggleList:start", () => ({ tagName, range: this.describeRange(range), before: this.snapshot() }))
     if (!range) return
 
     const activeList = this.closestElement(range.startContainer, "ul, ol")
@@ -187,12 +292,12 @@ export default class extends Controller {
       } else {
         this.convertList(activeList, tagName)
       }
-      this.debug("toggleList:existingList", { tagName, after: this.snapshot() })
+      this.debug("toggleList:existingList", () => ({ tagName, after: this.snapshot() }))
       return
     }
 
     const blocks = this.selectedBlocks(range)
-    this.debug("toggleList:blocks", { tagName, blocks: blocks.map((block) => block.outerHTML) })
+    this.debug("toggleList:blocks", () => ({ tagName, blocks: blocks.map((block) => block.outerHTML) }))
     if (blocks.length === 0) return
 
     const list = document.createElement(tagName)
@@ -204,15 +309,15 @@ export default class extends Controller {
     })
 
     blocks[0].before(list)
-    blocks.forEach((block) => block.remove())
+    blocks.forEach((block) => { block.remove() })
     this.selectNodeContents(list)
-    this.debug("toggleList:done", { list: list.outerHTML, after: this.snapshot() })
+    this.debug("toggleList:done", () => ({ list: list.outerHTML, after: this.snapshot() }))
   }
 
   formatBlocks(tagName) {
     const normalizedTagName = this.normalizedBlockTag(tagName)
     const range = this.activeRange()
-    this.debug("formatBlocks:start", { tagName: normalizedTagName, range: this.describeRange(range) })
+    this.debug("formatBlocks:start", () => ({ tagName: normalizedTagName, range: this.describeRange(range) }))
     if (!range) return
 
     const blocks = this.selectedBlocks(range)
@@ -220,13 +325,13 @@ export default class extends Controller {
 
     const replacements = blocks.map((block) => this.replaceBlock(block, normalizedTagName))
     this.selectNodeContents(replacements[replacements.length - 1])
-    this.debug("formatBlocks:done", { tagName: normalizedTagName, blocks: replacements.map((block) => block.outerHTML) })
+    this.debug("formatBlocks:done", () => ({ tagName: normalizedTagName, blocks: replacements.map((block) => block.outerHTML) }))
   }
 
   alignBlocks(alignment) {
     const normalizedAlignment = this.normalizedAlignment(alignment)
     const range = this.activeRange()
-    this.debug("alignBlocks:start", { alignment: normalizedAlignment, range: this.describeRange(range) })
+    this.debug("alignBlocks:start", () => ({ alignment: normalizedAlignment, range: this.describeRange(range) }))
     if (!range) return
 
     const blocks = this.selectedBlocks(range)
@@ -239,7 +344,7 @@ export default class extends Controller {
     })
 
     if (blocks.length > 0) this.selectNodeContents(blocks[blocks.length - 1])
-    this.debug("alignBlocks:done", { alignment: normalizedAlignment, blocks: blocks.map((block) => block.outerHTML) })
+    this.debug("alignBlocks:done", () => ({ alignment: normalizedAlignment, blocks: blocks.map((block) => block.outerHTML) }))
   }
 
   unwrapList(list) {
@@ -279,11 +384,41 @@ export default class extends Controller {
     }
   }
 
+  // Shapes that are unsafe in every context. Browsers treat "\" as "/" and
+  // strip TAB/CR/LF before parsing, and any leading "//" is protocol-relative
+  // however many slashes follow — "///evil.example" resolves to
+  // https://evil.example/.
+  rejectedUrlShape(url) {
+    if (url.length === 0) return true
+    if (url.includes("\\")) return true
+    if ([...url].some((ch) => ch.charCodeAt(0) <= 0x1f || ch.charCodeAt(0) === 0x7f)) return true
+
+    return url.startsWith("//")
+  }
+
+  // Policy for an href that already exists in markup — a pasted anchor, or one
+  // being opened. It mirrors safe_url on the server: a relative reference stays
+  // relative, because in HTML `href="settings"` means "relative to this page",
+  // not "the host settings". Promoting it to https://settings/ would turn a
+  // same-origin link into an off-origin one.
+  normalizeHref(rawUrl) {
+    const url = String(rawUrl || "").trim()
+    if (this.rejectedUrlShape(url)) return null
+    if (url.startsWith("#") || url.startsWith("/")) return url
+
+    const scheme = url.match(/^[a-z][a-z0-9+.-]*:/i)
+    if (!scheme) return url
+
+    return ALLOWED_LINK_PROTOCOLS.has(scheme[0].toLowerCase()) ? url : null
+  }
+
+  // Policy for a URL a person typed into the link prompt, where a bare host is
+  // the common case and should become https://host/. Only ever applied to input
+  // the user just entered, never to markup.
   normalizeUrl(rawUrl) {
     const url = String(rawUrl || "").trim()
-    if (url.length === 0) return null
-    if (url.startsWith("#")) return url
-    if (url.startsWith("/") && !url.startsWith("//")) return url
+    if (this.rejectedUrlShape(url)) return null
+    if (url.startsWith("#") || url.startsWith("/")) return url
 
     const candidate = /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`
     try {
@@ -299,19 +434,19 @@ export default class extends Controller {
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0)
       if (this.rangeInsideEditor(range)) {
-        this.debug("activeRange:selection", this.describeRange(range))
+        this.debug("activeRange:selection", () => (this.describeRange(range)))
         return range
       }
     }
 
     if (this.savedRange && this.rangeInsideEditor(this.savedRange)) {
-      this.debug("activeRange:saved", this.describeRange(this.savedRange))
+      this.debug("activeRange:saved", () => (this.describeRange(this.savedRange)))
       return this.savedRange
     }
 
     this.placeCaretAtEnd()
     const range = window.getSelection().getRangeAt(0)
-    this.debug("activeRange:endFallback", this.describeRange(range))
+    this.debug("activeRange:endFallback", () => (this.describeRange(range)))
     return range
   }
 
@@ -445,9 +580,11 @@ export default class extends Controller {
     return `${node.tagName.toLowerCase()}${id}${classes}`
   }
 
+  // `detail` may be a thunk so callers can defer building expensive payloads
+  // (full innerHTML/textContent snapshots) until debugging is actually on.
   debug(message, detail = {}) {
     if (!this.debugValue) return
 
-    console.debug("[senren rich text]", message, detail)
+    console.debug("[senren rich text]", message, typeof detail === "function" ? detail() : detail)
   }
 }

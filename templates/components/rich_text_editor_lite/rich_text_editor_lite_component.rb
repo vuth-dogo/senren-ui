@@ -12,7 +12,7 @@ module Senren
       @value = value
       @label = label
       @placeholder = placeholder
-      @dom_id = id || "senren-editor-#{SecureRandom.hex(3)}"
+      @dom_id = id || senren_dom_id(name)
       @toolbar = toolbar
       @debug = debug
     end

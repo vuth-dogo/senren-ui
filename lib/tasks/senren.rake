@@ -6,8 +6,8 @@ namespace :senren do
   desc 'Install one or more Senren components. Preferred: bin/rails senren:add button dialog. ' \
        "Legacy: bin/rails 'senren:add[button,dialog]'"
   task :add, [:names] do |_t, args|
-    names = parse_names(args)
-    options = parse_options
+    names = SenrenRakeArgs.names(args)
+    options = SenrenRakeArgs.options
 
     Senren::Rails::ComponentInstaller.new.install(
       names: names,
@@ -59,21 +59,47 @@ end
 
 # Helpers ---------------------------------------------------------------
 
-def parse_names(args)
-  raw = []
-  raw.concat(args.extras)
-  raw << args[:names] if args[:names]
-  raw.concat(ARGV.drop_while { |a| !a.start_with?('senren:') }.drop(1))
-  Senren::Rails::ComponentInstaller.normalize_names(raw)
-end
+# Namespaced deliberately. These were top-level `def`s, which Ruby defines as
+# private methods on Object — so loading this rake file gave every class in the
+# host app a `parse_options` and a `parse_names`. `parse_options` is a
+# plausible name for an app to define itself.
+module SenrenRakeArgs
+  module_function
 
-def parse_options
-  client_override =
-    if ARGV.include?('--client')
-      true
-    elsif ARGV.include?('--no-client')
-      false
-    end
+  def names(args)
+    raw = []
+    raw.concat(args.extras)
+    raw << args[:names] if args[:names]
+    raw.concat(trailing_arguments)
+    Senren::Rails::ComponentInstaller.normalize_names(raw)
+  end
 
-  { client_override: client_override, force: ARGV.include?('--force') }
+  def options
+    words = trailing_arguments
+    client_override = true if words.include?('--client')
+    client_override = false if words.include?('--no-client')
+
+    { client_override: client_override, force: words.include?('--force') }
+  end
+
+  # The words that belong to `senren:add`, and only those.
+  #
+  # This used to be `ARGV.drop_while { ... }.drop(1)` with no upper bound, so
+  # every later argument on the command line was swallowed: `rake
+  # 'senren:add[button]' db:seed` tried to install a component named "db:seed"
+  # and aborted the whole invocation, and a `--force` intended for a different
+  # task silently enabled overwriting here.
+  def trailing_arguments
+    ARGV
+      .drop_while { |arg| !arg.start_with?('senren:') }
+      .drop(1)
+      .take_while { |arg| !rake_target?(arg) }
+  end
+
+  # A namespaced task (`db:seed`) or an environment assignment (`RAILS_ENV=x`).
+  # Component names are matched by Registry::NAME_PATTERN and can contain
+  # neither character.
+  def rake_target?(arg)
+    arg.include?(':') || arg.include?('=')
+  end
 end

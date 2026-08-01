@@ -22,6 +22,10 @@ Metrics/AbcSize:
 
 Metrics/ClassLength:
   Max: 150
+  Exclude:
+    # A test class is a list of independent cases, not a cohesive unit; its
+    # length says nothing about its complexity.
+    - 'test/**/*_test.rb'
 
 Metrics/CyclomaticComplexity:
   Max: 10
@@ -49,3 +53,10 @@ Lint/MissingSuper:
 Style/OneClassPerFile:
   Exclude:
     - 'bin/*.rb'
+
+# The gem is published as "senren-ui", and Bundler's default require target is
+# the gem name verbatim. The hyphen is required for `gem "senren-ui"` with no
+# require: option to work at all.
+Naming/FileName:
+  Exclude:
+    - 'lib/senren-ui.rb'

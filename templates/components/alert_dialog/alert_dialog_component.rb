@@ -13,7 +13,7 @@ module Senren
 
     def initialize(variant: :default, id: nil, class_name: nil, **html)
       super(variant: variant, size: :md, class_name: class_name, **html)
-      @dom_id = id || "senren-alert-dialog-#{SecureRandom.hex(3)}"
+      @dom_id = id || senren_dom_id
     end
 
     attr_reader :dom_id

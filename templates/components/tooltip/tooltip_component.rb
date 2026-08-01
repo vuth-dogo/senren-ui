@@ -5,10 +5,10 @@ module Senren
     VARIANTS = { default: '' }.freeze
     SIZES    = { md: '' }.freeze
 
-    def initialize(text:, class_name: nil, **html)
+    def initialize(text:, id: nil, class_name: nil, **html)
       super(variant: :default, size: :md, class_name: class_name, **html)
       @text = text
-      @id = "senren-tooltip-#{SecureRandom.hex(3)}"
+      @id = id || senren_dom_id(text)
     end
 
     attr_reader :text, :id

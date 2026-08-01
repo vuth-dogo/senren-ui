@@ -7,6 +7,13 @@ module Senren
 
     SIZES = { md: '' }.freeze
 
+    # BaseComponent defaults to `variant: :default`, which this component does
+    # not define, so `.new` with no variant raised instead of rendering. The
+    # default is :horizontal (a rule across the flow).
+    def initialize(variant: :horizontal, **args)
+      super
+    end
+
     def aria_orientation = variant == :vertical ? 'vertical' : 'horizontal'
   end
 end

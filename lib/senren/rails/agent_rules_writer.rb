@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'yaml'
+require 'senren/rails/marker_block'
+require 'senren/rails/safe_write'
 
 module Senren
   module Rails
@@ -21,6 +23,7 @@ module Senren
       end
 
       def sync!
+        assert_distinct_adapters!
         paths.ensure_agent_dirs!
         files = []
         files << write_full_file(paths.agent_rules_file, render_source_rules)
@@ -31,7 +34,45 @@ module Senren
         files
       end
 
+      # Each adapter gets different content, so two of them resolving to the
+      # same file means the last write silently wins.
+      #
+      # `ln -s AGENTS.md CLAUDE.md` is a normal way to keep one set of agent
+      # instructions, and now that in-repo symlinks are allowed it reaches here
+      # rather than being refused as an escape.
+      #
+      # Public so ComponentInstaller can run it as a preflight. The first
+      # version of this check lived inside sync!, which runs after the copier,
+      # so `senren:add` failed with components already on disk and the ledger
+      # already written.
+      def assert_distinct_adapters!
+        collisions = adapter_targets.group_by { |path, _| SafeWrite.real_target(path) }
+                                    .select { |_, group| group.size > 1 }
+        return if collisions.empty?
+
+        raise ArgumentError, collision_message(collisions)
+      end
+
       private
+
+      def adapter_targets
+        {
+          paths.codex_agents_md => 'AGENTS.md',
+          paths.claude_md => 'CLAUDE.md',
+          paths.copilot_instructions => '.github/copilot-instructions.md',
+          paths.cursor_rule_file => '.cursor/rules/senren.mdc'
+        }
+      end
+
+      def collision_message(collisions)
+        detail = collisions.map do |target, group|
+          "#{group.map(&:last).join(' and ')} both resolve to #{target}"
+        end.join('; ')
+
+        'Senren writes different instructions to each agent adapter, so these cannot share a file: ' \
+          "#{detail}. Replace the link with a real file, or have one adapter reference the other " \
+          'by path instead of linking to it.'
+      end
 
       def installed_names
         path = paths.installed_components
@@ -57,8 +98,14 @@ module Senren
           - Use ViewComponent for reusable UI.
           - Use Turbo for server state.
           - Use Stimulus only for local behavior.
-          - Do not introduce React, Vue, Alpine, or external state frameworks.
+          - Keep interactivity in Stimulus. These components render on the server,
+            so a client-side framework alongside them means two systems own the
+            same state.
           - Use semantic Tailwind tokens; do not hard-code color families.
+          - Never add `app/components` to `config.assets.paths`. Propshaft
+            publishes every file under an asset path, so component `.rb` and
+            `.html.erb` source is precompiled into `public/assets` and served
+            over HTTP. Put sidecar assets in `app/components/assets` instead.
 
           ## Important Files
 
@@ -82,7 +129,7 @@ module Senren
           - Prefer Senren components before custom HTML.
           - Keep reusable UI in ViewComponent.
           - Use Turbo for server state, Stimulus for local behavior.
-          - Do not add React, Vue, Alpine, or external state frameworks.
+          - Keep interactivity in Stimulus rather than a client-side framework.
           - Use semantic Tailwind tokens.
         MD
       end
@@ -106,7 +153,7 @@ module Senren
           - Prefer Senren components before custom HTML.
           - Reusable UI must use ViewComponent.
           - Turbo handles server state; Stimulus handles local behavior.
-          - Do not introduce React, Vue, Alpine, or external state frameworks.
+          - Keep interactivity in Stimulus rather than a client-side framework.
           - Use semantic Tailwind tokens.
         MD
       end
@@ -120,7 +167,7 @@ module Senren
           - Prefer Senren components before custom HTML.
           - Reusable UI uses ViewComponent.
           - Turbo for server state, Stimulus for local behavior.
-          - No React/Vue/Alpine/external state frameworks.
+          - Keep interactivity in Stimulus rather than a client-side framework.
           - Use semantic Tailwind tokens.
         MD
       end
@@ -147,28 +194,24 @@ module Senren
 
       def write_adapter_file(path, generated, prefix: '')
         existing = path.exist? ? path.read : prefix.to_s
-        updated = inject(existing, generated)
+        updated = inject(existing, generated, label: path.to_s)
         atomic_write(path, updated)
         path
       end
 
-      def inject(existing, generated)
-        if existing.include?(START_MARKER) && existing.include?(END_MARKER)
-          before = existing.split(START_MARKER, 2).first
-          tail = existing.split(START_MARKER, 2).last
-          after = tail.split(END_MARKER, 2).last
-          "#{before}#{START_MARKER}\n\n#{generated.rstrip}\n\n#{END_MARKER}#{after}"
-        else
-          body = existing.rstrip
-          prefix = body.empty? ? '' : "#{body}\n\n"
-          "#{prefix}#{START_MARKER}\n\n#{generated.rstrip}\n\n#{END_MARKER}\n"
-        end
+      def inject(existing, generated, label: nil)
+        MarkerBlock.inject(
+          existing, generated,
+          start_marker: START_MARKER, end_marker: END_MARKER, label: label
+        )
       end
 
+      # write_adapter_file reads its destination before rewriting it, so a
+      # symlinked .senren, .github or .cursor/rules did not merely redirect the
+      # write — it pulled outside content in and wrote it back out. SafeWrite
+      # refuses on the real path before either half of that happens.
       def atomic_write(path, content)
-        tmp = "#{path}.tmp"
-        File.write(tmp, content)
-        File.rename(tmp, path)
+        SafeWrite.write!(path, content, paths.root, path.to_s)
       end
     end
   end

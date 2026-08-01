@@ -19,7 +19,7 @@ module Senren
 
     def initialize(side: :right, id: nil, class_name: nil, **html)
       super(variant: side, size: :md, class_name: class_name, **html)
-      @dom_id = id || "senren-sheet-#{SecureRandom.hex(3)}"
+      @dom_id = id || senren_dom_id(side)
     end
 
     attr_reader :dom_id

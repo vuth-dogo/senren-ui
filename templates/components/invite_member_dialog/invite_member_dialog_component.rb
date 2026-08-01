@@ -18,7 +18,7 @@ module Senren
       @role_name = role_name
       @roles = Array(roles)
       @button_label = button_label
-      @dom_id = id || "senren-invite-member-#{SecureRandom.hex(3)}"
+      @dom_id = id || senren_dom_id(title)
     end
 
     attr_reader :title, :description, :email_name, :role_name, :roles, :button_label, :dom_id

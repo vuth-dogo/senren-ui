@@ -17,7 +17,7 @@ export default class extends Controller {
   }
 
   _closeAll() {
-    this.triggerTargets.forEach((trigger) => trigger.setAttribute("aria-expanded", "false"))
+    this.triggerTargets.forEach((trigger) => { trigger.setAttribute("aria-expanded", "false") })
     this.panelTargets.forEach((panel) => { panel.hidden = true })
   }
 

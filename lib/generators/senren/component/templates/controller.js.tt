@@ -3,11 +3,14 @@ import { Controller } from "@hotwired/stimulus"
 // Stimulus controller for Senren <%= class_name %>.
 // Identifier: <%= stimulus_identifier %>
 //
-// Responsibilities (local UI only):
+// Scope — local UI only:
 // - Manage open/close, focus, or keyboard behavior for this component.
-// Forbidden:
-// - fetch / XHR (Turbo handles server state)
-// - importing React, Vue, Alpine, lit, or any other framework
+//
+// Out of scope:
+// - fetch / XHR. Turbo owns server state; a controller that fetches ends up
+//   holding a second copy of it.
+// - Importing a client-side rendering framework. This component's markup comes
+//   from the server, so a second renderer would be fighting it for the DOM.
 export default class extends Controller {
   static targets = []
   static values  = {}

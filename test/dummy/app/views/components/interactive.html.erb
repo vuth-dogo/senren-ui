@@ -57,4 +57,13 @@
   <section>
     <%= render Senren::RichTextEditorLiteComponent.new(name: "body", value: "<p>Initial content</p>") %>
   </section>
+<section>
+  <%= render Senren::CartComponent.new(
+    checkout_url: "/checkout",
+    items: [
+      { id: "sku-1", name: "Spring Garden Mug", price_cents: 1_450, quantity: 2 },
+      { id: "sku-2", name: "Pond Blue Notebook", price_cents: 890, quantity: 1 }
+    ]
+  ) %>
+</section>
 </main>

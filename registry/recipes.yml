@@ -77,3 +77,15 @@ recipes:
       - native_select
       - button
       - alert
+
+  storefront:
+    description: Product listing with a cart panel; the server owns the cart, the widget owns the UI.
+    components:
+      - app_shell
+      - top_nav
+      - page_header
+      - product_card
+      - cart
+      - badge
+      - button
+      - empty_state

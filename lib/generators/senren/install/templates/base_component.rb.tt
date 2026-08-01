@@ -27,19 +27,56 @@ module Senren
 
     # Compose final root attributes; subclasses pass their base classes.
     def root_attrs(*classes, **extra)
-      data = (extra.delete(:data) || {}).merge(senren_component: senren_component_name)
+      # `data` arrives from two places: the caller's own attributes (html_attrs)
+      # and whatever the template passes here. Both are merged, and the
+      # component marker is applied last so it always survives.
+      #
+      # Splatting html_attrs after a computed `data:` used to overwrite it
+      # wholesale, so any component given a `data:` hash silently lost its
+      # data-senren-component marker. MaskedInput hit this on every render.
+      data = (html_attrs[:data] || {})
+             .merge(extra.delete(:data) || {})
+             .merge(senren_component: senren_component_name)
+
+      # `class` had exactly the same defect and it was never fixed alongside
+      # `data`. Every Rails tag helper accepts `class:`, so it is the first
+      # thing anyone types — and splatting html_attrs replaced the computed
+      # value outright, erasing the component's variant and size styling with
+      # no warning. It is merged like any other caller-supplied class instead,
+      # last so it still wins where the two genuinely conflict.
       tag_class = merge_classes(
         classes,
         self.class::VARIANTS[@variant],
         self.class::SIZES[@size],
         @class_name,
-        extra.delete(:class)
+        extra.delete(:class),
+        html_attrs[:class]
       )
-      { class: tag_class, data: data, **html_attrs, **extra }
+      { class: tag_class, data: data, **html_attrs.except(:data, :class), **extra }
     end
 
     def senren_component_name
       self.class.name.to_s.sub(/^Senren::/, '').sub(/Component$/, '').gsub(/([a-z])([A-Z])/, '\1_\2').downcase
+    end
+
+    # Builds a DOM id from the arguments that identify this component, so the
+    # same inputs always produce the same id.
+    #
+    # Components used to append `SecureRandom.hex`, which made every render emit
+    # different HTML. That single fact disabled Turbo morph (it pairs nodes by
+    # id), HTTP ETags (the body never matched), fragment caching (cached and
+    # fresh fragments referenced different ids), and snapshot testing.
+    #
+    # Two components with identical identifying inputs on one page now produce
+    # the same id and the accessibility test fails. That is deliberate: the
+    # caller should pass an explicit `id:`. A random suffix hid the collision
+    # instead of resolving it.
+    def senren_dom_id(*parts)
+      seed = parts.flatten.map(&:to_s).reject(&:empty?).join('-')
+      base = "senren-#{senren_component_name.tr('_', '-')}"
+      return base if seed.empty?
+
+      "#{base}-#{seed.parameterize}"
     end
 
     private
@@ -47,8 +84,19 @@ module Senren
     def safe_url(value, fallback: '#', protocols: SAFE_URL_PROTOCOLS)
       url = value.to_s.strip
       return fallback if url.empty?
+      # Browsers treat "\" as "/" for special schemes and strip TAB/CR/LF
+      # before parsing, so "/\evil.example" and "/<TAB>/evil.example" would
+      # both slip past a plain "//" check and resolve off-origin.
+      return fallback if url.include?('\\')
+      return fallback if url.match?(/[[:cntrl:]]/)
       return url if url.start_with?('#')
-      return url if url.start_with?('/') && !url.start_with?('//')
+      # Any leading "//" is protocol-relative regardless of how many slashes
+      # follow. Rejecting here rather than relying on URI.parse matters:
+      # URI.parse("///evil.example") reports no scheme and no host, so the
+      # scheme-less fallback below would otherwise hand back a URL the browser
+      # resolves to https://evil.example/.
+      return fallback if url.start_with?('//')
+      return url if url.start_with?('/')
 
       uri = URI.parse(url)
       return url if uri.scheme && Array(protocols).map(&:to_s).include?(uri.scheme.downcase)
