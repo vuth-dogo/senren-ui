@@ -53,3 +53,10 @@ Lint/MissingSuper:
 Style/OneClassPerFile:
   Exclude:
     - 'bin/*.rb'
+
+# The gem is published as "senren-ui", and Bundler's default require target is
+# the gem name verbatim. The hyphen is required for `gem "senren-ui"` with no
+# require: option to work at all.
+Naming/FileName:
+  Exclude:
+    - 'lib/senren-ui.rb'
