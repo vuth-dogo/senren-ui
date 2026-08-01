@@ -17,3 +17,9 @@ node_modules/
 images/
 .local/
 /feedbacks/
+
+# Per-Rails lockfiles are resolved per job, not committed. The matrix runs
+# Ruby 3.2-3.4 against each gemfile, and one lockfile cannot satisfy three
+# Rubies: resolving on 3.4 picked parallel 2.1.0, which requires >= 3.3, and
+# every Ruby 3.2 job failed at bundle install.
+gemfiles/*.gemfile.lock
