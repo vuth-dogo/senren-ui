@@ -121,11 +121,37 @@ module Senren
         end
       end
 
+      # Describes what is installed, not what the registry offers.
+      #
+      # This rendered the registry default, so after `senren:add select
+      # --no-client` the skill file told agents to use
+      # `senren--select` and named a controller file that is not on disk. The
+      # copier computes the truth and writes it to the ledger — with a comment
+      # saying "never record client behavior in the ledger that was not
+      # installed" — and nothing read it back. The gem's flagship feature was
+      # wrong for precisely the installs where the flag was exercised.
       def client_summary(comp)
         return 'none' unless comp.client?
+        return 'none (installed without its Stimulus controller)' unless installed_with_client?(comp.name)
 
         path = "app/javascript/controllers/senren/#{comp.name}_controller.js"
         "Stimulus `#{comp.controller}` (`#{path}`)"
+      end
+
+      # nil when the ledger predates this field, in which case the registry
+      # default is the best available answer.
+      def installed_with_client?(name)
+        entry = ledger_entries.find { |e| e['name'] == name }
+        return true if entry.nil? || !entry.key?('client')
+
+        entry['client']
+      end
+
+      def ledger_entries
+        @ledger_entries ||= begin
+          path = paths.installed_components
+          path.exist? ? Array((YAML.safe_load_file(path) || {})['installed']) : []
+        end
       end
 
       def format_list(items)
@@ -134,8 +160,12 @@ module Senren
         items.map { |i| "`#{i}`" }.join(', ')
       end
 
+      # NAME_PATTERN accepts consecutive underscores, and "foo__bar".split("_")
+      # yields an empty segment, so w[0] was nil and this raised NoMethodError —
+      # after the files were copied and the ledger written, leaving a
+      # half-completed install. Empty segments are dropped instead.
       def humanize(name)
-        name.split('_').map { |w| w[0].upcase + w[1..] }.join
+        name.split('_').reject(&:empty?).map { |w| w[0].upcase + w[1..] }.join
       end
 
       def ruby_class_for(name)

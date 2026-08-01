@@ -36,16 +36,30 @@ module Senren
         paths.ensure_dirs!
         ensure_base_component_url_helpers!
 
+        requested = Array(component_names).map(&:to_s)
         wanted.each do |name|
           comp = registry.fetch(name)
-          install_component(comp, client_override: client_override, force: force)
+          install_component(comp, client_override: override_for(name, requested, client_override), force: force)
         end
 
-        update_installed_ledger(wanted, client_override: client_override)
+        update_installed_ledger(wanted, requested: requested, client_override: client_override)
         wanted
       end
 
       private
+
+      # --client / --no-client describes what the user asked for, not what its
+      # dependencies are. Applying it to the whole closure meant
+      # `senren:add context_menu --no-client` also suppressed the controller for
+      # dropdown_menu, whose markup emits data-controller unconditionally — so
+      # the installed menu silently never opened, and the ledger then recorded
+      # client: false for a component this command was never asked about.
+      #
+      # validate_client_override! already exempts dependencies in the other
+      # direction, for the same reason.
+      def override_for(name, requested, client_override)
+        requested.include?(name) ? client_override : nil
+      end
 
       def ensure_base_component_url_helpers!
         dest = paths.base_component_path
@@ -169,7 +183,7 @@ module Senren
         raise ArgumentError, e.message
       end
 
-      def update_installed_ledger(names, client_override:)
+      def update_installed_ledger(names, requested:, client_override:)
         ledger_path = paths.installed_components
         ledger = ledger_path.exist? ? (YAML.safe_load_file(ledger_path) || {}) : {}
         installed = ledger['installed'] ||= []
@@ -180,7 +194,9 @@ module Senren
             'name' => name,
             'version' => Senren::Rails::VERSION,
             'installed_at' => Time.now.utc.iso8601,
-            'client' => effective_client_for(registry.fetch(name), client_override)
+            'client' => effective_client_for(
+              registry.fetch(name), override_for(name, requested, client_override)
+            )
           }
           if existing
             existing.merge!(attrs.except('installed_at'))
