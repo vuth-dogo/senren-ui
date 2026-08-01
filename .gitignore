@@ -16,3 +16,4 @@ test/dummy/db/*.sqlite3-journal
 node_modules/
 images/
 .local/
+/feedbacks/

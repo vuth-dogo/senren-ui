@@ -100,6 +100,54 @@ module Senren
         end
       end
 
+      # A dangling link is invisible to exist?, so a walk that only tested
+      # existence stepped over an intermediate one and rebuilt the tail
+      # lexically -- reporting a contained path for a write that would land
+      # outside. Not reachable through today's callers, which all mkdir_p! the
+      # parent first, but the helper must not depend on callers remembering.
+      def test_a_dangling_intermediate_symlink_is_not_stepped_over
+        @root.join('a').mkpath
+        File.symlink(@outside.join('ghost').to_s, @root.join('a/b').to_s)
+
+        refute SafeWrite.inside?(@root.join('a/b/c.txt'), @root),
+               'a write under a dangling link that points outside is not contained'
+      end
+
+      # The temporary was the last way out, and containment never looked at it.
+      # `<dest>.<pid>.tmp` is guessable and git stores symlinks, so a cloned
+      # repository could pre-place one; File.write follows it, and the write
+      # landed outside with every containment check passed.
+      def test_a_preplaced_symlink_at_the_temp_path_cannot_redirect_the_write
+        victim = @outside.join('authorized_keys')
+        victim.write("ORIGINAL\n")
+        dest = @root.join('registry.yml')
+        File.symlink(victim.to_s, "#{dest}.#{Process.pid}.tmp")
+
+        SafeWrite.write!(dest, "payload\n", @root, 'test')
+
+        assert_equal "ORIGINAL\n", victim.read, 'the temp path must not redirect the write'
+        assert_equal "payload\n", dest.read
+      end
+
+      # Belt to the O_EXCL braces: an unguessable name means the attacker has
+      # nothing to pre-place in the first place.
+      def test_the_temp_name_is_unpredictable
+        names = Array.new(2) do
+          captured = nil
+          SafeWrite.atomically(@root.join('x.yml')) do |io|
+            captured = io.to_path
+            io.write('x')
+          end
+          captured
+        end
+
+        refute_equal names[0], names[1], 'two writes must not reuse a temp name'
+        # Only the suffix: Dir.mktmpdir puts the pid in the sandbox path itself.
+        suffix = File.basename(names[0]).delete_prefix('x.yml.')
+
+        refute_includes suffix, Process.pid.to_s, 'the pid must not be the temp name'
+      end
+
       def test_mkdir_p_accepts_a_symlink_pointing_inside
         @root.join('real').mkpath
         File.symlink('real', @root.join('linked').to_s)

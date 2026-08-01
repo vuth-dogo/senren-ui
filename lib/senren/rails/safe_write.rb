@@ -2,6 +2,7 @@
 
 require 'fileutils'
 require 'pathname'
+require 'securerandom'
 
 module Senren
   module Rails
@@ -57,13 +58,23 @@ module Senren
 
       # For a destination that does not exist yet: resolve the deepest ancestor
       # that does, then re-append the part that is still missing.
+      #
+      # `symlink?` is part of the loop condition, not just `exist?`. A dangling
+      # link is invisible to `exist?`, so a walk that only tested existence
+      # stepped straight over an intermediate one and rebuilt the tail
+      # lexically -- reporting a path inside the root for a write that would
+      # land wherever the link pointed. Not reachable through today's callers,
+      # because each one runs mkdir_p! on the parent first and that catches it,
+      # but that is an implicit contract between caller and helper, and this
+      # cycle has already broken two of those.
       def resolve_existing_prefix(path)
         tail = []
         current = path
-        until current.exist? || current.root?
+        until current.exist? || current.symlink? || current.root?
           tail.unshift(current.basename)
           current = current.parent
         end
+        current = real_target(current) if current.symlink?
         current = current.realpath if current.exist?
         tail.reduce(current) { |acc, part| acc.join(part) }
       end
@@ -123,17 +134,31 @@ module Senren
       # file: rename is atomic and does not follow a symlink at the target.
       def write!(path, content, root, label)
         target = assert_writable!(path, root, label)
-        atomically(target) { |tmp| File.write(tmp, content) }
+        atomically(target) { |io| io.write(content) }
       end
 
       def copy!(source, path, root, label)
         target = assert_writable!(path, root, label)
-        atomically(target) { |tmp| FileUtils.cp(source, tmp) }
+        atomically(target) { |io| IO.copy_stream(source.to_s, io) }
       end
 
-      def atomically(target)
-        tmp = Pathname.new("#{target}.#{Process.pid}.tmp")
-        yield tmp
+      # The temporary was the last way out of the app root, and containment
+      # never looked at it.
+      #
+      # `<dest>.<pid>.tmp` is guessable, and git stores symlinks, so a
+      # repository could ship `.senren/registry.yml.<pid>.tmp` as a link to
+      # something outside the checkout. `File.write` follows a symlink, so the
+      # write landed there with every containment check having passed —
+      # verified before this was changed.
+      #
+      # Two independent fixes, because either alone is thin. A random suffix
+      # removes the guess, and O_CREAT|O_EXCL refuses to open an existing path
+      # at all and does not follow a final symlink, so a lucky guess still
+      # fails. 0o644 rather than 0o600 keeps the permissions a plain write
+      # would have produced.
+      def atomically(target, &)
+        tmp = Pathname.new("#{target}.#{SecureRandom.hex(12)}.tmp")
+        File.open(tmp, File::WRONLY | File::CREAT | File::EXCL, 0o644, &)
         File.rename(tmp, target)
         target
       ensure
