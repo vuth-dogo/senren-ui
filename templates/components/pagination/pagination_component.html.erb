@@ -1,4 +1,4 @@
-<nav <%= tag.attributes(**root_attrs("flex items-center justify-center gap-1", aria: { label: label })) %>>
+<nav <%= tag.attributes(**root_attrs("flex flex-wrap items-center justify-center gap-1", aria: { label: label })) %>>
   <% prev_page = current_page - 1 %>
   <%= link_to "Previous", page_url(prev_page), class: "rounded-md border border-[hsl(var(--senren-border))] px-3 py-2 text-sm #{current_page == 1 ? "pointer-events-none opacity-50" : "hover:bg-[hsl(var(--senren-accent))]"}", aria: { disabled: current_page == 1 } %>
 
