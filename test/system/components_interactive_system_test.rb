@@ -5,12 +5,14 @@ require_relative '../application_system_test_case'
 class ComponentsInteractiveSystemTest < ApplicationSystemTestCase
   EXPECTED_CONTROLLERS = %w[
     senren--accordion
+    senren--alert-dialog
     senren--cart
     senren--collapsible
     senren--combobox
     senren--dialog
     senren--dropdown-menu
     senren--rich-text-editor-lite
+    senren--sheet
     senren--tabs
   ].freeze
 

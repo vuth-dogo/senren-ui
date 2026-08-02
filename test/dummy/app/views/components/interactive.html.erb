@@ -13,6 +13,26 @@
   </section>
 
   <section>
+    <%= render Senren::SheetComponent.new(id: "system-sheet") do |sheet| %>
+      <% sheet.with_trigger do %>
+        <%= render(Senren::ButtonComponent.new(id: "sheet-open")) { "Open sheet" } %>
+      <% end %>
+      <% sheet.with_title { "Sheet title" } %>
+      <% sheet.with_body { "Sheet body" } %>
+    <% end %>
+  </section>
+
+  <section>
+    <%= render Senren::AlertDialogComponent.new(id: "system-alert-dialog") do |ad| %>
+      <% ad.with_trigger do %>
+        <%= render(Senren::ButtonComponent.new(id: "alert-dialog-open")) { "Open alert dialog" } %>
+      <% end %>
+      <% ad.with_title { "Are you sure?" } %>
+      <% ad.with_description { "This cannot be undone." } %>
+    <% end %>
+  </section>
+
+  <section>
     <%= render Senren::DropdownMenuComponent.new do |menu| %>
       <% menu.with_trigger do %>
         <%= render(Senren::ButtonComponent.new(id: "dropdown-trigger")) { "Menu actions" } %>

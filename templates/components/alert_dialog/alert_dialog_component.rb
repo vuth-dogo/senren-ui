@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 module Senren
+  # Unlike Dialog and Sheet, this does not close when the overlay is clicked.
+  # An alert dialog exists to make someone choose, and dismissing it by
+  # clicking beside it is indistinguishable from choosing Cancel by accident.
+  # Escape still closes it, because a keyboard user needs a way out.
   class AlertDialogComponent < BaseComponent
     renders_one :trigger
     renders_one :title
