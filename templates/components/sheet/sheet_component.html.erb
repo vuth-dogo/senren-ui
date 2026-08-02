@@ -21,7 +21,12 @@
       <% if description? %>
         <p class="text-sm text-[hsl(var(--senren-muted-foreground))]"><%= description %></p>
       <% end %>
-      <div class="mt-4 flex-1 overflow-auto">
+      <%# -mx-2 px-2 gives the scroll container room for focus rings.
+          overflow-auto clips whatever draws outside a child's border box,
+          and a ring does exactly that -- a focused input sitting flush
+          against the edge had its ring shaved off on both sides. The
+          negative margin cancels the padding, so nothing moves. %>
+      <div class="-mx-2 mt-4 flex-1 overflow-auto px-2">
         <%= body || content %>
       </div>
       <% if footer? %>

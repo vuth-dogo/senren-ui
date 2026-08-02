@@ -18,7 +18,13 @@
         <%= render(Senren::ButtonComponent.new(id: "sheet-open")) { "Open sheet" } %>
       <% end %>
       <% sheet.with_title { "Sheet title" } %>
-      <% sheet.with_body { "Sheet body" } %>
+      <% sheet.with_body do %>
+        <%# A real control, flush against the body's edge. The focus-ring test
+            needs something focusable inside the scrolling container -- with
+            only text here it measured nothing and passed either way. %>
+        <%= render Senren::LabelComponent.new(for_field: "sheet-name") { "Display name" } %>
+        <%= render Senren::InputComponent.new(name: "sheet-name", id: "sheet-name") %>
+      <% end %>
     <% end %>
   </section>
 
