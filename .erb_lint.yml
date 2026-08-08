@@ -3,28 +3,41 @@
 # linter at all -- RuboCop covers the .rb half, Biome covers the controllers,
 # and the markup in between was unchecked.
 #
-# Structural rules only. Formatting rules fight the long Tailwind class strings
-# that make up most of a component template, and would generate churn rather
-# than findings.
+# Every registered linter is named here, on or off, and a test asserts that
+# stays true. erb_lint enables a linter it ships unless you say otherwise, so an
+# unnamed linter is not "off" -- it is "on, and nobody decided that". The header
+# used to claim "structural rules only" while eight formatting linters ran by
+# default; they passed, so nothing surfaced the gap. Naming them all means a
+# gem upgrade that adds a linter fails the config test rather than turning up as
+# a CI failure in an unrelated PR.
 linters:
+  # --- Structural: a template that trips one of these is broken. -------------
   ErbSafety:
     enabled: true
   ParserErrors:
     enabled: true
-  ExtraNewline:
-    enabled: false
+  CommentSyntax:
+    enabled: true
+  SelfClosingTag:
+    enabled: true
+
+  # --- Formatting: on, and they pass. ----------------------------------------
+  # These were the ones running unnamed. The worry was that they would fight the
+  # long Tailwind class strings that make up most of a component template -- they
+  # do not, because none of them touch attribute values.
   FinalNewline:
     enabled: true
   TrailingWhitespace:
     enabled: true
-  DeprecatedClasses:
-    enabled: false
-  Rubocop:
-    enabled: false
-  SpaceInHtmlTag:
-    enabled: false
-  RequireScriptNonce:
-    enabled: false
+  RightTrim:
+    enabled: true
+  SpaceAroundErbTag:
+    enabled: true
+  SpaceIndentation:
+    enabled: true
+  ClosingErbTagIndent:
+    enabled: true
+
   # Kept on, but taught about importmap: javascript_importmap_tags emits
   # type="importmap" and type="module", and the default allow-list predates
   # both. Widening it beats disabling the linter.
@@ -35,6 +48,55 @@ linters:
       - application/ld+json
       - module
       - importmap
+
+  # On, and it earns its place in a component library: an <input> with no
+  # autocomplete hint is an accessibility defect, not a style preference.
+  RequireInputAutocomplete:
+    enabled: true
+
+  # On. The helper it forbids injects a script tag from Ruby, which no component
+  # template here does or should.
+  NoJavascriptTagHelper:
+    enabled: true
+
+  # --- Off, deliberately. -----------------------------------------------------
+  # Reformats blank lines inside templates; the spacing here is load-bearing for
+  # reading long slot definitions.
+  ExtraNewline:
+    enabled: false
+  # Bootstrap-era class deny-list. These templates are Tailwind.
+  DeprecatedClasses:
+    enabled: false
+  # Would run RuboCop a second time over the Ruby inside ERB, under a different
+  # config than .rubocop.yml. One source of truth for Ruby style.
+  Rubocop:
+    enabled: false
+  RubocopText:
+    enabled: false
+  # Rewrites whitespace inside HTML tags, which is exactly where the wrapped
+  # Tailwind class strings live.
+  SpaceInHtmlTag:
+    enabled: false
+  # A CSP nonce is the host application's decision; the gem does not ship a CSP
+  # and cannot assume one exists.
+  RequireScriptNonce:
+    enabled: false
+  # Flags every literal string as untranslated. This library ships English
+  # markup and no i18n layer.
+  HardCodedString:
+    enabled: false
+  # Partials here are previews in test/dummy, where instance variables from the
+  # controller are the point.
+  PartialInstanceVariable:
+    enabled: false
+  # `locals:` magic comments on every partial, for a handful of preview
+  # partials that are not a public API.
+  StrictLocals:
+    enabled: false
+  # Reports erb-lint disable comments that no longer suppress anything. There
+  # are none, so it has nothing to report and only costs a pass.
+  NoUnusedDisable:
+    enabled: false
 exclude:
   # better_html's parser -- not a linter, so it cannot be configured off --
   # rejects type="importmap", which is what javascript_importmap_tags emits.

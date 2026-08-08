@@ -25,16 +25,79 @@ module Senren
         assert_directory 'app/assets/stylesheets'
       end
 
-      def test_writes_every_managed_file
+      # Read out of the generator rather than typed here.
+      #
+      # A hand-kept list only covers what someone remembered to add to it, and
+      # senren_themes.css shipped for a whole release without an entry -- the
+      # generator wrote it, the test never looked, and a regression that stopped
+      # writing it would have been silent. Deriving the list means adding a
+      # `template` line to the generator extends this test automatically.
+      GENERATOR_SOURCE = File.expand_path(
+        '../../lib/generators/senren/install/install_generator.rb', __dir__
+      )
+
+      def declared_destinations
+        File.read(GENERATOR_SOURCE)
+            .scan(/^\s*(?:template|copy_file)\s+\S+?,\s*'([^']+)'/)
+            .flatten
+      end
+
+      def test_the_generator_declares_the_files_this_test_checks
+        assert_operator declared_destinations.size, :>=, 6,
+                        'the destination scan matched almost nothing -- it has drifted from ' \
+                        'the generator source and is no longer testing anything'
+      end
+
+      def test_writes_every_file_the_generator_declares
         run_generator
 
-        assert_file 'app/components/senren/base_component.rb'
-        assert_file 'app/assets/stylesheets/senren.css'
-        assert_file '.senren/conventions.md'
-        assert_file '.senren/installed_components.yml'
-        assert_file '.senren/registry.yml'
+        declared_destinations.each { |path| assert_file path }
+      end
+
+      # Written by the writers rather than by a `template` line, so the scan
+      # above cannot see them.
+      def test_writes_the_generated_agent_files
+        run_generator
+
         assert_file '.senren/skill.md'
         assert_file '.senren/agent-rules.md'
+      end
+
+      # Named, not derived, and that is the point.
+      #
+      # The derived test above only asks "is everything the generator declares
+      # actually written". Delete the `template` line for the palettes and it
+      # still passes, because the file it no longer writes is also no longer
+      # declared -- the list moves with the bug. These two are load-bearing
+      # enough to be spelled out: senren.css is the token set every component
+      # renders against, and senren_themes.css is the palette feature. An
+      # install missing either produces an app that boots and renders unstyled.
+      def test_the_install_is_not_complete_without_the_stylesheets
+        run_generator
+
+        assert_file 'app/assets/stylesheets/senren.css' do |content|
+          assert_includes content, ':root', 'the token set must declare :root'
+          assert_includes content, '--senren-primary'
+        end
+
+        assert_file 'app/assets/stylesheets/senren_themes.css' do |content|
+          assert_includes content, '[data-senren-theme=', 'the palette presets must ship with the install'
+          assert_includes content, '--senren-primary',
+                          'a palette that does not redeclare the tokens overrides nothing'
+        end
+      end
+
+      # senren_themes.css only takes effect if it is loaded after senren.css --
+      # the palettes and :root have equal specificity, so source order decides.
+      # An install that writes both but documents no order produces a themed app
+      # that renders in the base palette.
+      def test_the_theme_load_order_is_stated_where_someone_will_read_it
+        run_generator
+
+        assert_file '.senren/conventions.md' do |content|
+          assert_includes content, 'senren_themes.css',
+                          'the conventions file the agents read must mention the palette stylesheet'
+        end
       end
 
       # The template escapes its ERB examples as `<%%=` so Thor emits a literal

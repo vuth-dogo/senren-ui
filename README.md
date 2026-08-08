@@ -53,6 +53,33 @@ bin/rails senren:add button card badge alert form input \
 bracketed Rake task form, `bin/rails 'senren:add[button,card]'`, remains
 supported for backward compatibility.
 
+## Palettes
+
+The install writes two stylesheets. `senren.css` is the token set every
+component renders against; `senren_themes.css` is optional and adds five
+alternate palettes.
+
+```erb
+<%= stylesheet_link_tag "senren" %>
+<%= stylesheet_link_tag "senren_themes" %>   <%# after senren.css %>
+```
+
+```erb
+<html data-senren-theme="rose">
+```
+
+`rose`, `slate`, `indigo`, `emerald`, `amber` — or omit the attribute for the
+default, Spring Garden. Order matters: `:root` and `[data-senren-theme="rose"]`
+have equal specificity, so the file that loads last wins. Reversed, nothing
+errors and the page quietly renders in the default palette.
+
+A theme is a re-declaration of the same tokens and nothing else. No component
+reads the attribute, so a sixth palette is a copied CSS block — no component
+change, no build step, no configuration. Switch at runtime with
+`document.documentElement.dataset.senrenTheme = "slate"`.
+
+Details and the token table: [docs/visual_style.md](docs/visual_style.md).
+
 ## Daily commands
 
 ```bash
@@ -235,6 +262,7 @@ bin/performance                  # local payload/performance budgets
 bun run controllers:check        # lint + syntax check for templates/controllers/*.js
 bun run controllers:lint:fix     # auto-fix lint issues for controllers
 bundle exec rake test:system     # Stimulus/system tests
+bin/lint-fix                     # auto-fix RuboCop, ERB lint, and controller JS
 ```
 
 ## Contributing

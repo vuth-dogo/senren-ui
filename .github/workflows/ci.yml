@@ -77,7 +77,7 @@ jobs:
       # ERB is what 62 of the 64 components are written in, and was the one
       # layer no linter covered.
       - name: Lint ERB templates
-        run: bundle exec erblint --lint-all
+        run: bundle exec erb_lint --lint-all
 
       # Dependabot opens PRs but cannot fail a build. This gate does.
       - name: Audit dependencies for known CVEs

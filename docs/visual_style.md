@@ -37,6 +37,51 @@ tokens are available for documentation, examples, and branded surfaces.
 | `--senren-palette-iris` | secondary visual accent |
 | `--senren-palette-paper` | warm neutral surface |
 
+## Palette Presets
+
+`senren.css` declares Spring Garden in `:root`. That is the default and needs no
+attribute. `senren_themes.css` adds five alternates, each one a re-declaration
+of the same token table:
+
+| `data-senren-theme` | Reads as |
+| --- | --- |
+| *(omitted)* | Spring Garden — warm paper, pine ink, garden green |
+| `rose` | warm pink, low contrast |
+| `slate` | neutral grey, high contrast |
+| `indigo` | cool blue-violet |
+| `emerald` | cool green |
+| `amber` | warm gold |
+
+```erb
+<%= stylesheet_link_tag "senren" %>
+<%= stylesheet_link_tag "senren_themes" %>
+```
+
+```erb
+<html data-senren-theme="rose">
+```
+
+**Load `senren_themes.css` after `senren.css`.** `:root` and
+`[data-senren-theme="rose"]` are equal specificity, so the later rule wins and
+source order is the whole mechanism. Reversed, both files load, the attribute is
+on `<html>`, nothing errors, and the page renders in the default palette — the
+one failure mode of this feature, and it looks like the theme file was never
+installed.
+
+The attribute goes on `<html>`, not on `<body>` or a wrapper, so it composes
+with the existing `.dark` class instead of replacing it. Light/dark stays
+orthogonal to palette: each preset ships both blocks.
+
+No component knows themes exist. They read `hsl(var(--senren-*))` and inherit
+whatever is in scope, which is why a sixth palette is a copied CSS block and
+nothing else — no component to touch, no build step, no configuration.
+
+Switching at runtime is one attribute write:
+
+```js
+document.documentElement.dataset.senrenTheme = "slate"
+```
+
 ## Component Rules
 
 - Prefer semantic tokens over raw color utilities.

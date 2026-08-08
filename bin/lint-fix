@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Auto-fixes what bin/ci's lint gates check: RuboCop, ERB lint, and the
+# Stimulus controller JS. Runs every fixer and reports all results, rather
+# than stopping at the first — same reasoning as bin/ci.
+#
+# Offenses that can't be autocorrected are left in place and reported; the
+# gates still need to pass by hand for those. RuboCop runs with -a (safe
+# autocorrect only) rather than -A, so review the diff before committing —
+# even safe autocorrects can change behavior in edge cases.
+#
+#   bin/lint-fix
+set -uo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+passed=()
+failed=()
+
+step() {
+  local name="$1"; shift
+  echo
+  echo "==> Fixing: ${name}"
+  if "$@"; then
+    passed+=("$name")
+  else
+    failed+=("$name")
+    echo "    remaining offenses in: ${name}"
+  fi
+}
+
+step "RuboCop"      bundle exec rubocop -a
+step "ERB lint"     bundle exec erb_lint --lint-all -a
+step "JavaScript"   bun run controllers:lint:fix
+
+echo
+echo "================ summary ================"
+
+# Guarded by length rather than expanded directly: bash 3.2 (macOS's
+# /bin/bash) treats "${arr[@]}" on an EMPTY array as unbound under `set -u`.
+if [ ${#passed[@]} -ne 0 ]; then
+  for name in "${passed[@]}"; do
+    echo "  CLEAN      ${name}"
+  done
+fi
+
+if [ ${#failed[@]} -ne 0 ]; then
+  for name in "${failed[@]}"; do
+    echo "  NEEDS WORK ${name} — offenses remain that autocorrect can't fix"
+  done
+fi
+
+echo "==========================================="
+
+if [ ${#failed[@]} -ne 0 ]; then
+  exit 1
+fi

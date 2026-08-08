@@ -35,6 +35,7 @@ bin/matrix                            # unit tests on every supported Rails
 bundle exec rubocop
 bundle exec bundle-audit check --update
 bun run controllers:check
+bin/lint-fix                          # auto-fix RuboCop, ERB lint, controller JS
 ```
 
 `bin/system` needs no setup: it uses a system Chrome and

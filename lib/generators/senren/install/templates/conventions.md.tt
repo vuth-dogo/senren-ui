@@ -54,6 +54,23 @@ and obey it strictly.
    <%%= render(Senren::ButtonComponent.new(type: :button)) { "Open dialog" } %>
    ```
 
+10. **Load `senren_themes.css` after `senren.css`.** The install writes both.
+    `senren.css` declares the token set in `:root`; `senren_themes.css`
+    redeclares it under `[data-senren-theme="..."]` for the `rose`, `slate`,
+    `indigo`, `emerald`, and `amber` presets. The two selectors have equal
+    specificity, so source order decides which wins. In the wrong order every
+    file still loads, the attribute is still on `<html>`, nothing errors — and
+    the page renders in the default palette.
+    ```erb
+    <%%= stylesheet_link_tag "senren" %>
+    <%%= stylesheet_link_tag "senren_themes" %>
+
+    <html data-senren-theme="rose">   <%%# omit for the default palette %>
+    ```
+    The attribute belongs on `<html>` so it composes with `.dark` rather than
+    replacing it. Add a palette by copying a block and changing values; no
+    component reads the theme, so none needs editing.
+
 ## File ownership
 
 | Path                                | Owned by         |

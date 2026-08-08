@@ -7,6 +7,68 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 v0.x is a pre-stable line: minor bumps may break things; patch bumps are
 bug fixes only.
 
+## [Unreleased]
+
+### Breaking
+
+- **`ButtonComponent` no longer emits `type="button"` by default.** The
+  attribute is omitted, so a button inside a form submits it, which is what
+  plain HTML does and what everyone expects. The old default silently swallowed
+  submits: a form's own submit button did nothing, with no error anywhere to
+  explain it. The new default fails the other way, and loudly — a trigger that
+  should not submit now has to say so.
+
+  **Migrate:** pass `type: :button` to any button that must not submit — overlay
+  triggers, menu triggers, a dialog's Cancel. Everything inside a form that is
+  meant to submit needs no change and starts working. Buttons outside a form
+  are unaffected either way.
+
+  ```erb
+  <%= render(Senren::ButtonComponent.new(type: :button)) { "Open dialog" } %>
+  ```
+
+### Fixed
+
+- Every component now merges a caller's `class:` and `data:` instead of
+  dropping them. Splatting `**html_attrs` after the computed values replaced
+  them outright, so `class:` erased the component's own variant and size
+  styling and `data:` erased its `data-senren-component` marker.
+- For the eight wrapper components — dialog, alert dialog, sheet, popover,
+  dropdown menu, context menu, hover card, tooltip — a caller's class now lands
+  on the panel, which is the element they style, not on the empty root. It used
+  to be applied to the root, where it sat in the DOM doing nothing:
+  `class_name: "max-w-2xl"` on a dialog left the panel at `max-w-lg`.
+- `data-controller` and `data-action` are appended rather than substituted, so
+  attaching your own Stimulus controller to a Senren component no longer unbinds
+  the component's own.
+- `data:` written with String keys (`data: { "action" => ... }`) is merged the
+  same as Symbol keys. The Symbol-only read meant a dropdown item passing a
+  String key lost close-on-click and arrow-key handling.
+- A dropdown item's `class:` is merged rather than substituted. Losing the hover
+  style was cosmetic; losing `focus:bg-` removed the only indication a keyboard
+  user has of where they are in the menu.
+- Sheet's scrolling body no longer clips focus rings.
+- Dialog, sheet, and the invite-member dialog close on an overlay click.
+- `method:` on a dropdown item reaches Turbo. It was passed to `link_to` as a
+  rails-ujs option, which Rails 7 dropped, so it had rendered an inert `method`
+  attribute since the library began targeting Rails 7.1.
+- Card footer spacing, and pagination now wraps.
+
+### Documentation
+
+- The palette presets shipped in 0.2.0 with no mention in the README, the docs,
+  or the generated conventions file. All three now cover them, including the
+  load-order constraint: `senren_themes.css` must be linked after `senren.css`
+  or the theme silently does nothing.
+
+### Internal
+
+- ERB linting names every linter it runs. Thirteen were running against nine
+  named in the config; eight formatting linters had been on by default and
+  unrecorded. A test now fails if an upgrade adds a fourteenth.
+- `bin/ci` and the GitHub workflow call `erb_lint` rather than the deprecated
+  `erblint` shim.
+
 ## [0.2.0] — 2026-08-02
 
 A hardening release. Most of it came out of an adversarial review of the whole
