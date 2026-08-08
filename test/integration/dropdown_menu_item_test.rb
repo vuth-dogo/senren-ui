@@ -103,4 +103,24 @@ class DropdownMenuItemTest < ViewComponent::TestCase
     refute_includes html, 'data-turbo-method',
                     'a button cannot act on data-turbo-method; Turbo only reads it on <a>'
   end
+
+  # The append only ran for a Symbol key. `data: { "action" => ... }` skipped it
+  # and the tag builder then kept the caller's value alone, so ITEM_ACTION
+  # vanished -- no close-on-click, no arrow keys. Worse than the bug the append
+  # was written to fix, and invisible because the original test only ever passed
+  # a Symbol.
+  def test_a_string_data_key_is_treated_the_same_as_a_symbol
+    html = render_menu(href: '/x', data: { 'action' => 'click->analytics#track' }).native.to_html
+
+    assert_includes html, 'senren--dropdown-menu#close'
+    assert_includes html, 'senren--dropdown-menu#onItemKey'
+    assert_includes html, 'analytics#track'
+  end
+
+  def test_a_string_class_key_is_merged_too
+    html = render_menu(href: '/x', 'class' => 'font-bold').native.to_html
+
+    assert_includes html, 'font-bold'
+    assert_includes html, 'focus:bg-'
+  end
 end

@@ -19,7 +19,7 @@
        role="dialog" aria-modal="true" aria-labelledby="<%= dom_id %>-title"
        id="<%= dom_id %>-panel"
        tabindex="-1"
-       class="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-6 shadow-lg focus:outline-none">
+       class="<%= panel_class("fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-6 shadow-lg focus:outline-none") %>">
     <% if title? %>
       <h2 id="<%= dom_id %>-title" class="text-lg font-semibold leading-none tracking-tight"><%= title %></h2>
     <% end %>

@@ -7,7 +7,7 @@
   </div>
 
   <div data-senren--dropdown-menu-target="menu" role="menu" hidden
-       class="absolute right-0 z-50 mt-2 w-56 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-1 shadow-md">
+       class="<%= panel_class("absolute right-0 z-50 mt-2 w-56 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-1 shadow-md") %>">
     <% items.each do |it| %>
       <%= it %>
     <% end %>

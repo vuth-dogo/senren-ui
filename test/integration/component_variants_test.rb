@@ -135,19 +135,32 @@ class ComponentVariantsTest < ViewComponent::TestCase
     assert_empty losses, "components whose styling a caller `class:` erased:\n#{losses.join("\n")}"
   end
 
-  # Every component now applies a caller `class:` to its root. The eight that
-  # did not were pinned here as an exact list so the set could only shrink; it
-  # shrank to nothing, so the exception list is gone and the property stands on
-  # its own.
-  def test_every_component_applies_a_caller_class
-    ignoring = registry.names.reject do |name|
-      root_classes(render_component(component_class(name), name, class: 'sentinel-class'))
-        .include?('sentinel-class')
+  # "The class appears somewhere" is not the property worth having.
+  #
+  # The first version of this asserted only that a caller class landed on the
+  # element carrying data-senren-component. For the eight wrapper components
+  # that root is an empty shell, so `class_name: "max-w-2xl"` on a dialog
+  # satisfied the test while the panel stayed max-w-lg -- the class was in the
+  # DOM doing nothing, which is harder to debug than it being dropped. The test
+  # certified the bug.
+  #
+  # What a caller means by `class:` is "style this component", so the assertion
+  # is that the class lands on an element that also carries the component's own
+  # styling.
+  def test_a_caller_class_reaches_the_element_the_component_styles
+    stranded = registry.names.reject do |name|
+      html = render_component(component_class(name), name, class: 'sentinel-class')
+      Nokogiri::HTML5.fragment(html).css('[class]').any? do |el|
+        classes = el['class'].to_s.split
+        classes.include?('sentinel-class') && classes.size > 1
+      end
     rescue StandardError
       true
     end
 
-    assert_empty ignoring, "these drop a caller `class:`: #{ignoring.join(', ')}"
+    assert_empty stranded,
+                 'these put a caller class on an element they do not style, where it does ' \
+                 "nothing: #{stranded.join(', ')}"
   end
 
   # An unknown variant must be refused loudly rather than silently rendering the

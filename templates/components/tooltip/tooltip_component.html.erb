@@ -7,5 +7,5 @@
     <%= content %>
   </span>
   <span id="<%= id %>" role="tooltip" hidden data-senren--tooltip-target="bubble"
-        class="absolute z-50 mt-1 whitespace-nowrap rounded-md bg-[hsl(var(--senren-foreground))] text-[hsl(var(--senren-background))] px-2 py-1 text-xs shadow"><%= text %></span>
+        class="<%= panel_class("absolute z-50 mt-1 whitespace-nowrap rounded-md bg-[hsl(var(--senren-foreground))] text-[hsl(var(--senren-background))] px-2 py-1 text-xs shadow") %>"><%= text %></span>
 <% end %>

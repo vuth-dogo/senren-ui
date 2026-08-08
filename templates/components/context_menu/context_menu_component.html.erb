@@ -6,7 +6,7 @@
     <%= trigger %>
   </div>
   <div data-senren--context-menu-target="menu" role="menu" hidden
-       class="absolute z-50 w-56 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-1 shadow-md">
+       class="<%= panel_class("absolute z-50 w-56 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-1 shadow-md") %>">
     <% items.each do |it| %>
       <%= it %>
     <% end %>

@@ -16,7 +16,7 @@
 
   <div data-senren--sheet-target="panel" hidden role="dialog" aria-modal="true"
        data-open="false"
-       class="fixed z-50 bg-[hsl(var(--senren-background))] text-[hsl(var(--senren-foreground))] shadow-lg transition-transform duration-200 <%= self.class::VARIANTS[variant] %>">
+       class="<%= panel_class("fixed z-50 bg-[hsl(var(--senren-background))] text-[hsl(var(--senren-foreground))] shadow-lg transition-transform duration-200 #{ self.class::VARIANTS[variant] }") %>">
     <div class="flex h-full flex-col p-6">
       <% if title? %>
         <h2 class="text-lg font-semibold"><%= title %></h2>

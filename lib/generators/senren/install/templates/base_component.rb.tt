@@ -34,9 +34,7 @@ module Senren
       # Splatting html_attrs after a computed `data:` used to overwrite it
       # wholesale, so any component given a `data:` hash silently lost its
       # data-senren-component marker. MaskedInput hit this on every render.
-      data = (html_attrs[:data] || {})
-             .merge(extra.delete(:data) || {})
-             .merge(senren_component: senren_component_name)
+      data = merge_data(caller_data, extra.delete(:data), { senren_component: senren_component_name })
 
       # `class` had exactly the same defect and it was never fixed alongside
       # `data`. Every Rails tag helper accepts `class:`, so it is the first
@@ -50,9 +48,9 @@ module Senren
         self.class::SIZES[@size],
         @class_name,
         extra.delete(:class),
-        html_attrs[:class]
+        caller_class
       )
-      { class: tag_class, data: data, **html_attrs.except(:data, :class), **extra }
+      { class: tag_class, data: data, **html_attrs_without_class_and_data, **extra }
     end
 
     # For components whose root is a wrapper and whose styling lives on an inner
@@ -65,13 +63,21 @@ module Senren
     # descendants -- so the panel was positioned against the shifted root and
     # rendered off-screen. It opened; you just could not see it.
     def wrapper_attrs(*classes, **extra)
-      data = (html_attrs[:data] || {})
-             .merge(extra.delete(:data) || {})
-             .merge(senren_component: senren_component_name)
+      data = merge_data(caller_data, extra.delete(:data), { senren_component: senren_component_name })
+      tag_class = merge_classes(classes, extra.delete(:class))
 
-      tag_class = merge_classes(classes, @class_name, extra.delete(:class), html_attrs[:class])
+      { class: tag_class.presence, data: data, **html_attrs_without_class_and_data, **extra }.compact
+    end
 
-      { class: tag_class.presence, data: data, **html_attrs.except(:data, :class), **extra }.compact
+    # The class list for the element a wrapper component actually styles.
+    #
+    # For an overlay the caller means the panel: `class_name: "max-w-2xl"` on a
+    # dialog is a request to widen the dialog, not to widen an invisible
+    # wrapper. Putting it on the root left it in the DOM doing nothing, which is
+    # harder to debug than dropping it -- the class is right there and the panel
+    # is still max-w-lg.
+    def panel_class(*classes)
+      merge_classes(classes, @class_name, caller_class)
     end
 
     def senren_component_name
@@ -99,6 +105,38 @@ module Senren
     end
 
     private
+
+    # Callers write `data: { controller: "x" }` and `data: { "controller" => "x" }`
+    # interchangeably, and Rails renders both the same, so the merge has to see
+    # both the same. Reading with dig(:symbol) missed the String form entirely:
+    # the append never ran and the tag builder kept the caller's value alone,
+    # which for data-action removed the component's own close-on-click and
+    # arrow-key handling.
+    #
+    # `controller` and `action` are space-separated lists in Stimulus, so a
+    # caller's value is appended rather than substituted -- attaching your own
+    # controller to a Senren component must not unbind the component's.
+    APPENDABLE_DATA = %i[controller action].freeze
+
+    def merge_data(*sources)
+      sources.compact.map { |h| h.transform_keys(&:to_sym) }.reduce({}) do |acc, incoming|
+        acc.merge(incoming) do |key, old, new|
+          APPENDABLE_DATA.include?(key) ? [old, new].map(&:to_s).reject(&:empty?).uniq.join(' ') : new
+        end
+      end
+    end
+
+    def caller_class
+      html_attrs[:class] || html_attrs['class']
+    end
+
+    def caller_data
+      html_attrs[:data] || html_attrs['data']
+    end
+
+    def html_attrs_without_class_and_data
+      html_attrs.reject { |k, _| %w[class data].include?(k.to_s) }
+    end
 
     def safe_url(value, fallback: '#', protocols: SAFE_URL_PROTOCOLS)
       url = value.to_s.strip

@@ -18,7 +18,7 @@
   <div data-senren--alert-dialog-target="panel" hidden
        role="alertdialog" aria-modal="true" aria-labelledby="<%= dom_id %>-title" aria-describedby="<%= dom_id %>-desc"
        tabindex="-1"
-       class="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-6 shadow-lg">
+       class="<%= panel_class("fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-6 shadow-lg") %>">
     <% if title? %>
       <h2 id="<%= dom_id %>-title" class="text-lg font-semibold"><%= title %></h2>
     <% end %>

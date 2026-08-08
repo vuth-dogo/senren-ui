@@ -6,7 +6,7 @@
     <%= trigger %>
   </div>
   <div data-senren--popover-target="panel" hidden role="dialog"
-       class="absolute z-40 mt-2 min-w-[12rem] rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-4 shadow-md">
+       class="<%= panel_class("absolute z-40 mt-2 min-w-[12rem] rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-4 shadow-md") %>">
     <%= content_panel || content %>
   </div>
 <% end %>

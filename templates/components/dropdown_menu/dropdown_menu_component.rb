@@ -59,7 +59,7 @@ module Senren
           BASE_CLASSES,
           ('text-[hsl(var(--senren-destructive))]' if @destructive),
           class_name.presence,
-          html_attrs[:class].presence
+          caller_class.presence
         ].compact.join(' ')
       end
 
@@ -81,11 +81,10 @@ module Senren
       # A caller's own action is appended rather than dropped: an item that
       # tracks a click still has to close its menu.
       def item_attrs
-        actions = [ITEM_ACTION, html_attrs.dig(:data, :action).presence].compact.join(' ')
-        data = (html_attrs[:data] || {}).merge(action: actions)
+        data = merge_data(caller_data, { action: ITEM_ACTION })
         data = data.merge(turbo_method: @method) if @method && @href
 
-        html_attrs.except(:data, :class).merge(data: data)
+        html_attrs_without_class_and_data.merge(data: data)
       end
     end
   end

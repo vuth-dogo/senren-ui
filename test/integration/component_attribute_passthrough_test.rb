@@ -56,10 +56,21 @@ class ComponentAttributePassthroughTest < ViewComponent::TestCase
                  "from the server: #{missing.join(', ')}"
   end
 
-  def test_every_overlay_merges_a_caller_class_into_its_root
-    missing = OVERLAYS.reject { |name| render_root(name)&.attr('class').to_s.include?('probe-class') }
+  # Not "on its root" -- on the element it styles.
+  #
+  # An overlay's root is an empty wrapper; the panel is what has a width. A
+  # class parked on the wrapper is in the DOM and does nothing, which is worse
+  # to debug than being dropped, because it looks applied.
+  def test_every_overlay_puts_a_caller_class_where_it_styles
+    stranded = OVERLAYS.reject do |name|
+      render_inline(build(name)) { 'content' }
+      Nokogiri::HTML5.fragment(page.native.to_html).css('[class]').any? do |el|
+        classes = el['class'].to_s.split
+        classes.include?('probe-class') && classes.size > 1
+      end
+    end
 
-    assert_empty missing, "these drop a caller's class: #{missing.join(', ')}"
+    assert_empty stranded, "these leave a caller class on an element they do not style: #{stranded.join(', ')}"
   end
 
   # Merging must not cost the component its own hooks.
