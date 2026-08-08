@@ -106,6 +106,9 @@ module Senren
             publishes every file under an asset path, so component `.rb` and
             `.html.erb` source is precompiled into `public/assets` and served
             over HTTP. Put sidecar assets in `app/components/assets` instead.
+          - A button inside a form needs no `type:`. ButtonComponent omits the
+            attribute so the browser submits, as plain HTML does. Pass
+            `type: :button` only for a trigger that must not submit.
 
           ## Important Files
 

@@ -12,6 +12,17 @@
     <% end %>
   </section>
 
+  <section id="submit-probe">
+    <%# A real GET form. The browser navigates on submit, so the test can tell
+        "the button submitted" from "the button did nothing" by looking at the
+        URL rather than at an attribute. %>
+    <form action="/components/interactive" method="get">
+      <input type="hidden" name="submitted" value="yes">
+      <%= render(Senren::ButtonComponent.new(variant: :primary, id: "probe-submit")) { "Submit" } %>
+      <%= render(Senren::ButtonComponent.new(type: :button, id: "probe-trigger")) { "Trigger" } %>
+    </form>
+  </section>
+
   <section>
     <%= render Senren::SheetComponent.new(id: "system-sheet") do |sheet| %>
       <% sheet.with_trigger do %>

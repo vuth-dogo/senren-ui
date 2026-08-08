@@ -42,6 +42,18 @@ and obey it strictly.
    # NOT app/components
    ```
 
+9. **Do not pass `type:` to a button inside a form.** `ButtonComponent`
+   omits the attribute, so the browser's own rule applies and the button
+   submits, exactly as plain HTML does. Pass `type: :button` only for a
+   control that must *not* submit — a dialog, sheet, or menu trigger.
+   ```erb
+   <%%= form_with url: sessions_path do %>
+     <%%= render(Senren::ButtonComponent.new(variant: :primary)) { "Sign in" } %>
+   <%% end %>
+
+   <%%= render(Senren::ButtonComponent.new(type: :button)) { "Open dialog" } %>
+   ```
+
 ## File ownership
 
 | Path                                | Owned by         |
