@@ -4,7 +4,7 @@
   <section>
     <%= render Senren::DialogComponent.new(id: "system-dialog") do |dialog| %>
       <% dialog.with_trigger do %>
-        <%= render(Senren::ButtonComponent.new(id: "dialog-open")) { "Open dialog" } %>
+        <%= render(Senren::ButtonComponent.new(type: :button, id: "dialog-open")) { "Open dialog" } %>
       <% end %>
       <% dialog.with_title { "Dialog title" } %>
       <% dialog.with_description { "Dialog description" } %>
@@ -26,7 +26,7 @@
   <section>
     <%= render Senren::SheetComponent.new(id: "system-sheet") do |sheet| %>
       <% sheet.with_trigger do %>
-        <%= render(Senren::ButtonComponent.new(id: "sheet-open")) { "Open sheet" } %>
+        <%= render(Senren::ButtonComponent.new(type: :button, id: "sheet-open")) { "Open sheet" } %>
       <% end %>
       <% sheet.with_title { "Sheet title" } %>
       <% sheet.with_body do %>
@@ -42,7 +42,7 @@
   <section>
     <%= render Senren::AlertDialogComponent.new(id: "system-alert-dialog") do |ad| %>
       <% ad.with_trigger do %>
-        <%= render(Senren::ButtonComponent.new(id: "alert-dialog-open")) { "Open alert dialog" } %>
+        <%= render(Senren::ButtonComponent.new(type: :button, id: "alert-dialog-open")) { "Open alert dialog" } %>
       <% end %>
       <% ad.with_title { "Are you sure?" } %>
       <% ad.with_description { "This cannot be undone." } %>
@@ -52,7 +52,7 @@
   <section>
     <%= render Senren::DropdownMenuComponent.new do |menu| %>
       <% menu.with_trigger do %>
-        <%= render(Senren::ButtonComponent.new(id: "dropdown-trigger")) { "Menu actions" } %>
+        <%= render(Senren::ButtonComponent.new(type: :button, id: "dropdown-trigger")) { "Menu actions" } %>
       <% end %>
       <% menu.with_item { "First action" } %>
       <% menu.with_item { "Second action" } %>

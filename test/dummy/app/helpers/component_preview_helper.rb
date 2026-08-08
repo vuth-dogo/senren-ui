@@ -35,10 +35,10 @@ module ComponentPreviewHelper
       end
     when 'alert_dialog'
       render Senren::AlertDialogComponent.new(id: 'preview-alert-dialog') do |dialog|
-        dialog.with_trigger { render(Senren::ButtonComponent.new) { 'Open alert dialog' } }
+        dialog.with_trigger { render(Senren::ButtonComponent.new(type: :button)) { 'Open alert dialog' } }
         dialog.with_title { 'Confirm action' }
         dialog.with_description { 'This is an alert dialog preview.' }
-        dialog.with_cancel { render(Senren::ButtonComponent.new(variant: :ghost)) { 'Cancel' } }
+        dialog.with_cancel { render(Senren::ButtonComponent.new(type: :button, variant: :ghost)) { 'Cancel' } }
         dialog.with_confirm { render(Senren::ButtonComponent.new(variant: :destructive)) { 'Confirm' } }
       end
     when 'api_key_field'
@@ -129,14 +129,14 @@ module ComponentPreviewHelper
       render Senren::DatePickerComponent.new(name: 'published_on', value: '2026-05-30')
     when 'dialog'
       render Senren::DialogComponent.new(id: 'preview-dialog') do |dialog|
-        dialog.with_trigger { render(Senren::ButtonComponent.new) { 'Open dialog' } }
+        dialog.with_trigger { render(Senren::ButtonComponent.new(type: :button)) { 'Open dialog' } }
         dialog.with_title { 'Dialog title' }
         dialog.with_description { 'Dialog description' }
         dialog.with_body { 'Dialog body' }
       end
     when 'dropdown_menu'
       render Senren::DropdownMenuComponent.new do |menu|
-        menu.with_trigger { render(Senren::ButtonComponent.new) { 'Open menu' } }
+        menu.with_trigger { render(Senren::ButtonComponent.new(type: :button)) { 'Open menu' } }
         menu.with_item { 'First action' }
         menu.with_item { 'Second action' }
       end
@@ -176,7 +176,7 @@ module ComponentPreviewHelper
       render Senren::PaginationComponent.new(current_page: 2, total_pages: 5, path: '/components/kitchen_sink')
     when 'popover'
       render Senren::PopoverComponent.new do |popover|
-        popover.with_trigger { render(Senren::ButtonComponent.new) { 'Open popover' } }
+        popover.with_trigger { render(Senren::ButtonComponent.new(type: :button)) { 'Open popover' } }
         popover.with_content_panel { 'Popover content' }
       end
     when 'progress'
@@ -214,7 +214,7 @@ module ComponentPreviewHelper
       end
     when 'sheet'
       render Senren::SheetComponent.new(id: 'preview-sheet') do |sheet|
-        sheet.with_trigger { render(Senren::ButtonComponent.new) { 'Open sheet' } }
+        sheet.with_trigger { render(Senren::ButtonComponent.new(type: :button)) { 'Open sheet' } }
         sheet.with_title { 'Sheet title' }
         sheet.with_description { 'Sheet description' }
         sheet.with_body { 'Sheet body' }
