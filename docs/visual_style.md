@@ -82,6 +82,41 @@ Switching at runtime is one attribute write:
 document.documentElement.dataset.senrenTheme = "slate"
 ```
 
+## Overriding a Component's Classes
+
+`class_name:` and `class:` are both merged into the element the component
+styles. Merged, not resolved — the component's own class stays in the list:
+
+```erb
+<%= render Senren::DialogComponent.new(class_name: "max-w-sm") %>
+<!-- panel renders class="… max-w-lg max-w-sm …" -->
+```
+
+Two `max-w-*` declarations with identical specificity, so the winner is whichever
+Tailwind emits later in the stylesheet. The order of the HTML attribute is not an
+input to that. Tailwind emits the named scale alphabetically, which measured
+against a real build means:
+
+| You pass | Against dialog's `max-w-lg` | Result |
+| --- | --- | --- |
+| `max-w-sm` | `sm` emitted after `lg` | applies |
+| `max-w-2xl` | `2xl` emitted before `lg` | **silently ignored** |
+
+Nothing about either class tells you which you are getting. For an override that
+does not depend on emit order, use Tailwind's important modifier:
+
+```erb
+<%= render Senren::DialogComponent.new(class_name: "max-w-2xl!") %>
+```
+
+This applies to any pair from one utility family — `w-`, `h-`, `p-`, `z-`,
+`text-`, `bg-`. It is not specific to widths. Senren does not ship a
+class-conflict resolver; adding one means a `tailwind_merge` dependency, which
+the library has so far chosen not to take.
+
+Classes from families the component does not use need no modifier — there is
+nothing to conflict with.
+
 ## Component Rules
 
 - Prefer semantic tokens over raw color utilities.

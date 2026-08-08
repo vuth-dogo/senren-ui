@@ -40,8 +40,9 @@ module Senren
       # `data`. Every Rails tag helper accepts `class:`, so it is the first
       # thing anyone types — and splatting html_attrs replaced the computed
       # value outright, erasing the component's variant and size styling with
-      # no warning. It is merged like any other caller-supplied class instead,
-      # last so it still wins where the two genuinely conflict.
+      # no warning. It is merged like any other caller-supplied class instead.
+      #
+      # Merged, not resolved, and the distinction matters. See merge_classes.
       tag_class = merge_classes(
         classes,
         self.class::VARIANTS[@variant],
@@ -121,7 +122,12 @@ module Senren
     def merge_data(*sources)
       sources.compact.map { |h| h.transform_keys(&:to_sym) }.reduce({}) do |acc, incoming|
         acc.merge(incoming) do |key, old, new|
-          APPENDABLE_DATA.include?(key) ? [old, new].map(&:to_s).reject(&:empty?).uniq.join(' ') : new
+          # Split before uniq. Deduplicating the two whole strings only catches an
+        # exact repeat: `data: { controller: "a senren--popover" }` on a popover
+        # produced "a senren--popover senren--popover", and Stimulus reads that
+        # list literally -- same controller connected twice on one element, every
+        # action firing twice, so a toggle opens and immediately closes.
+        APPENDABLE_DATA.include?(key) ? [old, new].map(&:to_s).join(' ').split.uniq.join(' ') : new
         end
       end
     end
@@ -176,6 +182,33 @@ module Senren
       raise ArgumentError, "Unknown #{label}: #{value.inspect}. Allowed: #{table.keys.join(', ')}"
     end
 
+    # Concatenation, not conflict resolution — and the caller's class going last
+    # in the attribute does not make it win.
+    #
+    # `class="max-w-lg max-w-2xl"` leaves both declarations live. Which applies
+    # is decided by the order the two rules appear in the stylesheet, because
+    # their specificity is identical; the order of the attribute is not an input
+    # to that at all. Tailwind emits the named scale alphabetically, so measured
+    # against a real build:
+    #
+    #   dialog base max-w-lg + class_name: "max-w-sm"  -> sm wins   (works)
+    #   dialog base max-w-lg + class_name: "max-w-2xl" -> lg wins   (silent no-op)
+    #
+    # Narrowing happens to work and widening happens not to, and nothing about
+    # either class says which you are getting. Any pair drawn from one utility
+    # family has this property.
+    #
+    # Resolving it properly means knowing which Tailwind utilities conflict,
+    # which is irregular enough (`text-sm` and `text-red-500` share a prefix and
+    # are different families) that a partial implementation would silently drop
+    # a component's own styling — a worse failure than the one it replaces. That
+    # is what tailwind_merge is for, and taking the dependency is a decision
+    # this library has not made.
+    #
+    # Until it does, the deterministic override is Tailwind's own important
+    # modifier, which beats source order rather than depending on it:
+    #
+    #   render Senren::DialogComponent.new(class_name: "max-w-2xl!")
     def merge_classes(*sources)
       sources.flatten.map { |s| s.to_s.strip }.reject(&:empty?).join(' ')
     end

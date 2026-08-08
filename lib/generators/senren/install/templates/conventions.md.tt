@@ -71,6 +71,18 @@ and obey it strictly.
     replacing it. Add a palette by copying a block and changing values; no
     component reads the theme, so none needs editing.
 
+11. **`class:` is merged, not resolved.** Passing `class_name: "max-w-sm"` to a
+    dialog produces `class="… max-w-lg max-w-sm …"` — the component's own class
+    is still there. Both have the same specificity, so the winner is decided by
+    which one Tailwind emits later in the stylesheet, **not** by the order in
+    the attribute. Narrowing a dialog works; widening it silently does not.
+    When overriding a utility the component already uses, add Tailwind's
+    important modifier:
+    ```erb
+    <%%= render Senren::DialogComponent.new(class_name: "max-w-2xl!") %>
+    ```
+    Classes from families the component does not use need no modifier.
+
 ## File ownership
 
 | Path                                | Owned by         |

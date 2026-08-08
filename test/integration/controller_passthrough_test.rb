@@ -37,6 +37,42 @@ class ControllerPassthroughTest < ViewComponent::TestCase
     assert_includes value, 'senren--popover'
   end
 
+  # Appending is only half of it: the result has to be a valid identifier list.
+  #
+  # A caller who names the component's own controller alongside theirs -- which
+  # is what you write if you are not sure whether the component sets it, and what
+  # copying an existing data-controller produces -- got it twice. The merge did
+  # dedupe, but on the two whole strings, so "a senren--popover" and
+  # "senren--popover" compared unequal and both went through.
+  #
+  # Stimulus takes that list literally. The same controller connects twice on one
+  # element and every action fires twice, so a toggle opens and immediately
+  # closes: an intermittent-looking bug with no error attached to it.
+  def test_a_repeated_controller_token_appears_once
+    duplicated = WRAPPERS.reject do |name|
+      own = "senren--#{name.tr('_', '-')}"
+      value = root(name, data: { controller: "my-analytics #{own}" })&.attr('data-controller').to_s
+      value.split.count(own) == 1 && value.include?('my-analytics')
+    end
+
+    assert_empty duplicated,
+                 'these emit their own controller twice, so Stimulus connects it twice and every ' \
+                 "action fires twice: #{duplicated.join(', ')}"
+  end
+
+  # data-action is the same list, and the case that actually reaches users:
+  # a dropdown item that tracks clicks is written by copying the existing action.
+  def test_a_repeated_action_token_appears_once
+    render_inline(Senren::DropdownMenuComponent.new) do |menu|
+      menu.with_trigger { 'Open' }
+      menu.with_item(href: '/x', data: { action: 'click->analytics#track click->senren--dropdown-menu#close' }) { 'A' }
+    end
+    value = Nokogiri::HTML5.fragment(page.native.to_html).at_css('a[role="menuitem"]')['data-action'].to_s
+
+    assert_equal 1, value.split.count('click->senren--dropdown-menu#close'), value
+    assert_includes value, 'click->analytics#track'
+  end
+
   # dropdown_menu also writes data-state on its root; a caller's own state must
   # not knock it out.
   def test_component_owned_data_survives_alongside_caller_data

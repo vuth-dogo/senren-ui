@@ -35,9 +35,23 @@ bug fixes only.
   styling and `data:` erased its `data-senren-component` marker.
 - For the eight wrapper components — dialog, alert dialog, sheet, popover,
   dropdown menu, context menu, hover card, tooltip — a caller's class now lands
-  on the panel, which is the element they style, not on the empty root. It used
-  to be applied to the root, where it sat in the DOM doing nothing:
-  `class_name: "max-w-2xl"` on a dialog left the panel at `max-w-lg`.
+  on the panel, which is the element they style, not on the empty root, where it
+  sat in the DOM doing nothing.
+
+  This makes the extension point reachable; it does not make it resolve
+  conflicts. `class_name: "max-w-sm"` on a dialog emits
+  `class="max-w-lg max-w-sm"` and both declarations stay live, so which one
+  applies is decided by the order Tailwind emits them, not by the order of the
+  attribute. Measured against a real build: `max-w-sm` wins (narrowing works),
+  `max-w-2xl` loses (widening is a silent no-op). Use Tailwind's important
+  modifier — `class_name: "max-w-2xl!"` — for an override that does not depend
+  on emit order.
+- A caller's `data-controller` or `data-action` that repeated one of the
+  component's own tokens was appended rather than deduplicated:
+  `data: { controller: "a senren--popover" }` produced
+  `"a senren--popover senren--popover"`. Stimulus reads that list literally, so
+  the controller connected twice and every action fired twice — a toggle opened
+  and immediately closed. Tokens are deduplicated individually now.
 - `data-controller` and `data-action` are appended rather than substituted, so
   attaching your own Stimulus controller to a Senren component no longer unbinds
   the component's own.

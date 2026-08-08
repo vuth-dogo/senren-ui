@@ -56,21 +56,53 @@ class ComponentAttributePassthroughTest < ViewComponent::TestCase
                  "from the server: #{missing.join(', ')}"
   end
 
+  # Every overlay's panel is positioned, so every one of them carries this.
+  # Named rather than inferred: "the element with the most classes" looked like
+  # a reasonable stand-in for "the element the component styles" and is wrong
+  # for 20 of the 62 components -- composites like app_shell and calendar style
+  # a root that has fewer classes than something nested inside it.
+  PANEL_TOKEN = {
+    'dialog' => 'max-w-lg',
+    'alert_dialog' => 'max-w-md',
+    'sheet' => 'fixed',
+    'popover' => 'min-w-[12rem]',
+    'dropdown_menu' => 'w-56',
+    'context_menu' => 'w-56',
+    'hover_card' => 'w-64',
+    'tooltip' => 'whitespace-nowrap'
+  }.freeze
+
   # Not "on its root" -- on the element it styles.
   #
   # An overlay's root is an empty wrapper; the panel is what has a width. A
   # class parked on the wrapper is in the DOM and does nothing, which is worse
   # to debug than being dropped, because it looks applied.
+  #
+  # Anchored to a class the panel is known to carry. An earlier version accepted
+  # any element holding the sentinel plus one other class, which happens to
+  # single out the panel for these eight and would not for a component that
+  # renders, say, a <span class="sr-only"> -- it would pass on the label.
   def test_every_overlay_puts_a_caller_class_where_it_styles
-    stranded = OVERLAYS.reject do |name|
-      render_inline(build(name)) { 'content' }
-      Nokogiri::HTML5.fragment(page.native.to_html).css('[class]').any? do |el|
-        classes = el['class'].to_s.split
-        classes.include?('probe-class') && classes.size > 1
-      end
-    end
+    stranded = OVERLAYS.reject { |name| panel_carrying(name, 'probe-class') }
 
     assert_empty stranded, "these leave a caller class on an element they do not style: #{stranded.join(', ')}"
+  end
+
+  # `class_name:` is the documented styling hook and `class:` is what a Rails
+  # developer types first. They must reach the same element or one of the two is
+  # lying about what it does.
+  def test_class_and_class_name_reach_the_same_element
+    split = OVERLAYS.reject do |name|
+      render_inline(
+        build(name).class.new(**REQUIRED.fetch(name, {}), class_name: 'via-class-name', class: 'via-class')
+      ) { 'content' }
+      element = element_with(page.native.to_html, 'via-class')
+      element && element['class'].to_s.split.include?('via-class-name')
+    end
+
+    assert_empty split,
+                 'these send class: and class_name: to different elements, so one of them is ' \
+                 "not the styling hook it claims to be: #{split.join(', ')}"
   end
 
   # Merging must not cost the component its own hooks.
@@ -93,5 +125,19 @@ class ComponentAttributePassthroughTest < ViewComponent::TestCase
     root = root_of('sheet', page.native.to_html)
 
     assert_equal 'true', root.attr('data-senren--sheet-open-value')
+  end
+
+  private
+
+  def element_with(html, token)
+    Nokogiri::HTML5.fragment(html).css('[class]').find { |el| el['class'].to_s.split.include?(token) }
+  end
+
+  # The sentinel must sit on the element carrying the panel's own base class,
+  # not merely somewhere in the subtree.
+  def panel_carrying(name, token)
+    render_inline(build(name)) { 'content' }
+    element = element_with(page.native.to_html, token)
+    element && element['class'].to_s.split.include?(PANEL_TOKEN.fetch(name))
   end
 end
