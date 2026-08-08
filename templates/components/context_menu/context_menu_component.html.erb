@@ -1,4 +1,7 @@
-<div data-controller="senren--context-menu" class="relative" data-senren-component="context_menu">
+<%# Root goes through root_attrs so a caller's class: and data: reach it.
+    Hand-writing these attributes dropped both -- which is why a Stimulus
+    value could not be set from the server. %>
+<%= tag.div(**wrapper_attrs("relative", data: { controller: "senren--context-menu" })) do %>
   <div data-senren--context-menu-target="trigger" data-action="contextmenu->senren--context-menu#open">
     <%= trigger %>
   </div>
@@ -8,4 +11,4 @@
       <%= it %>
     <% end %>
   </div>
-</div>
+<% end %>

@@ -55,6 +55,25 @@ module Senren
       { class: tag_class, data: data, **html_attrs.except(:data, :class), **extra }
     end
 
+    # For components whose root is a wrapper and whose styling lives on an inner
+    # element -- every overlay: the panel is what gets positioned, the root just
+    # hosts the controller.
+    #
+    # Same merging as root_attrs, minus VARIANTS and SIZES. Passing those to the
+    # root of a sheet applied `translate-x-full` there, and a transformed
+    # ancestor becomes the containing block for its `position: fixed`
+    # descendants -- so the panel was positioned against the shifted root and
+    # rendered off-screen. It opened; you just could not see it.
+    def wrapper_attrs(*classes, **extra)
+      data = (html_attrs[:data] || {})
+             .merge(extra.delete(:data) || {})
+             .merge(senren_component: senren_component_name)
+
+      tag_class = merge_classes(classes, @class_name, extra.delete(:class), html_attrs[:class])
+
+      { class: tag_class.presence, data: data, **html_attrs.except(:data, :class), **extra }.compact
+    end
+
     def senren_component_name
       self.class.name.to_s.sub(/^Senren::/, '').sub(/Component$/, '').gsub(/([a-z])([A-Z])/, '\1_\2').downcase
     end

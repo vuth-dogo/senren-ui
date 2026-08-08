@@ -1,4 +1,7 @@
-<div data-controller="senren--dropdown-menu" class="relative inline-block" data-state="closed" data-senren-component="dropdown_menu">
+<%# Root goes through root_attrs so a caller's class: and data: reach it.
+    Hand-writing these attributes dropped both -- which is why a Stimulus
+    value could not be set from the server. %>
+<%= tag.div(**wrapper_attrs("relative inline-block", data: { controller: "senren--dropdown-menu", state: "closed" })) do %>
   <div class="inline-flex cursor-pointer" data-state="closed" aria-haspopup="menu" aria-expanded="false" data-senren--dropdown-menu-target="trigger" data-action="click->senren--dropdown-menu#toggle keydown->senren--dropdown-menu#onTriggerKey">
     <%= trigger %>
   </div>
@@ -9,4 +12,4 @@
       <%= it %>
     <% end %>
   </div>
-</div>
+<% end %>

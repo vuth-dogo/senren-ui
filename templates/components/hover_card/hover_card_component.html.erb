@@ -1,4 +1,7 @@
-<span data-controller="senren--hover-card" class="relative inline-block" data-senren-component="hover_card">
+<%# Root goes through root_attrs so a caller's class: and data: reach it.
+    Hand-writing these attributes dropped both -- which is why a Stimulus
+    value could not be set from the server. %>
+<%= tag.span(**wrapper_attrs("relative inline-block", data: { controller: "senren--hover-card" })) do %>
   <span tabindex="0"
         data-action="mouseenter->senren--hover-card#show mouseleave->senren--hover-card#hide focus->senren--hover-card#show blur->senren--hover-card#hide">
     <%= trigger %>
@@ -7,4 +10,4 @@
         class="absolute z-40 mt-2 w-64 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-4 shadow-md">
     <%= content_panel || content %>
   </span>
-</span>
+<% end %>

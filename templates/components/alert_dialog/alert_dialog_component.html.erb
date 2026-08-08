@@ -1,4 +1,7 @@
-<div data-controller="senren--alert-dialog" data-senren-component="alert_dialog" id="<%= dom_id %>">
+<%# Root goes through root_attrs so a caller's class: and data: reach it.
+    Hand-writing these attributes dropped both -- which is why a Stimulus
+    value could not be set from the server. %>
+<%= tag.div(**wrapper_attrs(id: dom_id, data: { controller: "senren--alert-dialog" })) do %>
   <% if trigger? %>
     <span data-action="click->senren--alert-dialog#open" data-senren--alert-dialog-target="trigger">
       <%= trigger %>
@@ -31,4 +34,4 @@
       <% end %>
     </div>
   </div>
-</div>
+<% end %>

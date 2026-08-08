@@ -1,4 +1,7 @@
-<div data-controller="senren--popover" class="relative inline-block" data-senren-component="popover">
+<%# Root goes through root_attrs so a caller's class: and data: reach it.
+    Hand-writing these attributes dropped both -- which is why a Stimulus
+    value could not be set from the server. %>
+<%= tag.div(**wrapper_attrs("relative inline-block", data: { controller: "senren--popover" })) do %>
   <div data-senren--popover-target="trigger" data-action="click->senren--popover#toggle">
     <%= trigger %>
   </div>
@@ -6,4 +9,4 @@
        class="absolute z-40 mt-2 min-w-[12rem] rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-popover))] text-[hsl(var(--senren-popover-foreground))] p-4 shadow-md">
     <%= content_panel || content %>
   </div>
-</div>
+<% end %>

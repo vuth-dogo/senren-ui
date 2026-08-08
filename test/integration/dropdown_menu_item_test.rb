@@ -64,4 +64,43 @@ class DropdownMenuItemTest < ViewComponent::TestCase
 
     refute_includes html, 'javascript:'
   end
+
+  # `class:` had the same defect `data:` did, and the fix for `data:` was never
+  # extended to it. Losing the item's own classes costs more than looks:
+  # `focus:bg-` is the only indication a keyboard user has of where they are in
+  # the menu, so arrow-key navigation goes silent.
+  def test_caller_classes_are_merged_with_the_item_styles
+    html = render_menu(href: '/x', class: 'font-bold').native.to_html
+
+    assert_includes html, 'font-bold'
+    assert_includes html, 'hover:bg-', 'caller class must not replace the item styles'
+    assert_includes html, 'focus:bg-', 'a keyboard user needs the focus indicator'
+  end
+
+  def test_class_name_and_class_both_survive
+    html = render_menu(href: '/x', class_name: 'ml-2', class: 'font-bold').native.to_html
+
+    assert_includes html, 'ml-2'
+    assert_includes html, 'font-bold'
+    assert_includes html, 'focus:bg-'
+  end
+
+  # A caller binding its own action must not lose the menu's -- closing on click
+  # and arrow-key handling are what make it a menu.
+  def test_a_caller_action_is_appended_to_the_item_action
+    html = render_menu(href: '/x', data: { action: 'click->analytics#track' }).native.to_html
+
+    assert_includes html, 'senren--dropdown-menu#close'
+    assert_includes html, 'analytics#track'
+  end
+
+  # Turbo reads data-turbo-method on links. On a <button> it does nothing, so
+  # emitting it there advertises behaviour that cannot happen.
+  def test_method_without_href_does_not_emit_an_inert_attribute
+    html = render_menu(method: :delete).native.to_html
+
+    assert_includes html, '<button'
+    refute_includes html, 'data-turbo-method',
+                    'a button cannot act on data-turbo-method; Turbo only reads it on <a>'
+  end
 end

@@ -24,6 +24,10 @@ module Senren
       SIZES = { md: '' }.freeze
       ITEM_ACTION = 'click->senren--dropdown-menu#close keydown->senren--dropdown-menu#onItemKey'
 
+      BASE_CLASSES = 'block w-full text-left px-3 py-2 text-sm rounded-sm ' \
+                     'hover:bg-[hsl(var(--senren-accent))] focus:bg-[hsl(var(--senren-accent))] ' \
+                     'outline-none cursor-pointer'
+
       def initialize(href: nil, method: nil, destructive: false, class_name: nil, **)
         super(variant: :default, size: :md, class_name: class_name, **)
         @href = href
@@ -32,18 +36,32 @@ module Senren
       end
 
       def call
-        klass = 'block w-full text-left px-3 py-2 text-sm rounded-sm hover:bg-[hsl(var(--senren-accent))] focus:bg-[hsl(var(--senren-accent))] outline-none cursor-pointer'
-        klass += " #{class_name}" if class_name.present?
-        klass += ' text-[hsl(var(--senren-destructive))]' if @destructive
-
         if @href
-          link_to(content, safe_url(@href), role: 'menuitem', class: klass, **item_attrs)
+          link_to(content, safe_url(@href), role: 'menuitem', class: item_classes, **item_attrs)
         else
-          tag.button(content, type: 'button', role: 'menuitem', class: klass, **item_attrs)
+          tag.button(content, type: 'button', role: 'menuitem', class: item_classes, **item_attrs)
         end
       end
 
       private
+
+      # `class:` is merged, not substituted.
+      #
+      # It used to reach `call` only through **html_attrs, which the tag helper
+      # splatted over the computed class -- so `class: "font-bold"` produced an
+      # item wearing nothing but font-bold. Losing the hover style is cosmetic;
+      # losing `focus:bg-` is not, because it is the only indication a keyboard
+      # user has of where they are while arrowing through the menu.
+      #
+      # Same defect `data:` had, and the fix for `data:` was not extended here.
+      def item_classes
+        [
+          BASE_CLASSES,
+          ('text-[hsl(var(--senren-destructive))]' if @destructive),
+          class_name.presence,
+          html_attrs[:class].presence
+        ].compact.join(' ')
+      end
 
       # Two defects lived in the old one-line version of `call`.
       #
@@ -57,12 +75,17 @@ module Senren
       # Rails 7 dropped rails-ujs, so it rendered a `method` attribute on an
       # `<a>` that does nothing at all: a documented parameter that had been
       # inert since the library targeted Rails 7.1. Turbo reads
-      # data-turbo-method.
+      # data-turbo-method -- and only on a link, which is why `method:` without
+      # `href:` emits nothing rather than an attribute a <button> cannot act on.
+      #
+      # A caller's own action is appended rather than dropped: an item that
+      # tracks a click still has to close its menu.
       def item_attrs
-        data = (html_attrs[:data] || {}).merge(action: ITEM_ACTION)
-        data = data.merge(turbo_method: @method) if @method
+        actions = [ITEM_ACTION, html_attrs.dig(:data, :action).presence].compact.join(' ')
+        data = (html_attrs[:data] || {}).merge(action: actions)
+        data = data.merge(turbo_method: @method) if @method && @href
 
-        html_attrs.except(:data).merge(data: data)
+        html_attrs.except(:data, :class).merge(data: data)
       end
     end
   end

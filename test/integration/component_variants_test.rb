@@ -135,19 +135,11 @@ class ComponentVariantsTest < ViewComponent::TestCase
     assert_empty losses, "components whose styling a caller `class:` erased:\n#{losses.join("\n")}"
   end
 
-  # A separate defect from the one above, and a pre-existing one: these eight
-  # write their root element by hand instead of through root_attrs, so a caller
-  # `class:` (and `class_name:`) is not substituted — it is dropped entirely and
-  # never reaches the DOM. Found by the test above, which is why it is recorded
-  # here rather than quietly excluded from it.
-  #
-  # Pinned as an exact list so the set can only shrink. Fixing one means
-  # deleting its name here; the assertion fails if a new component joins them.
-  DROPS_CALLER_CLASS = %w[
-    alert_dialog context_menu dialog dropdown_menu hover_card popover sheet tooltip
-  ].freeze
-
-  def test_only_the_known_hand_written_roots_ignore_a_caller_class
+  # Every component now applies a caller `class:` to its root. The eight that
+  # did not were pinned here as an exact list so the set could only shrink; it
+  # shrank to nothing, so the exception list is gone and the property stands on
+  # its own.
+  def test_every_component_applies_a_caller_class
     ignoring = registry.names.reject do |name|
       root_classes(render_component(component_class(name), name, class: 'sentinel-class'))
         .include?('sentinel-class')
@@ -155,8 +147,7 @@ class ComponentVariantsTest < ViewComponent::TestCase
       true
     end
 
-    assert_equal DROPS_CALLER_CLASS, ignoring.sort,
-                 'this list must only shrink; a new component ignoring `class:` is a regression'
+    assert_empty ignoring, "these drop a caller `class:`: #{ignoring.join(', ')}"
   end
 
   # An unknown variant must be refused loudly rather than silently rendering the

@@ -1,4 +1,7 @@
-<div data-controller="senren--sheet" data-senren-component="sheet" id="<%= dom_id %>">
+<%# Root goes through root_attrs so a caller's class: and data: reach it.
+    Hand-writing these attributes dropped both -- which is why a Stimulus
+    value could not be set from the server. %>
+<%= tag.div(**wrapper_attrs(id: dom_id, data: { controller: "senren--sheet" })) do %>
   <% if trigger? %>
     <span data-action="click->senren--sheet#open" data-senren--sheet-target="trigger">
       <%= trigger %>
@@ -40,4 +43,4 @@
       <span aria-hidden="true">×</span>
     </button>
   </div>
-</div>
+<% end %>
