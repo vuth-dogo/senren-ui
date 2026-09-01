@@ -101,3 +101,9 @@ jobs:
 
       - name: Run controller checks
         run: bun run controllers:check
+
+      # Herb lints the markup. It lives in this job rather than the Ruby one
+      # because it ships as an npm package, and the version is pinned in
+      # .herb.yml so a new release cannot enable rules under an unrelated PR.
+      - name: Lint HTML in templates
+        run: bun run templates:lint

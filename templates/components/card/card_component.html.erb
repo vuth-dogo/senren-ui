@@ -2,11 +2,9 @@
   <% if header? %>
     <div class="flex flex-col space-y-1.5 p-6 border-b border-[hsl(var(--senren-border))]"><%= header %></div>
   <% end %>
-  <% if body? %>
-    <div class="p-6"><%= body %></div>
-  <% else %>
-    <div class="p-6"><%= content %></div>
-  <% end %>
+  <%# One <div>, not the same one in both branches: the padding is the card's, %>
+  <%# and duplicating the element meant a change to it had to be made twice. %>
+  <div class="p-6"><%= body? ? body : content %></div>
   <% if footer? %>
     <div class="flex items-center gap-2 p-6 border-t border-[hsl(var(--senren-border))]"><%= footer %></div>
   <% end %>

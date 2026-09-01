@@ -1,0 +1,61 @@
+# Herb lints the HTML side of these templates. RuboCop checks the Ruby, Biome
+# checks the Stimulus controllers, erb_lint checks ERB structure -- and the
+# markup itself had no linter, which is where this one earns its place.
+#
+# It was adopted after a user reported squiggles in their editor that none of
+# our gates produced. Herb found 32 offenses in the templates this gem copies
+# into other people's applications: conditional boolean attributes written as
+# `<%= "hidden" unless x %>`, roots built with `tag.attributes` where `tag.div`
+# reads plainly, an `aria-activedescendant=""` that is invalid empty, and three
+# raw `<img>` tags where `image_tag` belongs. All are fixed; this file keeps
+# them fixed.
+#
+# That is the reason the version is pinned. A floating version would enable new
+# rules on some unrelated pull request and fail it for something its author did
+# not write. Bump it deliberately, with `herb-lint --upgrade`, and fix what the
+# new rules find as its own change.
+version: 0.10.3
+
+# Auto-detected, but stated so a checkout without the Gemfile loaded still
+# enables the actionview-* rules -- one of which found 15 of the 32.
+framework: actionview
+template_engine: erubi
+
+linter:
+  enabled: true
+
+  # Every rule Herb enables by default, with none switched off.
+  #
+  # Two were tempting to disable and were fixed instead, which is worth
+  # recording because both looked like false positives:
+  #
+  #   html-anchor-require-href fired on ButtonComponent and LinkComponent, whose
+  #   href arrives inside `**root_attrs(...)`. A static analyser cannot see
+  #   through a splat, so the honest fix was to hoist `href:` into an explicit
+  #   keyword argument -- which reads better anyway, since the href is the point
+  #   of an anchor and was buried among styling.
+  #
+  #   erb-prefer-image-tag-helper fired on three components that take a URL from
+  #   application data. `image_tag` was safe there only because all three already
+  #   route through `safe_media_url`, so the value is always an absolute http(s)
+  #   URL and the asset pipeline has nothing to resolve. Checked before changing
+  #   them, not assumed.
+  #
+  # The 15 rules Herb ships but does not enable by default stay off. They are
+  # opinionated in ways this library has not decided on -- `erb-strict-locals-
+  # required` alone would want a magic comment on every partial.
+  #
+  # These templates get copied into other people's applications, where their
+  # herb config lints them, not ours. So they are also checked against every
+  # rule Herb has, and that run is down to six offences from one rule that is
+  # simply wrong: html-no-block-inside-inline reports "Unknown element `<svg>`"
+  # inside a button and "Unknown element `<option>`" inside a select. Its
+  # element table does not know either tag. It is not enabled by default and the
+  # markup is not being bent to satisfy it -- but the number is checked, because
+  # a downstream developer with stricter settings should not inherit warnings in
+  # files we wrote and they now own.
+
+formatter:
+  # Off. It reflows attributes, and these templates carry Tailwind class strings
+  # long enough that any reflow is churn rather than a diff anyone can read.
+  enabled: false

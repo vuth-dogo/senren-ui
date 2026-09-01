@@ -1,4 +1,4 @@
-<div <%= tag.attributes(**root_attrs("w-72 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] p-3 text-[hsl(var(--senren-card-foreground))]", data: { controller: "senren--calendar" })) %>>
+<%= tag.div(**root_attrs("w-72 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] p-3 text-[hsl(var(--senren-card-foreground))]", data: { controller: "senren--calendar" })) do %>
   <% if name.present? %>
     <input type="hidden" name="<%= name %>" value="<%= selected&.iso8601 %>" data-senren--calendar-target="value">
   <% end %>
@@ -18,4 +18,4 @@
       </button>
     <% end %>
   </div>
-</div>
+<% end %>

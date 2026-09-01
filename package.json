@@ -6,9 +6,12 @@
     "controllers:syntax": "bun run scripts/check_js_syntax.js templates/controllers",
     "controllers:lint": "bun run --bun biome lint templates/controllers",
     "controllers:lint:fix": "bun run --bun biome lint --write templates/controllers",
-    "controllers:check": "bun run controllers:syntax && bun run controllers:lint"
+    "controllers:check": "bun run controllers:syntax && bun run controllers:lint",
+    "templates:lint": "bun run --bun herb-lint",
+    "templates:lint:fix": "bun run --bun herb-lint --fix"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.6"
+    "@biomejs/biome": "^2.5.6",
+    "@herb-tools/linter": "0.10.3"
   }
 }

@@ -1,5 +1,9 @@
-<% if items.any? %>
-  <nav <%= tag.attributes(**root_attrs("text-sm text-[hsl(var(--senren-muted-foreground))]", aria: { label: label })) %>>
+<%# The <nav> is outside the branch on purpose. It used to be written twice,
+    once per branch, with the same root_attrs call duplicated -- so a change to
+    the root had to be made in two places and the empty case was one edit away
+    from silently losing its aria-label. %>
+<%= tag.nav(**root_attrs("text-sm text-[hsl(var(--senren-muted-foreground))]", aria: { label: label })) do %>
+  <% if items.any? %>
     <ol class="flex flex-wrap items-center gap-2">
       <% items.each_with_index do |item, index| %>
         <% current = index == items.length - 1 || item[:href].blank? %>
@@ -15,9 +19,7 @@
         </li>
       <% end %>
     </ol>
-  </nav>
-<% else %>
-  <nav <%= tag.attributes(**root_attrs("text-sm text-[hsl(var(--senren-muted-foreground))]", aria: { label: label })) %>>
+  <% else %>
     <%= content %>
-  </nav>
+  <% end %>
 <% end %>

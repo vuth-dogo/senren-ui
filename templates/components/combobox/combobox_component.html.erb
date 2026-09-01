@@ -1,4 +1,4 @@
-<div <%= tag.attributes(**root_attrs("relative w-full", data: { controller: "senren--combobox" })) %>>
+<%= tag.div(**root_attrs("relative w-full", data: { controller: "senren--combobox" })) do %>
   <input type="hidden" name="<%= name %>" value="<%= value %>" data-senren--combobox-target="value">
   <button type="button" class="group flex h-10 w-full cursor-pointer items-center justify-between rounded-(--senren-radius) border bg-[hsl(var(--senren-background))] px-3 text-left text-sm text-[hsl(var(--senren-foreground))] transition-colors hover:bg-[hsl(var(--senren-muted)/0.35)] <%= self.class::VARIANTS[variant] %>" aria-haspopup="listbox" aria-expanded="false" data-state="closed" data-senren--combobox-target="button" data-action="click->senren--combobox#toggle">
     <span data-senren--combobox-target="label"><%= selected_label || placeholder %></span>
@@ -16,4 +16,4 @@
       <% end %>
     </div>
   </div>
-</div>
+<% end %>

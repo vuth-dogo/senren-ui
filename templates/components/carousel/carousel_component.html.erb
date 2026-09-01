@@ -6,7 +6,7 @@
       <% slides.each_with_index do |slide, index| %>
         <article data-senren--carousel-target="slide" data-index="<%= index %>" class="<%= index.zero? ? '' : 'hidden' %>">
           <% if slide[:image_url].present? %>
-            <img src="<%= slide[:image_url] %>" alt="<%= slide[:alt] || slide[:title] %>" class="aspect-video w-full object-cover">
+            <%= image_tag slide[:image_url], alt: slide[:alt] || slide[:title], class: "aspect-video w-full object-cover" %>
           <% else %>
             <div class="relative flex aspect-video items-end overflow-hidden bg-[hsl(var(--senren-muted)/0.45)] p-6">
               <svg aria-hidden="true" viewBox="0 0 960 540" preserveAspectRatio="none" class="absolute inset-0 h-full w-full">

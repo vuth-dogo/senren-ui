@@ -4,7 +4,7 @@
   <% else %>
     <label for="<%= dom_id %>-input" class="sr-only"><%= label %></label>
     <div class="border-b border-[hsl(var(--senren-border))] p-2">
-      <input id="<%= dom_id %>-input" type="search" autocomplete="off" placeholder="<%= placeholder %>" aria-label="<%= label %>" aria-controls="<%= dom_id %>-list" aria-activedescendant="" data-senren--command-target="input" data-action="input->senren--command#filter keydown->senren--command#onKey" class="h-10 w-full rounded-(--senren-radius) bg-[hsl(var(--senren-background))] px-3 text-sm text-[hsl(var(--senren-foreground))] outline-none placeholder:text-[hsl(var(--senren-muted-foreground))] focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
+      <input id="<%= dom_id %>-input" type="search" autocomplete="off" placeholder="<%= placeholder %>" aria-label="<%= label %>" aria-controls="<%= dom_id %>-list" data-senren--command-target="input" data-action="input->senren--command#filter keydown->senren--command#onKey" class="h-10 w-full rounded-(--senren-radius) bg-[hsl(var(--senren-background))] px-3 text-sm text-[hsl(var(--senren-foreground))] outline-none placeholder:text-[hsl(var(--senren-muted-foreground))] focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
     </div>
     <div id="<%= dom_id %>-list" role="listbox" aria-label="<%= label %>" data-senren--command-target="list" class="max-h-72 overflow-y-auto p-1.5">
       <% items.each_with_index do |item, index| %>

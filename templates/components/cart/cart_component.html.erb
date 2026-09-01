@@ -20,7 +20,7 @@
             <% if item[:remove_url].present? %>data-remove-url="<%= safe_url(item[:remove_url]) %>"<% end %>
             data-price-cents="<%= item[:price_cents] %>">
           <% if (image = safe_media_url(item[:image_url])) %>
-            <img src="<%= image %>" alt="" loading="lazy" class="h-12 w-12 shrink-0 rounded-(--senren-radius) object-cover">
+            <%= image_tag image, alt: "", loading: "lazy", class: "h-12 w-12 shrink-0 rounded-(--senren-radius) object-cover" %>
           <% else %>
             <div class="h-12 w-12 shrink-0 rounded-(--senren-radius) bg-[hsl(var(--senren-muted)/0.5)]" aria-hidden="true"></div>
           <% end %>

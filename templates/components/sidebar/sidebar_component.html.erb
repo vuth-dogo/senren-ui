@@ -1,4 +1,4 @@
-<aside <%= tag.attributes(**root_attrs("flex min-h-80 flex-col overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] p-3 text-[hsl(var(--senren-card-foreground))] transition-[width] duration-300 ease-in-out", data: { controller: "senren--sidebar" })) %>>
+<%= tag.aside(**root_attrs("flex min-h-80 flex-col overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] p-3 text-[hsl(var(--senren-card-foreground))] transition-[width] duration-300 ease-in-out", data: { controller: "senren--sidebar" })) do %>
   <div class="mb-4 flex items-center justify-between gap-2 px-2">
     <div data-senren--sidebar-target="brand" class="truncate font-display text-sm font-semibold tracking-tight"><%= brand %></div>
     <button type="button" data-senren--sidebar-target="toggleButton" class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-[hsl(var(--senren-muted-foreground))] transition-colors hover:bg-[hsl(var(--senren-accent))] hover:text-[hsl(var(--senren-accent-foreground))]" data-action="click->senren--sidebar#toggle" aria-label="Toggle sidebar" aria-expanded="<%= variant != :compact %>">
@@ -21,4 +21,4 @@
   <% if content? %>
     <div data-senren--sidebar-target="footer" class="mt-auto pt-4 text-xs text-[hsl(var(--senren-muted-foreground))]"><%= content %></div>
   <% end %>
-</aside>
+<% end %>

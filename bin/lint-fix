@@ -31,6 +31,7 @@ step() {
 
 step "RuboCop"      bundle exec rubocop -a
 step "ERB lint"     bundle exec erb_lint --lint-all -a
+step "HTML lint"    bun run templates:lint:fix
 step "JavaScript"   bun run controllers:lint:fix
 
 echo
