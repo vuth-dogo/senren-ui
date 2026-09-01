@@ -93,6 +93,30 @@ bug fixes only.
 - `bin/ci` and the GitHub workflow call `erb_lint` rather than the deprecated
   `erblint` shim.
 - json bumped to 2.21.2 for CVE-2026-71847.
+- Herb now lints the markup, and the 32 offenses it found in shipped templates
+  are fixed. It was adopted after a developer reported warnings in their editor
+  that none of this project's gates produced — RuboCop covered the Ruby, Biome
+  the Stimulus controllers, erb_lint the ERB structure, and the HTML itself had
+  no linter at all. Pinned to 0.10.3 in `.herb.yml`, and wired into `bin/ci`,
+  `bin/lint-fix` and the GitHub workflow.
+
+  Most of what it found is invisible in the rendered page but visible in the
+  editor of anyone who installs these components, since `senren:add` copies them
+  into their repository. Fifteen component roots moved from
+  `<div <%= tag.attributes(**root_attrs(...)) %>>` to `tag.div(...) do`, which
+  is what the overlays already used; seven conditional boolean attributes moved
+  from `<%= "hidden" unless expanded %>` to `<% unless expanded %>hidden<% end %>`;
+  three raw `<img>` tags became `image_tag`; breadcrumb stopped writing its whole
+  `<nav>` once per branch; and an empty `aria-activedescendant` is gone.
+
+  Nothing changes visually, but the markup string is not identical: rendering
+  all 64 components before and after produces 35 differing lines — 26 of them
+  whitespace and indentation, 6 the attribute order and self-closing slash that
+  `image_tag` emits, 2 the `href` moving to the front of an `<a>`, and 1 the
+  removed empty attribute. If you assert on exact markup anywhere, those
+  snapshots need regenerating. If you have already installed these components,
+  nothing in your application changes at all — the new markup arrives only if
+  you re-run `senren:add --force`.
 
 ## [0.2.0] — 2026-08-02
 
