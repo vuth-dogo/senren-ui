@@ -27,9 +27,11 @@ export default class extends Controller {
     if (!line) return
 
     const id = line.dataset.lineId
+    // Read before the node goes away.
+    const removeUrl = line.dataset.removeUrl || null
     line.remove()
     this._recalculate()
-    this.dispatch("removed", { detail: { id, subtotalCents: this.subtotalCentsValue } })
+    this.dispatch("removed", { detail: { id, removeUrl, subtotalCents: this.subtotalCentsValue } })
   }
 
   // The value is the state; this renders it. Called on initialization too, so

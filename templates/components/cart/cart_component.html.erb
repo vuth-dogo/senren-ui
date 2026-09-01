@@ -12,6 +12,12 @@
         <li class="flex items-center gap-3 px-4 py-3"
             data-senren--cart-target="line"
             data-line-id="<%= item[:id] %>"
+            <%# Emitted so the `removed` event can carry it. The component
+                accepted remove_url: and normalised it, then never wrote it
+                anywhere -- an advertised input that reached nothing, so the
+                consumer listening for the event had no way to learn where to
+                send the delete. %>
+            <% if item[:remove_url].present? %>data-remove-url="<%= safe_url(item[:remove_url]) %>"<% end %>
             data-price-cents="<%= item[:price_cents] %>">
           <% if (image = safe_media_url(item[:image_url])) %>
             <img src="<%= image %>" alt="" loading="lazy" class="h-12 w-12 shrink-0 rounded-(--senren-radius) object-cover">
