@@ -106,3 +106,10 @@ exclude:
   - 'tmp/**/*'
   - '.local/**/*'
   - 'node_modules/**/*'
+  # CI runs with bundler-cache, which installs every gem into vendor/bundle --
+  # and `--lint-all` reads that as 'all', so the run linted Rails' own scaffold
+  # templates and RuboCop's HTML formatter. It passed locally, where gems live
+  # in the rbenv directory instead, so the difference was invisible until the
+  # workflow ran it. Reproduced by creating vendor/bundle and watching two
+  # offenses appear.
+  - 'vendor/**/*'
