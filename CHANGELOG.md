@@ -7,7 +7,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 v0.x is a pre-stable line: minor bumps may break things; patch bumps are
 bug fixes only.
 
-## [Unreleased]
+## [0.3.0] — 2026-09-01
 
 ### Breaking
 
@@ -46,15 +46,15 @@ bug fixes only.
   `max-w-2xl` loses (widening is a silent no-op). Use Tailwind's important
   modifier — `class_name: "max-w-2xl!"` — for an override that does not depend
   on emit order.
+- `data-controller` and `data-action` are appended rather than substituted, so
+  attaching your own Stimulus controller to a Senren component no longer unbinds
+  the component's own.
 - A caller's `data-controller` or `data-action` that repeated one of the
   component's own tokens was appended rather than deduplicated:
   `data: { controller: "a senren--popover" }` produced
   `"a senren--popover senren--popover"`. Stimulus reads that list literally, so
   the controller connected twice and every action fired twice — a toggle opened
   and immediately closed. Tokens are deduplicated individually now.
-- `data-controller` and `data-action` are appended rather than substituted, so
-  attaching your own Stimulus controller to a Senren component no longer unbinds
-  the component's own.
 - `data:` written with String keys (`data: { "action" => ... }`) is merged the
   same as Symbol keys. The Symbol-only read meant a dropdown item passing a
   String key lost close-on-click and arrow-key handling.
@@ -67,6 +67,16 @@ bug fixes only.
   rails-ujs option, which Rails 7 dropped, so it had rendered an inert `method`
   attribute since the library began targeting Rails 7.1.
 - Card footer spacing, and pagination now wraps.
+- `CartComponent` accepted `remove_url:` per item, normalised it, and wrote it
+  nowhere. Removal is client-side and dispatches `senren--cart:removed` for the
+  application to act on, so the URL was the one thing the listener needed and
+  the only thing it could not get. It is emitted as `data-remove-url` on the
+  line and carried in the event detail, omitted entirely when not supplied, and
+  passed through `safe_url` like every other URL the library renders.
+- `senren_themes.css` shipped with its ERB examples unrendered, so the header
+  comment showed `<%%=` where it means `<%=`. The assertion guarding against that
+  named a single file, so the property held exactly where someone had thought to
+  look; it now runs over everything the generator writes.
 
 ### Documentation
 
@@ -82,6 +92,7 @@ bug fixes only.
   unrecorded. A test now fails if an upgrade adds a fourteenth.
 - `bin/ci` and the GitHub workflow call `erb_lint` rather than the deprecated
   `erblint` shim.
+- json bumped to 2.21.2 for CVE-2026-71847.
 
 ## [0.2.0] — 2026-08-02
 
