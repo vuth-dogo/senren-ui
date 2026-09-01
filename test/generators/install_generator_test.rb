@@ -109,8 +109,27 @@ module Senren
         assert_file '.senren/conventions.md' do |content|
           assert_includes content, '<%= render(Senren::ButtonComponent',
                           'escaped ERB must render to a usable example'
-          refute_includes content, '<%%', 'no raw ERB escape may survive into the output'
         end
+      end
+
+      # Across everything written, not just the conventions file.
+      #
+      # senren_themes.css escapes two stylesheet_link_tag examples in its header
+      # comment and was never checked. A copy of it reached a real application
+      # with the raw `<%%=` intact, because the only assertion of this kind
+      # named one file -- so the property held exactly where someone had thought
+      # to look, which is the same as not holding.
+      def test_no_generated_file_leaks_a_raw_erb_escape
+        run_generator
+
+        leaked = Dir.glob(File.join(destination_root, '**', '*'), File::FNM_DOTMATCH)
+                    .select { |path| File.file?(path) }
+                    .select { |path| File.read(path).include?('<%%') }
+                    .map { |path| path.sub("#{destination_root}/", '') }
+
+        assert_empty leaked,
+                     'these shipped an unrendered ERB escape, so what the user reads is ' \
+                     "`<%%=` where the example should say `<%=`: #{leaked.join(', ')}"
       end
 
       def test_base_component_ships_the_hardened_url_helpers
