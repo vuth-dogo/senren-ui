@@ -13,9 +13,18 @@ module Senren
       lg: 'h-12 text-base px-4'
     }.freeze
 
-    # native_arrow: true  → keep browser/OS native arrow (appearance-auto)
-    # native_arrow: false → use custom SVG arrow (appearance-none + SVG overlay)
-    def initialize(name:, options:, selected: nil, id: nil, prompt: nil, native_arrow: true,
+    # native_arrow: false → custom SVG chevron that rotates while the select has
+    #                       focus (appearance-none + positioned SVG). The default.
+    # native_arrow: true  → the browser's own arrow (appearance-auto), which
+    #                       matches the OS but cannot be styled or animated.
+    #
+    # The default was `true`, so out of the box a Senren select was the one
+    # control in the library with no state to see: the arrow never moved, and
+    # nothing distinguished an open select from a closed one. The custom arrow
+    # was already written and had to be asked for by name, which meant nobody
+    # got it. Pass native_arrow: true to opt back in -- worth doing on mobile,
+    # where the OS renders its own picker anyway.
+    def initialize(name:, options:, selected: nil, id: nil, prompt: nil, native_arrow: false,
                    variant: :default, size: :md, class_name: nil, **html)
       super(variant: variant, size: size, class_name: class_name, **html)
       @name = name

@@ -30,6 +30,7 @@ module Senren
           options: [%w[draft Draft], %w[published Published]],
           selected: 'published',
           prompt: 'Choose status',
+          native_arrow: true,
           data: { controller: 'custom-select' }
         ),
         'native_select'
@@ -64,6 +65,12 @@ module Senren
       assert root.at_css('svg[aria-hidden="true"]')
     end
 
+    # SelectComponent delegates, and the default it inherits is the custom arrow.
+    #
+    # This asserted the marker sat on the <select>, which was true only while
+    # native_arrow defaulted to true. The default is now the SVG chevron, so the
+    # marker moves to the wrapper that positions it -- the select underneath is
+    # still the element that carries the name, the controller and the selection.
     def test_select_component_default_delegation_renders_marked_native_select
       html = render_component(
         SelectComponent.new(
@@ -73,12 +80,28 @@ module Senren
         ),
         'select'
       )
+      root = fragment(html).at_css('[data-senren-component="native_select"]')
+      select = root.at_css('select')
+
+      assert_equal 'div', root.name
+      assert root.at_css('svg[aria-hidden="true"]'), 'the delegating default lost its chevron'
+      assert_equal 'senren--select', select['data-controller']
+      assert_equal 'role', select['name']
+      assert_includes select['class'], 'appearance-none'
+      assert select.at_css('option[value="admin"]').has_attribute?('selected')
+    end
+
+    # And the opt-out still behaves the way it did.
+    def test_select_component_can_still_ask_for_the_native_arrow
+      html = render_component(
+        SelectComponent.new(name: :role, options: [%w[admin Admin]], native_arrow: true),
+        'select'
+      )
       root = fragment(html).at_css('select')
 
       assert_equal 'native_select', root['data-senren-component']
-      assert_equal 'senren--select', root['data-controller']
-      assert_equal 'role', root['name']
-      assert root.at_css('option[value="admin"]').has_attribute?('selected')
+      assert_includes root['class'], 'appearance-auto'
+      assert_nil root.previous_element
     end
 
     private

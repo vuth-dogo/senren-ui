@@ -7,6 +7,47 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 v0.x is a pre-stable line: minor bumps may break things; patch bumps are
 bug fixes only.
 
+## [Unreleased]
+
+### Changed
+
+- **`NativeSelectComponent` defaults to its own chevron instead of the browser's
+  arrow** (`native_arrow: false`). A select was the one control in the library
+  with no visible state: the OS arrow cannot be styled or animated, so nothing
+  distinguished an open select from a closed one. The custom chevron already
+  existed, rotated on focus, and had to be asked for by name — which meant
+  nobody got it. Pass `native_arrow: true` to opt back in; worth doing on
+  mobile, where the OS renders its own picker anyway.
+
+  The component marker moves with it. In custom-arrow mode
+  `data-senren-component="native_select"` sits on the wrapper that positions the
+  chevron, and the `<select>` underneath still carries the name, the controller
+  and the selection. Anything selecting on `select[data-senren-component]` needs
+  updating.
+- `InviteMemberDialogComponent` renders its role field through
+  `NativeSelectComponent` rather than a hand-written `<select>` whose styling
+  had been copied out of it — which is why it silently missed everything that
+  component gained afterwards, the chevron included.
+
+### Fixed
+
+- `ThemeToggleComponent` rendered the letters `O`, `D` and `L` where an icon
+  belongs. It now ships sun and moon SVGs and swaps which is hidden, so the
+  correct icon is in the HTML the server sends rather than written in by
+  JavaScript after first paint. The icon names the theme the click switches to,
+  matching the label.
+- `AccordionComponent` showed a static `+` and snapped open. It now has a
+  chevron that turns over, driven by `aria-expanded` so the icon cannot drift
+  out of step with the state assistive technology is told, and the panel
+  animates via `grid-template-rows: 0fr → 1fr` — which reaches the content's own
+  height without measuring it in JavaScript.
+
+  The `hidden` attribute is kept through the animation. Content that is visually
+  collapsed but present is still focusable and still read aloud, so the
+  controller drops `hidden` before opening and restores it once the closing
+  transition ends, with a timer for the cases where `transitionend` never
+  arrives: reduced motion, an off-screen element, an already-collapsed panel.
+
 ## [0.3.0] — 2026-09-01
 
 ### Breaking
