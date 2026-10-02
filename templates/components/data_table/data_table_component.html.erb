@@ -32,7 +32,7 @@
             <tr class="transition-colors hover:bg-[hsl(var(--senren-muted)/0.35)]" data-senren--data-table-target="row">
               <% columns.each do |column| %>
                 <% value = cell_value(row, column) %>
-                <td class="px-4 py-3" data-sort-key="<%= column_sort_key(column) %>" data-sort-value="<%= value %>"><%= value %></td>
+                <td class="px-4 py-3" data-sort-key="<%= column_sort_key(column) %>" data-sort-value="<%= sort_value(value) %>"><%= value %></td>
               <% end %>
             </tr>
           <% end %>

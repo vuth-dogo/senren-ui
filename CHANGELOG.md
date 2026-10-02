@@ -31,6 +31,13 @@ bug fixes only.
 
 ### Fixed
 
+- `DataTableComponent` no longer breaks a `<td>` whose cell holds markup. The
+  cell value was written straight into `data-sort-value="..."`, and a badge,
+  link or anything else built with `tag` or `render` is a SafeBuffer, which ERB
+  does not escape: the markup's first `"` closed the attribute, the rest became
+  junk attributes, and every row sorted on the same `<span class=` fragment.
+  The sort value is now the cell's decoded text, escaped once, so a cell
+  showing `R&D` sorts as `R&D`. Plain-string and numeric cells are unchanged.
 - `ThemeToggleComponent` rendered the letters `O`, `D` and `L` where an icon
   belongs. It now ships sun and moon SVGs and swaps which is hidden, so the
   correct icon is in the HTML the server sends rather than written in by
