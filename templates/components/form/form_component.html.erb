@@ -6,5 +6,5 @@
   form_opts[:multipart] = multipart if multipart
 %>
 <%= form_with(**form_opts, **root_attrs("space-y-4")) do |f| %>
-  <%= content || capture(f, &Proc.new) %>
+  <%= form_body(f) %>
 <% end %>
