@@ -31,6 +31,13 @@ bug fixes only.
 
 ### Fixed
 
+- `TableComponent` and `DataTableComponent` are now `relative`, so their
+  `sr-only` caption is positioned inside the component. `sr-only` is
+  `position: absolute`, and with nothing positioned the caption escaped the
+  components' own overflow clipping and was placed against the page. In a
+  fixed-height shell whose `<main>` scrolls, a captioned table below the fold
+  made the document taller, and the window scrolled into blank space under a
+  shell that should never scroll.
 - `ThemeToggleComponent` rendered the letters `O`, `D` and `L` where an icon
   belongs. It now ships sun and moon SVGs and swaps which is hidden, so the
   correct icon is in the HTML the server sends rather than written in by

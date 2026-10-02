@@ -1,4 +1,4 @@
-<%= tag.div(**root_attrs("overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] shadow-sm", data: { controller: "senren--data-table" })) do %>
+<%= tag.div(**root_attrs("relative overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] shadow-sm", data: { controller: "senren--data-table" })) do %>
   <% if toolbar? %>
     <div class="border-b border-[hsl(var(--senren-border))] p-3"><%= toolbar %></div>
   <% end %>
