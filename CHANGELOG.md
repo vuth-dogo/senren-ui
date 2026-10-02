@@ -31,6 +31,13 @@ bug fixes only.
 
 ### Fixed
 
+- `TopNavComponent`'s default variant had no background. Its class,
+  `bg-[hsl(var(--senren-background))/0.88]`, put the alpha outside `hsl()`,
+  inside the brackets, so Tailwind emitted `hsl(...)/0.88` verbatim and the
+  browser dropped it as an invalid colour: the sticky header was transparent
+  over scrolled content. It is now `bg-[hsl(var(--senren-background)/0.88)]`,
+  the form every other translucent class in the library uses, and a test bans
+  the broken shape across `templates/` and `lib/`.
 - `ThemeToggleComponent` rendered the letters `O`, `D` and `L` where an icon
   belongs. It now ships sun and moon SVGs and swaps which is hidden, so the
   correct icon is in the HTML the server sends rather than written in by
