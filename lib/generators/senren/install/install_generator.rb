@@ -11,6 +11,18 @@ module Senren
       class_option :force, type: :boolean, default: false,
                            desc: 'Overwrite existing Senren-managed files.'
 
+      # English is the default because it is the canonical wording and the file
+      # a translation is copied from. Anything else is asked for by name: a
+      # shipped translation adds its locale to I18n.available_locales, which a
+      # language switcher built from that list will then offer.
+      #
+      # `enum:` makes Thor refuse an unknown locale while it parses the options,
+      # before any step has run. Refusing in the middle would leave an app with the
+      # components copied and no instruction files.
+      class_option :locales, type: :array, default: Senren::Rails::LocaleInstaller::DEFAULT_LOCALES,
+                             enum: Senren::Rails::LocaleInstaller.available,
+                             desc: 'Translations to copy into config/locales.'
+
       def create_senren_dir
         empty_directory '.senren'
       end
@@ -39,6 +51,16 @@ module Senren
 
       def mirror_registry
         copy_file Senren::Rails.registry_path, '.senren/registry.yml'
+      end
+
+      # Components work without these: the English is in the code. They are the
+      # editable copy of every string, and the base for another language. An
+      # existing file is a translation someone wrote, so it is kept unless
+      # --force is given.
+      def copy_locale_files
+        say_status :senren, "copying locale files (#{options[:locales].join(', ')}) to config/locales"
+        installer = Senren::Rails::LocaleInstaller.new(paths: host_paths)
+        installer.install(locales: options[:locales], force: options[:force])
       end
 
       # Switches Stimulus to on-demand loading instead of documenting it.
@@ -75,6 +97,7 @@ module Senren
       def print_next_steps
         say "\nSenren installed."
         say 'Next: bin/rails senren:add button card badge alert dialog'
+        say 'Translate the components: bin/rails senren:locales vi (see docs/i18n.md)'
         say 'Then: bin/rails senren:agents:sync'
       end
 

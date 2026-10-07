@@ -14,6 +14,7 @@ module Senren
     autoload :LlmsWriter,       'senren/rails/llms_writer'
     autoload :Doctor,           'senren/rails/doctor'
     autoload :HostPaths,        'senren/rails/host_paths'
+    autoload :LocaleInstaller,  'senren/rails/locale_installer'
     autoload :MarkerBlock,      'senren/rails/marker_block'
 
     def self.gem_root
