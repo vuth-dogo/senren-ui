@@ -70,14 +70,18 @@ Out of scope:
    `dialog`, `sheet` and `alert_dialog`) and `close` (the close button of
    `dialog` and `sheet`). A key under `shared` that fewer than two components
    use fails a test, so the namespace cannot become a dumping ground.
-4. **A constructor default of `'Tabs'` becomes `nil`, resolved when it is
-   read.** `TabsComponent.new(label: nil)` and `TabsComponent.new` both give the
-   translated default; `label: 'Menu'` is used verbatim and never looked up;
-   `label: ''` renders empty. Resolving at read time rather than in
-   `initialize` means the locale in force when the component renders is the one
-   that applies. The one behaviour change: an explicit `nil` used to mean "no
-   text" in a handful of places and now means "the default". `''` is the way to
-   ask for nothing, and the docs say so.
+4. **A constructor default of `'Tabs'` becomes `senren_t('tabs.label', default:
+   'Tabs')`, in the signature.** Ruby evaluates a keyword default when the
+   argument is left out, with the component as `self`, so the call is made when
+   the component is built and not at all when the caller passes the argument.
+   `label: 'Menu'` is used verbatim and never looked up; `label: nil` still means
+   "none"; `label: ''` renders empty. The first design was `nil` as the default
+   and a lookup when the value is read. It was dropped because it changes what an
+   explicit `nil` means, and `nil` is how a caller turns text off in several
+   places (a combobox with no placeholder, a nav with no `aria-label`).
+   "No behaviour change other than translatable text" rules that out. The cost of
+   the chosen form is that the locale is the one current when the component is
+   built, which in a view is the one it renders in.
 5. **Variables use `%{name}`; the string a JavaScript controller needs is the
    raw template.** `I18n` interpolates only when values are passed, so
    `senren_t('carousel.status', default: 'Slide %{current} of %{total}')` with
@@ -98,7 +102,10 @@ Out of scope:
    wording is in the host app to read and edit. `--locales en vi` on the
    generator, or `bin/rails senren:locales vi` later, adds another. An existing
    file is never overwritten without `--force`: it is the host's translation,
-   not generated state.
+   not generated state. The generator declares the shipped locales as an `enum:`,
+   so Thor refuses an unknown one while parsing the options, before any step has
+   run; failing in the middle would leave components copied and no instruction
+   files.
 8. **The file is not in the registry.** Registry `files:` are per component and
    validated against a fixed allowlist of three paths. The locale file is one
    shared file whose keys cover every component, so it is wired through the
@@ -116,18 +123,29 @@ Out of scope:
     keys and the same `%{}` variables as `en`.
 11. **A template that shows an English word the catalogue does not know about
     fails a test.** Without that, the next component would reintroduce the
-    problem. The check reads every ERB text node and every `aria-label`,
-    `title`, `placeholder`, `alt` attribute, and every string default in a
-    component's `initialize`, and fails on a bare word that is not in the
-    allowlist (identifiers like `name: 'q'` are, by parameter name).
+    problem. Three checks: every ERB text node and every `aria-label`, `title`,
+    `placeholder`, `alt` attribute; every string default in a component's
+    `initialize`; and any capitalised word in a string literal outside a
+    `senren_t` call. Identifiers like `name: 'q'` are allowed by parameter name,
+    and the role values a form submits (`Member`, `Admin`) by value. It is a
+    ratchet, not a proof: it cannot see text built from caller data, which is
+    the caller's to translate.
 12. **An id derived from a label follows the displayed text.** `Command`, `Cart`,
     `InviteMemberDialog` and `Tabs` derive a DOM id from their title or label.
     In English that is unchanged; in another language the id is derived from the
     translated words, deterministically, as before.
-13. **The performance budget for component source is raised, and says why.** The
-    templates were 137,621 of 140,000 bytes. Every string now carries a key and a
-    call, so the set grows by a few kilobytes. The budget moves with a recorded
-    reason, as it did in plan 024, rather than being nudged.
+13. **Two performance budgets are raised, and say why.** The component source was
+    137,621 of 140,000 bytes; every string now carries a key and a call, +9.3KB,
+    so the budget goes to 150,000. The controllers were 55,700 of 56,000; five of
+    them now declare a value instead of holding a sentence, +317B, so the budget
+    goes to 56,500. Each moves with a recorded reason in
+    `config/performance_budgets.yml`, as it did in plan 024, rather than being
+    nudged. The per-file caps and the gzip total are unchanged.
+14. **`Style/FormatStringToken` runs in `conservative` mode.** `%{name}` is I18n's
+    interpolation syntax and every translatable string uses it; in the default
+    mode the cop reads any such string as a malformed format string. Conservative
+    mode checks only what is handed to `format`, `sprintf`, `printf` and `%`,
+    which is what the cop is for.
 
 ## Files to create
 
@@ -146,6 +164,10 @@ Out of scope:
 - `test/locale_installer_test.rb` - the copy, the skip, `--force`, containment.
 - `test/integration/i18n_rendering_test.rb` - defaults equal `en`, a host
   translation changes the output, every key reaches the markup.
+- `test/support/i18n_render_cases.rb` - the arguments that make each component
+  show every string it has, shared by the rendering test.
+- `test/system/i18n_system_test.rb` - the five controllers speak the sentence the
+  server rendered, in English and in Vietnamese, in a real browser.
 - `history/2026-10-07-HHMM-i18n-component-strings.md`.
 
 ## Files to modify
@@ -165,17 +187,21 @@ Out of scope:
   dialog, filter_bar, invite_member_dialog, pagination, product_card,
   rich_text_editor_lite, search_input, sheet, sidebar, tabs, theme_toggle,
   top_nav.
-- Six controllers under `templates/controllers/`: api_key_field, carousel,
+- Five controllers under `templates/controllers/`: api_key_field, carousel,
   clipboard, rich_text_editor_lite, theme_toggle, and the values they read.
-- `config/performance_budgets.yml`, `README.md`, `CONTRIBUTING.md`,
-  `CHANGELOG.md`.
+- `config/performance_budgets.yml`, `.rubocop.yml`, `README.md`,
+  `CONTRIBUTING.md`, `CHANGELOG.md`.
 - `test/generators/install_generator_test.rb`, `test/component_copier_test.rb`
   - the new install behaviour.
+- `test/dummy/app/controllers/application_controller.rb` and
+  `test/dummy/config/application.rb` - `?locale=vi` and the Vietnamese file on
+  the preview app's load path, so the browser test can render in Vietnamese.
 
 ## Expected behavior
 
 - With no `senren.*` key anywhere, every component renders exactly the HTML it
-  rendered before this change.
+  rendered before this change, apart from six `data-senren--*-value` attributes
+  that carry the sentences the controllers used to hold.
 - With `config/locales/senren.en.yml` installed, the output is still identical.
 - With `config/locales/senren.vi.yml` installed and `I18n.locale = :vi`,
   `PaginationComponent` renders "Trước" and "Sau", the calendar renders
@@ -184,7 +210,7 @@ Out of scope:
 - A host that defines only `senren.pagination.next` gets that one word
   translated and everything else in English.
 - A caller's own `label:`, `placeholder:` or `empty_text:` is used verbatim and
-  never looked up.
+  never looked up, and an explicit `nil` still means "none".
 - A missing key never raises, with or without
   `config.i18n.raise_on_missing_translations`.
 - `bin/rails generate senren:install` writes `config/locales/senren.en.yml`;
@@ -216,8 +242,10 @@ Out of scope:
 - **No bare English.** The guard in decision 11, so a future component cannot
   skip the helper unnoticed.
 - **The controllers stay honest.** `bun run controllers:check` and
-  `bin/performance` stay green, and the markup test asserts each new Stimulus
-  value is present and carries the translated string.
+  `bin/performance` stay green; the markup test asserts each new Stimulus value
+  carries the translated string; and a browser test clicks through the five
+  controllers in English and Vietnamese, so the name in the markup, the
+  declaration in the controller and the lookup are shown to agree.
 - **The migration.** The copier test starts from an old `BaseComponent` and
   asserts `senren_t` exists afterwards; a pin test asserts the patched helper and
   the template helper are the same code.
