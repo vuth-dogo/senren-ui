@@ -50,6 +50,52 @@ module Senren
         assert @paths.components_dir.join('link_component.html.erb').exist?
       end
 
+      # A component copied by `senren:add` calls senren_t. A host whose
+      # BaseComponent was written before that existed would raise NoMethodError
+      # the first time the component rendered.
+      def test_install_adds_senren_t_to_an_older_base_component
+        @paths.ensure_dirs!
+        File.write(@paths.base_component_path, <<~RUBY)
+          module Senren
+            class BaseComponent < ViewComponent::Base
+              def safe_url(value) = value
+              def safe_media_url(value) = value
+            end
+          end
+        RUBY
+
+        ComponentCopier.new(registry: Registry.load!, paths: @paths, stdout: @stdout).install(['pagination'])
+
+        base_component = @paths.base_component_path.read
+
+        assert_includes base_component, 'def senren_t(key, default:, **options)'
+        assert_includes base_component, "I18n.t(\"senren.\#{key}\""
+        assert_includes @stdout.string, 'senren_t'
+      end
+
+      def test_a_fresh_install_has_senren_t_exactly_once
+        copier = ComponentCopier.new(registry: Registry.load!, paths: @paths, stdout: @stdout)
+        copier.install(['pagination'])
+        copier.install(['badge'])
+
+        assert_equal 1, @paths.base_component_path.read.scan('def senren_t').size
+      end
+
+      def test_the_translation_helper_is_not_appended_through_a_link_that_leaves_the_app_root
+        outside = Pathname.new(Dir.mktmpdir)
+        victim = outside.join('victim.rb')
+        victim.write("# outside the app root\n")
+        @paths.ensure_dirs!
+        File.symlink(victim.to_s, @paths.base_component_path.to_s)
+
+        ComponentCopier.new(registry: Registry.load!, paths: @paths, stdout: @stdout)
+                       .send(:ensure_base_component_translation_helper!)
+
+        assert_equal "# outside the app root\n", victim.read
+      ensure
+        FileUtils.remove_entry(outside) if outside && Dir.exist?(outside)
+      end
+
       # 'ghost' is can_have_client but lists no controller file, so --client
       # cannot install anything. Silently recording client: true in the ledger
       # would misinform both developers and the AI agents that read it.
