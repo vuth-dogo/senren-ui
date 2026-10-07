@@ -7,7 +7,7 @@
       <%= trigger %>
     </span>
   <% else %>
-    <button type="button" data-action="click->senren--sheet#open" data-senren--sheet-target="trigger" class="hidden">Open</button>
+    <button type="button" data-action="click->senren--sheet#open" data-senren--sheet-target="trigger" class="hidden"><%= senren_t('shared.open', default: 'Open') %></button>
   <% end %>
 
   <div data-senren--sheet-target="overlay" hidden
@@ -38,7 +38,7 @@
         </div>
       <% end %>
     </div>
-    <button type="button" data-action="click->senren--sheet#close" aria-label="Close"
+    <button type="button" data-action="click->senren--sheet#close" aria-label="<%= senren_t('shared.close', default: 'Close') %>"
             class="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100">
       <span aria-hidden="true">×</span>
     </button>

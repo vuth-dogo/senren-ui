@@ -16,7 +16,7 @@ const DROPPED_PASTE_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "
 // Local UI: tiny contenteditable toolbar synced to a hidden textarea.
 export default class extends Controller {
   static targets = ["editor", "input", "button"]
-  static values = { debug: Boolean }
+  static values = { debug: Boolean, linkPrompt: String }
 
   connect() {
     this.savedRange = null
@@ -59,7 +59,7 @@ export default class extends Controller {
     this.debug("format:start", () => ({ command, before: this.snapshot() }))
     this.restoreSelection()
     if (command === "createLink") {
-      const url = window.prompt("Paste a URL")
+      const url = window.prompt(this.linkPromptValue)
       this.debug("createLink:prompt", () => ({ url, afterPrompt: this.snapshot() }))
       if (!url) return
       this.restoreSelection()

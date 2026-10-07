@@ -5,7 +5,8 @@ module Senren
     VARIANTS = { default: '' }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(current_page: 1, total_pages: 1, path: nil, label: 'Pagination', class_name: nil, **html)
+    def initialize(current_page: 1, total_pages: 1, path: nil, label: senren_t('pagination.label', default: 'Pagination'),
+                   class_name: nil, **html)
       super(variant: :default, size: :md, class_name: class_name, **html)
       @total_pages = [total_pages.to_i, 1].max
       @current_page = current_page.to_i.clamp(1, @total_pages)

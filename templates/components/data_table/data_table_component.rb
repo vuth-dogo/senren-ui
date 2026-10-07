@@ -6,7 +6,8 @@ module Senren
     VARIANTS = { default: '' }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(columns: [], rows: [], caption: nil, empty_text: 'No records found.', sortable: true,
+    def initialize(columns: [], rows: [], caption: nil,
+                   empty_text: senren_t('data_table.empty', default: 'No records found.'), sortable: true,
                    variant: :default, class_name: nil, **html)
       super(variant: variant, size: :md, class_name: class_name, **html)
       @columns = Array(columns)

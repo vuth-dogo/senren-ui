@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Keeps templates/locales/senren.en.yml equal to the strings in the components.
+#
+#   bin/i18n-sync           # rewrite senren.en.yml from the senren_t calls
+#   bin/i18n-sync --check   # change nothing; exit 1 if it is out of date
+#
+# The English is written once, as the `default:` of a senren_t call. This file is
+# derived from it, never the other way round, so there is no second copy to
+# drift. test/i18n_catalog_test.rb runs the same comparison on every test run;
+# this is the command that fixes what it reports.
+#
+# senren.vi.yml is not touched: it is written by a person.
+
+require_relative '../scripts/i18n_catalog'
+
+ROOT = File.expand_path('..', __dir__)
+TARGET = File.join(ROOT, 'templates/locales/senren.en.yml')
+
+catalog = I18nCatalog.new(root: ROOT)
+problems = catalog.problems + catalog.conflicts + catalog.namespace_violations
+
+unless problems.empty?
+  warn "bin/i18n-sync: cannot build the catalogue:\n  #{problems.join("\n  ")}"
+  exit 1
+end
+
+generated = catalog.to_yaml
+
+if ARGV.include?('--check')
+  if File.exist?(TARGET) && File.read(TARGET) == generated
+    puts "templates/locales/senren.en.yml is up to date (#{catalog.defaults.size} keys)"
+    exit 0
+  end
+
+  warn 'templates/locales/senren.en.yml is out of date. Run bin/i18n-sync.'
+  exit 1
+end
+
+File.write(TARGET, generated)
+puts "wrote templates/locales/senren.en.yml (#{catalog.defaults.size} keys)"

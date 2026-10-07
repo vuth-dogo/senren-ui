@@ -4,6 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // Local UI: previous/next controls, dots, and arrow-key navigation.
 export default class extends Controller {
   static targets = ["slide", "dot", "status"]
+  static values = { statusTemplate: String }
 
   connect() {
     this.index = 0
@@ -45,6 +46,10 @@ export default class extends Controller {
     this.dotTargets.forEach((dot, dotIndex) => {
       dot.setAttribute("aria-current", dotIndex === this.index ? "true" : "false")
     })
-    if (this.hasStatusTarget) this.statusTarget.textContent = `Slide ${this.index + 1} of ${count}`
+    if (this.hasStatusTarget && this.statusTemplateValue) {
+      this.statusTarget.textContent = this.statusTemplateValue
+        .replaceAll("%{current}", this.index + 1)
+        .replaceAll("%{total}", count)
+    }
   }
 }

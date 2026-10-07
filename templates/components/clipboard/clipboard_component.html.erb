@@ -1,4 +1,4 @@
-<%= tag.div(**root_attrs("inline-flex items-center gap-2", data: { controller: "senren--clipboard", "senren--clipboard-copied-label-value": copied_label })) do %>
+<%= tag.div(**root_attrs("inline-flex items-center gap-2", data: { controller: "senren--clipboard", "senren--clipboard-copied-label-value": copied_label, "senren--clipboard-copied-status-value": copied_status })) do %>
   <input type="text" readonly autocomplete="off" aria-label="<%= label %>" value="<%= value %>" data-senren--clipboard-target="source" class="h-10 rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-muted)/0.4)] px-3 font-mono text-sm text-[hsl(var(--senren-foreground))]">
   <button type="button" data-senren--clipboard-target="button" data-action="click->senren--clipboard#copy" class="inline-flex h-10 cursor-pointer items-center rounded-(--senren-radius) bg-[hsl(var(--senren-primary))] px-3 text-sm font-medium text-[hsl(var(--senren-primary-foreground))] hover:opacity-90">
     <%= label %>

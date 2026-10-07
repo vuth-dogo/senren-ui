@@ -5,7 +5,9 @@ module Senren
     VARIANTS = { default: '' }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(items: [], placeholder: 'Type a command...', label: 'Command menu', empty_text: 'No results found.',
+    def initialize(items: [], placeholder: senren_t('command.placeholder', default: 'Type a command...'),
+                   label: senren_t('command.label', default: 'Command menu'),
+                   empty_text: senren_t('command.empty', default: 'No results found.'),
                    id: nil, class_name: nil, **html)
       super(variant: :default, size: :md, class_name: class_name, **html)
       @placeholder = placeholder

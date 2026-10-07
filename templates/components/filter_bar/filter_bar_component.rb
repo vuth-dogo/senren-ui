@@ -5,7 +5,7 @@ module Senren
     VARIANTS = { default: '' }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(label: 'Filters', class_name: nil, **html)
+    def initialize(label: senren_t('filter_bar.label', default: 'Filters'), class_name: nil, **html)
       super(variant: :default, size: :md, class_name: class_name, **html)
       @label = label
     end

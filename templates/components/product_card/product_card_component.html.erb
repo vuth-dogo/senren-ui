@@ -4,7 +4,7 @@
       <%= image_tag safe_image_url, alt: title, loading: "lazy", class: "h-full w-full object-cover" %>
     <% else %>
       <div class="flex h-full w-full items-center justify-center text-sm text-[hsl(var(--senren-muted-foreground))]" aria-hidden="true">
-        No image
+        <%= senren_t('product_card.no_image', default: 'No image') %>
       </div>
     <% end %>
 

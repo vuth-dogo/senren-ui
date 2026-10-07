@@ -1,4 +1,4 @@
-<%= tag.section(**root_attrs("relative overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] text-[hsl(var(--senren-card-foreground))] shadow-sm", data: { controller: "senren--carousel" }, role: "region", "aria-roledescription": "carousel", "aria-label": label)) do %>
+<%= tag.section(**root_attrs("relative overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-card))] text-[hsl(var(--senren-card-foreground))] shadow-sm", data: { controller: "senren--carousel", "senren--carousel-status-template-value": status_template }, role: "region", "aria-roledescription": "carousel", "aria-label": label)) do %>
   <% if content? && slides.empty? %>
     <%= content %>
   <% else %>
@@ -45,12 +45,12 @@
 
     <% if slides.size > 1 %>
       <div class="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-between px-3">
-        <button type="button" class="pointer-events-auto inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-background)/0.88)] text-[hsl(var(--senren-foreground))] shadow-sm transition hover:-translate-y-0.5 hover:bg-[hsl(var(--senren-accent))] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]" data-action="click->senren--carousel#previous" aria-label="Previous slide">
+        <button type="button" class="pointer-events-auto inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-background)/0.88)] text-[hsl(var(--senren-foreground))] shadow-sm transition hover:-translate-y-0.5 hover:bg-[hsl(var(--senren-accent))] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]" data-action="click->senren--carousel#previous" aria-label="<%= previous_label %>">
           <svg aria-hidden="true" viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12.5 4.5 7 10l5.5 5.5" />
           </svg>
         </button>
-        <button type="button" class="pointer-events-auto inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-background)/0.88)] text-[hsl(var(--senren-foreground))] shadow-sm transition hover:-translate-y-0.5 hover:bg-[hsl(var(--senren-accent))] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]" data-action="click->senren--carousel#next" aria-label="Next slide">
+        <button type="button" class="pointer-events-auto inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[hsl(var(--senren-border))] bg-[hsl(var(--senren-background)/0.88)] text-[hsl(var(--senren-foreground))] shadow-sm transition hover:-translate-y-0.5 hover:bg-[hsl(var(--senren-accent))] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]" data-action="click->senren--carousel#next" aria-label="<%= next_label %>">
           <svg aria-hidden="true" viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M7.5 4.5 13 10l-5.5 5.5" />
           </svg>
@@ -59,10 +59,10 @@
 
       <div class="absolute bottom-3 left-0 right-0 z-10 flex justify-center gap-1.5">
         <% slides.each_with_index do |_slide, index| %>
-          <button type="button" class="h-2.5 w-2.5 cursor-pointer rounded-full bg-[hsl(var(--senren-background)/0.72)] ring-1 ring-[hsl(var(--senren-border))] transition-all aria-current:w-6 aria-current:bg-[hsl(var(--senren-primary))]" data-senren--carousel-target="dot" data-index="<%= index %>" data-action="click->senren--carousel#goTo" aria-label="Go to slide <%= index + 1 %>" aria-current="<%= index.zero? ? 'true' : 'false' %>"></button>
+          <button type="button" class="h-2.5 w-2.5 cursor-pointer rounded-full bg-[hsl(var(--senren-background)/0.72)] ring-1 ring-[hsl(var(--senren-border))] transition-all aria-current:w-6 aria-current:bg-[hsl(var(--senren-primary))]" data-senren--carousel-target="dot" data-index="<%= index %>" data-action="click->senren--carousel#goTo" aria-label="<%= go_to_label(index + 1) %>" aria-current="<%= index.zero? ? 'true' : 'false' %>"></button>
         <% end %>
       </div>
     <% end %>
-    <p class="sr-only" aria-live="polite" data-senren--carousel-target="status">Slide 1 of <%= slides.size %></p>
+    <p class="sr-only" aria-live="polite" data-senren--carousel-target="status"><%= status_text %></p>
   <% end %>
 <% end %>

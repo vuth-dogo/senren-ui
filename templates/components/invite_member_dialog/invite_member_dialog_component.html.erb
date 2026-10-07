@@ -19,9 +19,9 @@
       <% if content? %>
         <%= content %>
       <% else %>
-        <label class="block text-sm font-medium text-[hsl(var(--senren-foreground))]" for="<%= dom_id %>-email">Email</label>
-        <input id="<%= dom_id %>-email" name="<%= email_name %>" type="email" autocomplete="email" placeholder="teammate@company.com" class="h-10 w-full rounded-(--senren-radius) border border-[hsl(var(--senren-input))] bg-[hsl(var(--senren-background))] px-3 text-sm outline-none focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
-        <label class="block text-sm font-medium text-[hsl(var(--senren-foreground))]" for="<%= dom_id %>-role">Role</label>
+        <label class="block text-sm font-medium text-[hsl(var(--senren-foreground))]" for="<%= dom_id %>-email"><%= senren_t('invite_member_dialog.email', default: 'Email') %></label>
+        <input id="<%= dom_id %>-email" name="<%= email_name %>" type="email" autocomplete="email" placeholder="<%= senren_t('invite_member_dialog.email_placeholder', default: 'teammate@company.com') %>" class="h-10 w-full rounded-(--senren-radius) border border-[hsl(var(--senren-input))] bg-[hsl(var(--senren-background))] px-3 text-sm outline-none focus:ring-2 focus:ring-[hsl(var(--senren-ring))]">
+        <label class="block text-sm font-medium text-[hsl(var(--senren-foreground))]" for="<%= dom_id %>-role"><%= senren_t('invite_member_dialog.role', default: 'Role') %></label>
         <%# Was a hand-written <select> with the styling copied out of %>
         <%# NativeSelectComponent, which meant it silently missed anything that %>
         <%# component gained later -- the chevron and its rotation among them. %>
@@ -30,8 +30,8 @@
     </div>
 
     <div class="mt-6 flex justify-end gap-2">
-      <button type="button" class="inline-flex h-10 cursor-pointer items-center rounded-(--senren-radius) px-4 text-sm font-medium hover:bg-[hsl(var(--senren-accent))]" data-action="click->senren--invite-member-dialog#close">Cancel</button>
-      <% if footer? %><%= footer %><% else %><button type="submit" class="inline-flex h-10 cursor-pointer items-center rounded-(--senren-radius) bg-[hsl(var(--senren-primary))] px-4 text-sm font-medium text-[hsl(var(--senren-primary-foreground))] hover:opacity-90">Send invite</button><% end %>
+      <button type="button" class="inline-flex h-10 cursor-pointer items-center rounded-(--senren-radius) px-4 text-sm font-medium hover:bg-[hsl(var(--senren-accent))]" data-action="click->senren--invite-member-dialog#close"><%= senren_t('invite_member_dialog.cancel', default: 'Cancel') %></button>
+      <% if footer? %><%= footer %><% else %><button type="submit" class="inline-flex h-10 cursor-pointer items-center rounded-(--senren-radius) bg-[hsl(var(--senren-primary))] px-4 text-sm font-medium text-[hsl(var(--senren-primary-foreground))] hover:opacity-90"><%= senren_t('invite_member_dialog.send', default: 'Send invite') %></button><% end %>
     </div>
   </div>
 <% end %>

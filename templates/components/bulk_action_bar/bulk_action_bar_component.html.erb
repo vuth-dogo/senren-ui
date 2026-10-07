@@ -3,7 +3,7 @@
     <%= content %>
   <% else %>
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <div class="text-sm font-medium"><%= selection_text || "Selection ready" %></div>
+      <div class="text-sm font-medium"><%= selection_text || senren_t('bulk_action_bar.ready', default: 'Selection ready') %></div>
       <% if actions? %>
         <div class="flex flex-wrap items-center gap-2"><%= actions %></div>
       <% end %>

@@ -7,7 +7,8 @@ module Senren
     VARIANTS = { default: '' }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(selected_count: nil, item_label: 'items', class_name: nil, **html)
+    def initialize(selected_count: nil, item_label: senren_t('bulk_action_bar.items', default: 'items'),
+                   class_name: nil, **html)
       super(variant: :default, size: :md, class_name: class_name, **html)
       @selected_count = selected_count
       @item_label = item_label
@@ -18,7 +19,8 @@ module Senren
     def selection_text
       return nil if selected_count.nil?
 
-      "#{selected_count} #{item_label} selected"
+      senren_t('bulk_action_bar.selected', default: '%{count} %{item_label} selected',
+                                           count: selected_count, item_label: item_label)
     end
   end
 end

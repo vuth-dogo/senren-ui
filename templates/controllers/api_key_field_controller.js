@@ -6,7 +6,8 @@ export default class extends Controller {
   static values = {
     revealLabel: String,
     hideLabel: String,
-    copyLabel: String
+    copyLabel: String,
+    copiedStatus: String
   }
 
   connect() {
@@ -31,6 +32,6 @@ export default class extends Controller {
       this.inputTarget.setSelectionRange(0, 0)
     }
 
-    if (this.hasStatusTarget) this.statusTarget.textContent = `${this.copyLabelValue} complete`
+    if (this.hasStatusTarget) this.statusTarget.textContent = this.copiedStatusValue
   }
 }

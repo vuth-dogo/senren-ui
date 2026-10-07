@@ -1,0 +1,151 @@
+# Senren UI - Vietnamese strings (Tiếng Việt).
+#
+# Written by hand, in the register of a Vietnamese product or support team:
+# short and plain, with the words people already say in English ("email", "slide",
+# "tab") left as they are. The keys and every %{variable} match senren.en.yml;
+# test/i18n_catalog_test.rb fails if they stop matching.
+#
+# Copy this file to config/locales/ (bin/rails senren:locales vi), then change any
+# wording you like - it is your file. A key you delete falls back to the English.
+vi:
+  senren:
+    shared:
+      open: "Mở"
+      close: "Đóng"
+    accordion:
+      section: "Mục %{number}"
+    api_key_field:
+      label: "Khóa API"
+      reveal: "Hiện"
+      hide: "Ẩn"
+      copy: "Sao chép"
+      copied_status: "%{label} xong"
+    app_shell:
+      skip_to_content: "Chuyển đến nội dung chính"
+    breadcrumb:
+      label: "Đường dẫn"
+    bulk_action_bar:
+      items: "mục"
+      selected: "Đã chọn %{count} %{item_label}"
+      ready: "Đã chọn xong"
+    calendar:
+      title: "%{month} năm %{year}"
+      months:
+        january: "Tháng 1"
+        february: "Tháng 2"
+        march: "Tháng 3"
+        april: "Tháng 4"
+        may: "Tháng 5"
+        june: "Tháng 6"
+        july: "Tháng 7"
+        august: "Tháng 8"
+        september: "Tháng 9"
+        october: "Tháng 10"
+        november: "Tháng 11"
+        december: "Tháng 12"
+      weekdays:
+        sun: "CN"
+        mon: "T2"
+        tue: "T3"
+        wed: "T4"
+        thu: "T5"
+        fri: "T6"
+        sat: "T7"
+    carousel:
+      label: "Trình chiếu"
+      previous: "Slide trước"
+      next: "Slide sau"
+      go_to: "Đến slide %{number}"
+      status: "Slide %{current} trên %{total}"
+    cart:
+      title: "Giỏ hàng"
+      empty: "Giỏ hàng của bạn đang trống."
+      checkout: "Thanh toán"
+      subtotal: "Tạm tính"
+      remove: "Xóa"
+      quantity_group: "Số lượng %{name}"
+      decrease: "Giảm số lượng %{name}"
+      increase: "Tăng số lượng %{name}"
+      remove_item: "Xóa %{name}"
+    clipboard:
+      copy: "Sao chép"
+      copied: "Đã sao chép"
+      copied_status: "Đã sao chép vào bộ nhớ tạm"
+    collapsible:
+      details: "Chi tiết"
+    combobox:
+      placeholder: "Tìm kiếm..."
+    command:
+      placeholder: "Nhập lệnh..."
+      label: "Menu lệnh"
+      empty: "Không tìm thấy kết quả."
+    data_table:
+      empty: "Không có dữ liệu."
+      sort: "Sắp xếp"
+    date_picker:
+      placeholder: "Chọn ngày"
+      today: "Hôm nay"
+      clear: "Xóa"
+    filter_bar:
+      label: "Bộ lọc"
+    invite_member_dialog:
+      title: "Mời đồng nghiệp"
+      description: "Gửi lời mời tham gia không gian làm việc này."
+      role_member: "Thành viên"
+      role_admin: "Quản trị viên"
+      button: "Mời thành viên"
+      email: "Email"
+      email_placeholder: "ten@congty.com"
+      role: "Vai trò"
+      cancel: "Hủy"
+      send: "Gửi lời mời"
+    pagination:
+      label: "Phân trang"
+      previous: "Trước"
+      next: "Sau"
+    product_card:
+      add_to_cart: "Thêm vào giỏ"
+      out_of_stock: "Hết hàng"
+      no_image: "Chưa có ảnh"
+    rich_text_editor_lite:
+      label: "Nội dung"
+      placeholder: "Nhập nội dung..."
+      link_prompt: "Dán một URL"
+      toolbar:
+        paragraph: "Đoạn văn"
+        heading_1: "Tiêu đề 1"
+        heading_2: "Tiêu đề 2"
+        heading_3: "Tiêu đề 3"
+        bold: "In đậm"
+        italic: "In nghiêng"
+        create_link: "Tạo liên kết"
+        bulleted_list: "Danh sách dấu đầu dòng"
+        numbered_list: "Danh sách đánh số"
+        align_left: "Căn trái"
+        align_center: "Căn giữa"
+        align_right: "Căn phải"
+        justify: "Căn đều"
+      toolbar_short:
+        link: "Liên kết"
+        list: "Danh sách"
+        left: "Trái"
+        center: "Giữa"
+        right: "Phải"
+        justify: "Đều"
+    search_input:
+      placeholder: "Tìm kiếm..."
+      label: "Tìm kiếm"
+    sidebar:
+      brand: "Senren"
+      label: "Điều hướng chính"
+      toggle: "Bật/tắt thanh bên"
+    tabs:
+      label: "Các tab"
+      tab: "Tab %{number}"
+    theme_toggle:
+      label: "Đổi giao diện"
+      light: "Giao diện sáng"
+      dark: "Giao diện tối"
+    top_nav:
+      label: "Điều hướng chung"
+      brand: "Senren"

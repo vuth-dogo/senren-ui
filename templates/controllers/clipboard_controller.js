@@ -4,7 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // Local UI: copy text to the clipboard and announce success.
 export default class extends Controller {
   static targets = ["source", "button", "status"]
-  static values = { copiedLabel: String }
+  static values = { copiedLabel: String, copiedStatus: String }
 
   async copy() {
     const value = this.sourceTarget.value || this.sourceTarget.textContent
@@ -13,8 +13,8 @@ export default class extends Controller {
     if (!this.hasButtonTarget) return
 
     const original = this.buttonTarget.textContent
-    this.buttonTarget.textContent = this.copiedLabelValue || "Copied"
-    if (this.hasStatusTarget) this.statusTarget.textContent = "Copied to clipboard"
+    if (this.copiedLabelValue) this.buttonTarget.textContent = this.copiedLabelValue
+    if (this.hasStatusTarget) this.statusTarget.textContent = this.copiedStatusValue
 
     clearTimeout(this._resetTimer)
     this._resetTimer = setTimeout(() => {

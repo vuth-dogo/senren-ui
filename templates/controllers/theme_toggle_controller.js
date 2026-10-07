@@ -4,6 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // Local UI: toggles the document dark class and stores the preference.
 export default class extends Controller {
   static targets = ["label", "iconLight", "iconDark"]
+  static values = { lightLabel: String, darkLabel: String }
 
   connect() {
     this._sync()
@@ -18,7 +19,7 @@ export default class extends Controller {
   _sync() {
     const dark = document.documentElement.classList.contains("dark")
     this.element.setAttribute("aria-pressed", dark ? "true" : "false")
-    if (this.hasLabelTarget) this.labelTarget.textContent = dark ? "Light theme" : "Dark theme"
+    if (this.hasLabelTarget) this.labelTarget.textContent = dark ? this.lightLabelValue : this.darkLabelValue
 
     // The icon names the theme the click switches *to*, matching the label: in
     // light mode the label reads "Dark theme", so the moon is showing. Showing
