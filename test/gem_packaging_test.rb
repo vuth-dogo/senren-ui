@@ -36,12 +36,16 @@ class GemPackagingTest < Minitest::Test
     %w[
       lib/senren/rails.rb
       lib/senren/rails/component_copier.rb
+      lib/senren/rails/locale_installer.rb
       lib/generators/senren/install/install_generator.rb
       lib/generators/senren/install/templates/base_component.rb.tt
       lib/tasks/senren.rake
       registry/components.yml
       templates/components/button/button_component.rb
       templates/controllers/dialog_controller.js
+      templates/locales/senren.en.yml
+      templates/locales/senren.vi.yml
+      docs/i18n.md
       README.md
       CHANGELOG.md
       LICENSE

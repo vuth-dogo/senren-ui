@@ -36,6 +36,7 @@ bundle exec rubocop
 bundle exec bundle-audit check --update
 bun run controllers:check
 bin/lint-fix                          # auto-fix RuboCop, ERB lint, controller JS
+bin/i18n-sync --check                 # templates/locales/senren.en.yml matches the components
 ```
 
 `bin/system` needs no setup: it uses a system Chrome and
@@ -87,6 +88,13 @@ real documentation/reference app is maintained separately in
 - ViewComponent Ruby class under `Senren::` namespace.
 - ERB template with `data-senren-component="<name>"` on root.
 - Tailwind classes use semantic tokens only.
+- Every word the component shows or announces (visible text, `aria-label`,
+  `sr-only`, a default `label:` or `placeholder:`, a sentence a controller will
+  say) goes through `senren_t('<component>.<key>', default: 'English')` with a
+  literal key and a literal default, and a controller receives it as a Stimulus
+  value, never as text in JavaScript. Run `bin/i18n-sync` to regenerate
+  `templates/locales/senren.en.yml` and add the same key to `senren.vi.yml`.
+  See `docs/i18n.md`.
 - Variants/sizes declared as class-level constants.
 - Stimulus controller iff client behavior is needed
   (`app/javascript/controllers/senren/<name>_controller.js`).
@@ -115,6 +123,8 @@ real documentation/reference app is maintained separately in
   templates, Stimulus controllers, or Importmap loading guidance.
 - Run `bun run controllers:check` before pushing if you touched
   `templates/controllers/*.js`.
+- Run `bin/i18n-sync --check` before pushing if you touched text in a
+  component; `bin/i18n-sync` fixes what it reports.
 
 ## Pull request workflow
 

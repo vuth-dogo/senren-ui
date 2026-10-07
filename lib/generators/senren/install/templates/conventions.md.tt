@@ -83,6 +83,21 @@ and obey it strictly.
     ```
     Classes from families the component does not use need no modifier.
 
+12. **Every word a component shows or announces goes through `senren_t`.**
+    Visible text, `aria-label`, `sr-only` text, a default `label:` or
+    `placeholder:`, and any sentence a Stimulus controller will say. The English
+    is the `default:`, the key is `<component>.<key>`, and both are literals:
+    ```ruby
+    senren_t('pagination.next', default: 'Next')
+    senren_t('cart.remove_item', default: 'Remove %{name}', name: item[:name])
+    def initialize(label: senren_t('tabs.label', default: 'Tabs'), **html)
+    ```
+    Never hard-code a sentence in a template, and never write one in a Stimulus
+    controller: hand the controller a translated string as a value. An app with
+    no locale file renders the English unchanged; to change a word or add a
+    language, copy the keys from `config/locales/senren.en.yml`
+    (`bin/rails senren:locales vi` installs a shipped translation).
+
 ## File ownership
 
 | Path                                | Owned by         |

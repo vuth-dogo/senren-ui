@@ -9,8 +9,59 @@ bug fixes only.
 
 ## [0.4.0] — 2026-10-08
 
+### Added
+
+- **Every word a component shows or announces can be translated from the host
+  app, without editing a component.** Visible text, `aria-label` and `sr-only`
+  text, the defaults of `label:`, `placeholder:` and `empty_text:`, the
+  calendar's month and weekday names, and the sentences a Stimulus controller
+  says after load now go through one helper, `senren_t`, with the English as its
+  default: `senren_t('pagination.next', default: 'Next')` is
+  `I18n.t("senren.pagination.next", default: "Next")`. 111 keys across 27
+  components, named `senren.<component>.<key>`, with `senren.shared.*` for the
+  two words that are the same word in several components.
+
+  An app with no locale file renders exactly what it did before, and a missing
+  translation never raises, including under
+  `config.i18n.raise_on_missing_translations`. Text you pass in yourself is used
+  as given and never looked up; `label: nil` still means "none", and leaving the
+  argument out is what gets the translated default.
+
+  `bin/rails generate senren:install` now writes `config/locales/senren.en.yml`
+  (every key and its wording, to read and copy from). The gem also ships
+  `senren.vi.yml`; a shipped translation is copied only when asked for,
+  because it adds its locale to `I18n.available_locales`:
+  `bin/rails generate senren:install --locales en vi`, or later
+  `bin/rails senren:locales vi`. An existing file is never overwritten without
+  `--force`. To add another language, copy `senren.en.yml`, change `en:`, and
+  translate the values. See [docs/i18n.md](docs/i18n.md).
+
+  `bin/i18n-sync` regenerates `templates/locales/senren.en.yml` from the code,
+  and a test fails if it, `senren.vi.yml`, and the components disagree, or if a
+  template shows a word that did not go through `senren_t`.
+
 ### Changed
 
+- **Five Stimulus controllers no longer carry an English sentence.** `clipboard`
+  ("Copied", "Copied to clipboard"), `api_key_field` ("Copy complete"),
+  `carousel` ("Slide 2 of 3"), `theme_toggle` ("Light theme", "Dark theme") and
+  `rich_text_editor_lite` (the link prompt) read the sentence from a Stimulus
+  value the component renders, so they speak the host's language. The markup
+  gains six `data-senren--<controller>-…-value` attributes and is otherwise
+  byte-for-byte what it was.
+
+  **Migrate:** none for an unmodified install. The controller and its component
+  go together: if you copied a component and edited its controller, or the other
+  way round, copy both again (`bin/rails senren:add <name> --force`) so the value
+  the controller reads is the one the component writes.
+- `bin/rails senren:add` appends `senren_t` to an existing
+  `app/components/senren/base_component.rb` that lacks it, so a component added
+  after upgrading the gem does not raise `NoMethodError`. Components you copied
+  earlier keep the English written into them until you copy them again.
+- The performance budgets for component source (140000 -> 150000 bytes) and for
+  the Stimulus payload (56000 -> 56500) are raised, with the reasons recorded in
+  `config/performance_budgets.yml`. The per-file caps and the gzip total are
+  unchanged.
 - **`NativeSelectComponent` defaults to its own chevron instead of the browser's
   arrow** (`native_arrow: false`). A select was the one control in the library
   with no visible state: the OS arrow cannot be styled or animated, so nothing
