@@ -306,6 +306,7 @@ DEPENDENCIES
   bundler-audit
   capybara
   erb_lint
+  json (< 3)
   minitest
   nokogiri (>= 1.19.3)
   propshaft

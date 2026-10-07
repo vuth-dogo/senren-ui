@@ -10,6 +10,14 @@ group :development, :test do
   # ERB was the only layer with no linter, while being what 62 of the 64
   # components are actually written in.
   gem 'erb_lint', require: false
+  # json 3.0 dropped the `quirks_mode:` option, and ActiveSupport::JSON's
+  # JSONGemEncoder#stringify still passes it on Rails 7.1 and 8.0 (and on 7.2
+  # before 7.2.4), so any tag option holding a hash or array raised
+  # ArgumentError. Nothing in this gem needs json 3. RuboCop 1.91 no longer caps
+  # json (`>= 2.3`, where 1.86 had `~> 2.3`), which is what let the per-Rails
+  # lockfiles, resolved fresh on every run, pick it up. Lift this when the matrix
+  # no longer includes a Rails that passes `quirks_mode:` (8.1 and 7.2.4 do not).
+  gem 'json', '< 3'
   gem 'minitest'
   # Used only by component tests to parse rendered HTML. Not a runtime
   # dependency: the gem itself never parses HTML.
