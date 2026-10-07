@@ -48,6 +48,14 @@ bug fixes only.
   transition ends, with a timer for the cases where `transitionend` never
   arrives: reduced motion, an off-screen element, an already-collapsed panel.
 
+### Internal
+
+- The development bundle holds json below 3. json 3.0 removed `quirks_mode:`,
+  which ActiveSupport still passes on Rails 7.1, 8.0 and 7.2 before 7.2.4, so
+  `bin/matrix` failed `test:integration` on those versions as soon as a fresh
+  lockfile resolved json 3. The constraint lifts once the matrix no longer
+  includes such a Rails.
+
 ## [0.3.0] — 2026-09-01
 
 ### Breaking
