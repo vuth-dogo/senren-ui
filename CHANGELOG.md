@@ -7,7 +7,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 v0.x is a pre-stable line: minor bumps may break things; patch bumps are
 bug fixes only.
 
-## [Unreleased]
+## [0.4.0] — 2026-10-08
 
 ### Added
 
@@ -65,11 +65,6 @@ bug fixes only.
   the Stimulus payload (56000 -> 56500) are raised, with the reasons recorded in
   `config/performance_budgets.yml`. The per-file caps and the gzip total are
   unchanged.
-
-## [0.4.0] — 2026-10-08
-
-### Changed
-
 - **`NativeSelectComponent` defaults to its own chevron instead of the browser's
   arrow** (`native_arrow: false`). A select was the one control in the library
   with no visible state: the OS arrow cannot be styled or animated, so nothing
