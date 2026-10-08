@@ -135,7 +135,7 @@ Out of scope:
     In English that is unchanged; in another language the id is derived from the
     translated words, deterministically, as before.
 13. **Two performance budgets are raised, and say why.** The component source was
-    137,621 of 140,000 bytes; every string now carries a key and a call, +9.3KB,
+    139,238 of 140,000 bytes; every string now carries a key and a call, +9.3KB,
     so the budget goes to 150,000. The controllers were 55,700 of 56,000; five of
     them now declare a value instead of holding a sentence, +317B, so the budget
     goes to 56,500. Each moves with a recorded reason in
