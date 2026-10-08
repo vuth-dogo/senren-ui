@@ -7,6 +7,17 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 v0.x is a pre-stable line: minor bumps may break things; patch bumps are
 bug fixes only.
 
+## [Unreleased]
+
+### Fixed
+
+- `bin/rails senren:locales vi`, as the README, `docs/i18n.md` and the install
+  generator write it, failed with `Unrecognized command "vi"`: the task was a
+  rake task only, so Rails passed `vi` to rake as a second task name, and the
+  one spelling that worked was `bin/rails 'senren:locales[vi]'`. It is now a
+  Rails command, like `senren:add`, so `bin/rails senren:locales vi`,
+  `senren:locales en vi` and `senren:locales vi --force` work as documented.
+
 ## [0.4.0] — 2026-10-08
 
 ### Added
