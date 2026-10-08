@@ -6,7 +6,7 @@ require 'senren/rails/registry'
 
 # This helper is intentionally exhaustive: the kitchen-sink system test should
 # fail when the registry gains a component without a representative preview.
-# rubocop:disable Metrics/ModuleLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+# rubocop:disable-next Metrics/ModuleLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 module ComponentPreviewHelper
   def preview_component_names
     Senren::Rails::Registry.load!.names
@@ -295,4 +295,3 @@ module ComponentPreviewHelper
     ]
   end
 end
-# rubocop:enable Metrics/ModuleLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
