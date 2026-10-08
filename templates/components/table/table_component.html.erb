@@ -1,4 +1,4 @@
-<%= tag.div(**root_attrs("w-full overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))]")) do %>
+<%= tag.div(**root_attrs("relative w-full overflow-hidden rounded-(--senren-radius) border border-[hsl(var(--senren-border))]")) do %>
   <table class="w-full border-collapse text-left text-sm <%= self.class::VARIANTS[variant] %>">
     <% if caption.present? %>
       <caption class="sr-only"><%= caption %></caption>
