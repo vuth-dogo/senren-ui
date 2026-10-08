@@ -6,7 +6,7 @@ module Senren
     renders_one :actions
 
     VARIANTS = {
-      default: 'bg-[hsl(var(--senren-background))/0.88]',
+      default: 'bg-[hsl(var(--senren-background)/0.88)]',
       solid: 'bg-[hsl(var(--senren-card))]'
     }.freeze
     SIZES = { md: '' }.freeze
