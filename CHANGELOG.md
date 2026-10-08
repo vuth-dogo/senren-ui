@@ -31,6 +31,12 @@ bug fixes only.
 
 ### Fixed
 
+- `FormComponent` yields the Rails form builder, as `docs/components.md` always
+  said it did. The block received the component instead, and because a
+  component is an `ActionView::Base` the documented `f.text_field :title,
+  class: "x"` did not raise: it reached the template-level helper and rendered
+  `name="title[{class: "x"}]"`, so the field posted under a name no controller
+  reads. Blocks that never touch `f`, and `with_content`, render as before.
 - `ThemeToggleComponent` rendered the letters `O`, `D` and `L` where an icon
   belongs. It now ships sun and moon SVGs and swaps which is hidden, so the
   correct icon is in the HTML the server sends rather than written in by
