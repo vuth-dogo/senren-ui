@@ -28,9 +28,10 @@ module Senren
       super
     end
 
-    # Mirrors ViewComponent's own `content`: a block wins over with_content,
-    # and it runs under the caller's virtual path so relative `t('.key')`
-    # lookups inside it resolve against the caller's template.
+    # Mirrors ViewComponent's own `content`: the block runs under the caller's
+    # virtual path, so relative `t('.key')` lookups inside it resolve against
+    # the caller's template. (A block and with_content together never get
+    # here: ViewComponent raises DuplicateContentError first.)
     def form_body(builder)
       return content unless @form_block
 

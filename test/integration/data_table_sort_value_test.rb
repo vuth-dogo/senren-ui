@@ -43,6 +43,19 @@ class DataTableSortValueTest < ViewComponent::TestCase
     refute_includes rendered_content, '&amp;amp;'
   end
 
+  # ERB checks `to_s.html_safe?`, not the value's class, so an object that
+  # renders itself as markup reaches the attribute the same way a SafeBuffer
+  # does.
+  def test_an_object_whose_to_s_is_markup_is_reduced_to_its_text
+    badge = Struct.new(:label) do
+      def to_s = ActionController::Base.helpers.tag.b(label, class: 'x')
+    end
+    td = cells_for([badge.new('Active')]).first
+
+    assert_equal %w[class data-sort-key data-sort-value], td.attributes.keys.sort
+    assert_equal 'Active', td['data-sort-value']
+  end
+
   def test_a_plain_string_cell_is_unchanged
     td = cells_for(['R&D <b>not markup</b>']).first
 

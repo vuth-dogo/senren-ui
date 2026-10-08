@@ -37,6 +37,11 @@ bug fixes only.
   class: "x"` did not raise: it reached the template-level helper and rendered
   `name="title[{class: "x"}]"`, so the field posted under a name no controller
   reads. Blocks that never touch `f`, and `with_content`, render as before.
+
+  Code that treated `|f|` as the component breaks: `f.tag`, `f.link_to`,
+  `f.render`, `f.model` and `f.url` now raise `NoMethodError` on the builder.
+  Call those on the view instead. A `FormComponent` rendered with neither a
+  block nor content now renders an empty `<form>` rather than raising.
 - `TopNavComponent`'s default variant had no background. Its class,
   `bg-[hsl(var(--senren-background))/0.88]`, put the alpha outside `hsl()`,
   inside the brackets, so Tailwind emitted `hsl(...)/0.88` verbatim and the

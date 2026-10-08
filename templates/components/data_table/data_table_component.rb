@@ -34,13 +34,17 @@ module Senren
     end
 
     # The text a cell shows, for its data-sort-value. A cell holding markup (a
-    # badge, a link) is a SafeBuffer, which ERB does not escape, so writing it
+    # badge, a link) is html_safe, which ERB does not escape, so writing it
     # into the attribute as-is pasted the markup inside the quotes and broke
     # the <td>. Its decoded text is a plain String, which ERB escapes once.
+    #
+    # Asks the string, not the value: ERB decides on `to_s.html_safe?`, so an
+    # object whose to_s returns markup breaks the attribute just the same.
     def sort_value(value)
-      return value.to_s unless value.is_a?(ActiveSupport::SafeBuffer)
+      text = value.to_s
+      return text unless text.html_safe?
 
-      Nokogiri::HTML5.fragment(value.to_str).text
+      Nokogiri::HTML5.fragment(text.to_str).text
     end
 
     private
