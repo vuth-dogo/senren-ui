@@ -33,6 +33,16 @@ module Senren
       column_key(column).to_s
     end
 
+    # The text a cell shows, for its data-sort-value. A cell holding markup (a
+    # badge, a link) is a SafeBuffer, which ERB does not escape, so writing it
+    # into the attribute as-is pasted the markup inside the quotes and broke
+    # the <td>. Its decoded text is a plain String, which ERB escapes once.
+    def sort_value(value)
+      return value.to_s unless value.is_a?(ActiveSupport::SafeBuffer)
+
+      Nokogiri::HTML5.fragment(value.to_str).text
+    end
+
     private
 
     def column_key(column)
