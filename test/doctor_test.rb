@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'test_helper'
+require 'open3'
+require 'rbconfig'
 require 'senren/rails'
 require 'senren/rails/doctor'
 require 'senren/rails/host_paths'
@@ -48,6 +50,29 @@ module Senren
         assert_includes output, '✓ .senren/skill.md exists'
         assert_includes output, '✓ CLAUDE.md exists'
         assert_includes output, '✗ AGENTS.md exists', 'artifacts that are still missing must be reported as failures'
+      end
+
+      # A host's Gemfile lists senren-ui, not view_component, so Bundler.require
+      # does not load ViewComponent and nothing does until BaseComponent is
+      # autoloaded. `bin/rails senren:doctor` on a healthy, freshly booted app
+      # reported "✗ ViewComponent gem available" and exited 1. Run in a clean
+      # process, because this one has ViewComponent loaded already.
+      def test_view_component_passes_before_anything_has_loaded_it
+        script = <<~RUBY
+          require 'stringio'
+          require 'senren/rails'
+          require 'senren/rails/host_paths'
+          require 'senren/rails/doctor'
+          abort 'ViewComponent was already loaded; this test proves nothing' if defined?(::ViewComponent)
+          io = StringIO.new
+          Senren::Rails::Doctor.new(paths: Senren::Rails::HostPaths.new(Dir.pwd), stdout: io).run!
+          puts io.string
+        RUBY
+        lib = File.expand_path('../lib', __dir__)
+        output, status = Open3.capture2e(RbConfig.ruby, "-I#{lib}", '-e', script, chdir: @root)
+
+        assert status.success?, output
+        assert_includes output, '✓ ViewComponent gem available'
       end
 
       def test_counts_installed_components_from_the_ledger

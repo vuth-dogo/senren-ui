@@ -22,7 +22,10 @@ module Senren
           force: options[:force]
         )
       rescue ArgumentError => e
-        raise ::Rails::Command::Base::Error, e.message
+        # The message alone, as the rake task prints it. Rails does not rescue
+        # an error raised from a command, so raising printed a Thor backtrace
+        # with the one line that says what to type buried at the top of it.
+        abort e.message
       end
 
       private

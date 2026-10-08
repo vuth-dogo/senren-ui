@@ -63,16 +63,18 @@ module Senren
         assert_equal [{ locales: %w[en vi], force: true }], TestLocalesCommand.installer.calls
       end
 
-      def test_an_unshipped_locale_is_a_command_error_not_a_backtrace
+      def test_an_unshipped_locale_prints_the_message_and_fails_without_a_backtrace
         installer = Object.new
         installer.define_singleton_method(:install) { |**| raise ArgumentError, 'Senren ships no fr translation' }
         TestLocalesCommand.installer = installer
 
-        error = assert_raises(::Rails::Command::Base::Error) do
-          capture_io { TestLocalesCommand.perform('locales', %w[fr], {}) }
+        exit_error = nil
+        _, stderr = capture_io do
+          exit_error = assert_raises(SystemExit) { TestLocalesCommand.perform('locales', %w[fr], {}) }
         end
 
-        assert_includes error.message, 'fr'
+        refute exit_error.success?
+        assert_equal "Senren ships no fr translation\n", stderr
       end
     end
   end

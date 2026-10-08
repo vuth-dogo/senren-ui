@@ -25,9 +25,26 @@ rake task and the docs, but no command, and nothing ran the documented line end 
   `--force` replaces, `fr` is refused with the way to add it.
 - `bin/ci`
 
+## Audit: every documented command, in a real host app
+
+A fresh `rails new` app (Rails 8.1.4, importmap, Stimulus) with the gem by path, then every `bin/rails senren:*` line
+in the README, `docs/` and the generator output. All of them work now, including the legacy bracket forms
+(`'senren:add[form,input]'`, `'senren:locales[en]'`, which still reach the rake tasks). Two more defects turned up:
+
+- **`senren:doctor` failed a healthy app.** `✗ ViewComponent gem available`, exit 1. The check was
+  `defined?(::ViewComponent)`, and the host's Gemfile lists senren-ui, not view_component, so `Bundler.require` never
+  loads it; BaseComponent's `require 'view_component'` runs only when a component is autoloaded. Present since the
+  first release. It now falls back to `gem_loadable?('view_component')`, like the Turbo check beside it. The test
+  runs the doctor in a clean process, since the test process has ViewComponent loaded.
+- **Both commands printed a Thor backtrace for a bad name.** `raise Rails::Command::Base::Error` is not rescued by
+  Rails, so the message came out wrapped in ~20 lines of trace. They now `abort e.message`, which is what the rake
+  tasks always did: the message on stderr, exit 1.
+- `installed_components.yml.tt` named `bin/rails senren:install`; it is `bin/rails generate senren:install`.
+
 ## Not changed
 
-- An unknown locale prints the command error with a backtrace, exactly as `senren:add <unknown>` already does.
-- From the same upgrade report: the `senren_t` append reopens `Senren::BaseComponent` at the end of the host's file
-  (the URL_HELPERS precedent), and `.senren/conventions.md` is written at install time only, so an upgraded app does
-  not get the i18n convention. Both are left for a follow-up.
+- `.senren/conventions.md` is written at install time only, so an upgraded app's copy lacks the `senren_t`
+  convention. That is by design: the file is marked "safe to edit" and belongs to the app. The rule reaches agents
+  anyway through `.senren/agent-rules.md`, which `bin/rails senren:agents:sync` regenerates and which carries it.
+- The `senren_t` append reopens `Senren::BaseComponent` at the end of the host's file. It follows the URL_HELPERS
+  precedent and works; rewriting a host's class body in place is riskier than an append.

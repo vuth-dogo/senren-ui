@@ -50,7 +50,11 @@ module Senren
 
       def runtime_checks
         [
-          check('ViewComponent gem available')    { defined?(::ViewComponent) },
+          # Not just defined?(::ViewComponent): a host's Gemfile lists senren-ui,
+          # not view_component, so Bundler.require never loads it, and nothing
+          # does until BaseComponent is autoloaded on the first render. A healthy
+          # app booted for this task failed the check.
+          check('ViewComponent gem available')    { defined?(::ViewComponent) || gem_loadable?('view_component') },
           check('TailwindCSS stylesheet present') { paths.stylesheet_path.exist? },
           check('Stimulus directory present')     { paths.stimulus_dir.directory? },
           check('Turbo gem available')            { defined?(::Turbo) || gem_loadable?('turbo-rails') }

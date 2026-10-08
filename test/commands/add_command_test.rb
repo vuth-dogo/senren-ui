@@ -74,7 +74,10 @@ module Senren
         TestAddCommand.installer = nil
       end
 
-      def test_command_raises_clear_error_without_component_names
+      # The usage line alone on stderr and a failing exit, as the rake task gives.
+      # Raising Rails::Command::Base::Error printed a Thor backtrace instead:
+      # Rails does not rescue an error raised from a command.
+      def test_command_prints_usage_and_fails_without_component_names
         installer = Object.new
         installer.define_singleton_method(:install) do |**|
           raise ArgumentError, Senren::Rails::ComponentInstaller::USAGE
@@ -82,13 +85,13 @@ module Senren
 
         TestAddCommand.installer = installer
 
-        error = assert_raises(::Rails::Command::Base::Error) do
-          capture_io do
-            TestAddCommand.perform('add', [], {})
-          end
+        exit_error = nil
+        _, stderr = capture_io do
+          exit_error = assert_raises(SystemExit) { TestAddCommand.perform('add', [], {}) }
         end
 
-        assert_equal Senren::Rails::ComponentInstaller::USAGE, error.message
+        refute exit_error.success?
+        assert_equal "#{Senren::Rails::ComponentInstaller::USAGE}\n", stderr
       ensure
         TestAddCommand.installer = nil
       end

@@ -17,6 +17,15 @@ bug fixes only.
   one spelling that worked was `bin/rails 'senren:locales[vi]'`. It is now a
   Rails command, like `senren:add`, so `bin/rails senren:locales vi`,
   `senren:locales en vi` and `senren:locales vi --force` work as documented.
+- `bin/rails senren:doctor` reported `✗ ViewComponent gem available` and exited
+  1 on a healthy app. It checked only whether the `ViewComponent` constant was
+  loaded, and a host's Gemfile lists `senren-ui`, not `view_component`, so
+  nothing loads it until the first component renders. The check now also asks
+  whether the gem is installed, as the Turbo check already did.
+- `bin/rails senren:add` and `senren:locales` given a name they do not know (or
+  `senren:add` given none) printed a Thor backtrace with the useful line at the
+  top of it. They now print the message alone and exit 1, as the rake tasks
+  always did.
 
 ## [0.4.0] — 2026-10-08
 
