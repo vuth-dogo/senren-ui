@@ -7,6 +7,13 @@ source 'https://rubygems.org'
 
 gem 'rails', '~> 8.0.0'
 
+# json 3.0 dropped the `quirks_mode:` keyword, and ActiveSupport before 8.1
+# still passes it whenever it encodes a value, so every component with a
+# hash-valued data attribute raises ArgumentError. These matrix lockfiles are
+# not committed, so CI resolves the newest json on every run. The pin is a
+# matrix fact about this Rails line, not a constraint the gem imposes on apps.
+gem 'json', '< 3'
+
 eval_gemfile 'common.rb'
 
 gemspec path: '..'
