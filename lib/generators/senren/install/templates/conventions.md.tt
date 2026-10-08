@@ -94,9 +94,10 @@ and obey it strictly.
     ```
     Never hard-code a sentence in a template, and never write one in a Stimulus
     controller: hand the controller a translated string as a value. An app with
-    no locale file renders the English unchanged; to change a word or add a
-    language, copy the keys from `config/locales/senren.en.yml`
-    (`bin/rails senren:locales vi` installs a shipped translation).
+    no locale file renders the English unchanged; to change a word, set its
+    `senren.*` key in a locale file, and to add a language, start from
+    `bin/rails senren:locales en` (`bin/rails senren:locales vi` installs a
+    shipped translation).
 
 ## File ownership
 

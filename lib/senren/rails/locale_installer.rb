@@ -13,14 +13,15 @@ module Senren
     #
     # Nothing is needed for English to work. Every component carries its English
     # as the `default:` of the `senren_t` call, so an app with no locale file at
-    # all renders what it always did. The copied `senren.en.yml` is there so the
-    # keys and their current wording are in the host to read, change and use as
-    # the starting point for another language.
+    # all renders what it always did. That is also why English is not copied
+    # unless asked for: Rails loads config/locales in name order, so a copied
+    # senren.en.yml loads after the host's en.yml and overrides any senren key
+    # set there, and it pins the wording, so a default the gem later improves
+    # never reaches the app. Ask for `en` to get a copy to translate from.
     #
     # An existing file is never overwritten without `force:`: it is the host's
     # translation, and a re-run of the installer must not undo it.
     class LocaleInstaller
-      DEFAULT_LOCALES = %w[en].freeze
       LOCALE_PATTERN = /\A[a-z]{2,3}(?:-[A-Za-z0-9]+)*\z/
 
       attr_reader :paths, :stdout
@@ -41,9 +42,12 @@ module Senren
 
       # Returns the locales actually written. Every name is checked before any
       # file is, so a typo in the second does not leave the first half-installed.
-      def install(locales: DEFAULT_LOCALES, force: false)
+      def install(locales: [], force: false)
         names = Array(locales).flatten.map(&:to_s).reject(&:empty?).uniq
-        names = DEFAULT_LOCALES if names.empty?
+        if names.empty?
+          stdout.puts "  skip  no locale named (shipped: #{self.class.available.join(', ')}); English needs no file"
+          return []
+        end
         names.each { |name| validate!(name) }
 
         names.select { |name| copy_locale(name, force: force) }
@@ -59,8 +63,8 @@ module Senren
 
         raise ArgumentError,
               "Senren ships no #{name} translation (shipped: #{self.class.available.join(', ')}). " \
-              "To add #{name}, copy config/locales/senren.en.yml to config/locales/senren.#{name}.yml, " \
-              "change the top-level key to #{name}:, and translate the values."
+              "To add #{name}, run bin/rails senren:locales en, copy config/locales/senren.en.yml to " \
+              "config/locales/senren.#{name}.yml, change the top-level key to #{name}:, and translate the values."
       end
 
       def copy_locale(name, force:)
@@ -72,7 +76,7 @@ module Senren
         return false unless target
 
         if File.exist?(target) && !force
-          stdout.puts "  skip  #{dest} (already exists; pass --force to replace your translation)"
+          stdout.puts "  skip  #{dest} (already exists; bin/rails senren:locales #{name} --force replaces it)"
           return false
         end
 

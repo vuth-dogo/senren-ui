@@ -11,17 +11,23 @@ module Senren
       class_option :force, type: :boolean, default: false,
                            desc: 'Overwrite existing Senren-managed files.'
 
-      # English is the default because it is the canonical wording and the file
-      # a translation is copied from. Anything else is asked for by name: a
-      # shipped translation adds its locale to I18n.available_locales, which a
-      # language switcher built from that list will then offer.
+      # Nothing by default: English renders with no file. Every locale, English
+      # included, is asked for by name. A shipped translation adds its locale to
+      # I18n.available_locales, which a language switcher built from that list
+      # will then offer; a copied English file overrides the app's own en.yml.
       #
       # `enum:` makes Thor refuse an unknown locale while it parses the options,
       # before any step has run. Refusing in the middle would leave an app with the
       # components copied and no instruction files.
-      class_option :locales, type: :array, default: Senren::Rails::LocaleInstaller::DEFAULT_LOCALES,
+      class_option :locales, type: :array, default: [],
                              enum: Senren::Rails::LocaleInstaller.available,
                              desc: 'Translations to copy into config/locales.'
+
+      # --force refreshes the files Senren owns. A locale file stops being one
+      # the moment it is copied: it is the app's translation. So replacing it is
+      # its own flag, and a routine --force re-run cannot undo someone's wording.
+      class_option :force_locales, type: :boolean, default: false,
+                                   desc: 'Replace locale files that already exist with the shipped ones.'
 
       def create_senren_dir
         empty_directory '.senren'
@@ -53,14 +59,21 @@ module Senren
         copy_file Senren::Rails.registry_path, '.senren/registry.yml'
       end
 
-      # Components work without these: the English is in the code. They are the
-      # editable copy of every string, and the base for another language. An
-      # existing file is a translation someone wrote, so it is kept unless
-      # --force is given.
+      # Components work without these: the English is in the code. Nothing is
+      # copied unless asked for, English included -- a copied senren.en.yml would
+      # override the app's own en.yml and pin today's wording (see
+      # LocaleInstaller). An existing file is a translation someone wrote, so it
+      # is kept unless --force-locales is given.
       def copy_locale_files
-        say_status :senren, "copying locale files (#{options[:locales].join(', ')}) to config/locales"
+        locales = options[:locales]
+        if locales.empty?
+          say_status :senren, 'no locale files copied: English needs none (bin/rails senren:locales vi to add one)'
+          return
+        end
+
+        say_status :senren, "copying locale files (#{locales.join(', ')}) to config/locales"
         installer = Senren::Rails::LocaleInstaller.new(paths: host_paths)
-        installer.install(locales: options[:locales], force: options[:force])
+        installer.install(locales: locales, force: options[:force_locales])
       end
 
       # Switches Stimulus to on-demand loading instead of documenting it.

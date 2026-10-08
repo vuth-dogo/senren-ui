@@ -27,14 +27,17 @@ bug fixes only.
   as given and never looked up; `label: nil` still means "none", and leaving the
   argument out is what gets the translated default.
 
-  `bin/rails generate senren:install` now writes `config/locales/senren.en.yml`
-  (every key and its wording, to read and copy from). The gem also ships
-  `senren.vi.yml`; a shipped translation is copied only when asked for,
-  because it adds its locale to `I18n.available_locales`:
-  `bin/rails generate senren:install --locales en vi`, or later
-  `bin/rails senren:locales vi`. An existing file is never overwritten without
-  `--force`. To add another language, copy `senren.en.yml`, change `en:`, and
-  translate the values. See [docs/i18n.md](docs/i18n.md).
+  The gem ships `senren.en.yml` and `senren.vi.yml`, and copies either only
+  when asked for: `bin/rails generate senren:install --locales vi`, or later
+  `bin/rails senren:locales vi`. Not even English is copied by default: a copied
+  `senren.en.yml` loads after the app's `en.yml`, overriding any `senren.*` key
+  set there, and pins today's wording against later releases. An existing file
+  is never overwritten unless that is asked for by name
+  (`senren:locales vi --force`, or `senren:install --force-locales`); the
+  `--force` that refreshes Senren's own files leaves translations alone. To add
+  another language, `bin/rails senren:locales en`, copy the file, change `en:`,
+  and translate the values. A translation with a misspelt `%{variable}` falls
+  back to the English instead of raising. See [docs/i18n.md](docs/i18n.md).
 
   `bin/i18n-sync` regenerates `templates/locales/senren.en.yml` from the code,
   and a test fails if it, `senren.vi.yml`, and the components disagree, or if a

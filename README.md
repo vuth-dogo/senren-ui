@@ -91,12 +91,13 @@ English as the default:
 senren_t('pagination.next', default: 'Next')   # I18n.t("senren.pagination.next", default: "Next")
 ```
 
-An app with no locale file renders exactly the English it always did. To change
-a word or add a language, copy the keys into `config/locales`:
+An app with no locale file renders exactly the English it always did, and the
+installer copies none unless asked. To change a word, set its `senren.*` key in
+your own locale file. To add a language, copy a shipped file and translate it:
 
 ```bash
-bin/rails generate senren:install --locales en vi   # writes config/locales/senren.en.yml and senren.vi.yml
-bin/rails senren:locales vi                         # or add a shipped language later
+bin/rails generate senren:install --locales vi   # writes config/locales/senren.vi.yml
+bin/rails senren:locales en                      # every key and its English, to translate from
 ```
 
 ```yaml

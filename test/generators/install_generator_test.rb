@@ -246,17 +246,24 @@ module Senren
       # --- Translations ------------------------------------------------------
       #
       # Components work with no locale file at all, because each carries its
-      # English as a default. The install still writes the English file so every
-      # key and its wording is in the app to read, edit and copy from.
+      # English as a default. So the install writes none: a copied senren.en.yml
+      # loads after the app's en.yml, overrides any senren key set there, and pins
+      # the wording against later gem upgrades.
 
-      def test_the_install_writes_the_english_strings_and_nothing_else_by_default
+      def test_the_install_writes_no_locale_file_by_default
         run_generator
+
+        assert_no_file 'config/locales/senren.en.yml'
+        assert_no_file 'config/locales/senren.vi.yml'
+      end
+
+      def test_english_is_copied_when_asked_for
+        run_generator %w[--locales en]
 
         assert_file 'config/locales/senren.en.yml' do |content|
           assert_includes content, 'en:'
           assert_includes content, 'next: "Next"'
         end
-        assert_no_file 'config/locales/senren.vi.yml'
       end
 
       # A shipped translation puts its locale into I18n.available_locales, which a
@@ -281,7 +288,8 @@ module Senren
       end
 
       # The file is the app's translation. A re-run after a gem upgrade has to
-      # leave it alone, and only --force replaces it.
+      # leave it alone -- including the --force that refreshes Senren's own
+      # files -- and only --force-locales replaces it.
       def test_rerunning_the_install_keeps_an_edited_translation
         run_generator %w[--locales en vi]
         edited = File.join(destination_root, 'config/locales/senren.vi.yml')
@@ -292,6 +300,10 @@ module Senren
         assert_includes File.read(edited), 'Tiếp'
 
         run_generator %w[--locales en vi --force]
+
+        assert_includes File.read(edited), 'Tiếp', '--force refreshes Senren files, not the app\'s translations'
+
+        run_generator %w[--locales en vi --force-locales]
 
         assert_includes File.read(edited), 'Sau'
       end

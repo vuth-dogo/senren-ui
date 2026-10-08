@@ -33,8 +33,18 @@ module Senren
                      @paths.locale_file('vi').to_s.sub(@root, File.realpath(@root))
       end
 
-      def test_english_is_installed_when_nothing_is_asked_for
+      # English renders from the defaults in the code, and a copied senren.en.yml
+      # would override the host's own en.yml, so nothing is the default.
+      def test_nothing_is_installed_when_nothing_is_asked_for
         written = @installer.install
+
+        assert_empty written
+        refute @paths.locales_dir.exist?
+        assert_includes @stdout.string, 'English needs no file'
+      end
+
+      def test_english_is_installed_when_asked_for
+        written = @installer.install(locales: %w[en])
 
         assert_equal %w[en], written
         assert_equal File.read(File.join(SHIPPED, 'senren.en.yml')), @paths.locale_file('en').read
@@ -51,7 +61,7 @@ module Senren
       def test_the_config_locales_directory_is_created_when_the_app_has_none
         refute @paths.locales_dir.exist?
 
-        @installer.install
+        @installer.install(locales: %w[vi])
 
         assert @paths.locales_dir.directory?
       end
@@ -111,7 +121,7 @@ module Senren
         FileUtils.mkdir_p(File.join(@root, 'config'))
         File.symlink(outside, File.join(@root, 'config/locales'))
 
-        written = @installer.install
+        written = @installer.install(locales: %w[en])
 
         assert_empty written
         assert_includes @stdout.string, 'skip'
