@@ -22,8 +22,9 @@ module Senren
 
     SIZES = { md: '' }.freeze
 
-    def initialize(items: [], currency: '$', title: 'Cart', empty_text: 'Your cart is empty.',
-                   checkout_url: nil, checkout_label: 'Checkout', variant: :default,
+    def initialize(items: [], currency: '$', title: senren_t('cart.title', default: 'Cart'),
+                   empty_text: senren_t('cart.empty', default: 'Your cart is empty.'),
+                   checkout_url: nil, checkout_label: senren_t('cart.checkout', default: 'Checkout'), variant: :default,
                    id: nil, class_name: nil, **html)
       super(variant: variant, size: :md, class_name: class_name, **html)
       @items = Array(items).map { |item| normalize_item(item) }
@@ -36,6 +37,14 @@ module Senren
     end
 
     attr_reader :items, :currency, :title, :empty_text, :checkout_label, :dom_id
+
+    def subtotal_label = senren_t('cart.subtotal', default: 'Subtotal')
+    def remove_label = senren_t('cart.remove', default: 'Remove')
+
+    def quantity_label(item) = senren_t('cart.quantity_group', default: '%{name} quantity', name: item[:name])
+    def decrease_label(item) = senren_t('cart.decrease', default: 'Decrease %{name} quantity', name: item[:name])
+    def increase_label(item) = senren_t('cart.increase', default: 'Increase %{name} quantity', name: item[:name])
+    def remove_item_label(item) = senren_t('cart.remove_item', default: 'Remove %{name}', name: item[:name])
 
     def empty? = items.empty?
     def total_quantity = items.sum { |item| item[:quantity] }

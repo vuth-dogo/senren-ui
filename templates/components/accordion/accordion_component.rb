@@ -22,7 +22,8 @@ module Senren
     def normalize_items(items)
       Array(items).map.with_index do |item, index|
         source = item.is_a?(Hash) ? item : { title: item.to_s }
-        title = source[:title] || source['title'] || "Section #{index + 1}"
+        title = source[:title] || source['title'] ||
+                senren_t('accordion.section', default: 'Section %{number}', number: index + 1)
         id = (source[:id] || source['id'] || title.to_s.parameterize).to_s
         { id: id, title: title, content: source[:content] || source['content'] }
       end

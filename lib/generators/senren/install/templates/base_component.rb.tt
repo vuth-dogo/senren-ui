@@ -1,4 +1,5 @@
 require 'uri'
+require 'active_support/i18n'
 require 'view_component'
 
 module Senren
@@ -103,6 +104,44 @@ module Senren
       return base if seed.empty?
 
       "#{base}-#{seed.parameterize}"
+    end
+
+    # Translates a string the component shows or announces: a visible label, an
+    # aria-label, sr-only text, a default placeholder, an announcement a Stimulus
+    # controller will read out.
+    #
+    #   senren_t('pagination.next', default: 'Next')
+    #   senren_t('cart.remove_item', default: 'Remove %{name}', name: item[:name])
+    #
+    # `default:` is the English text and it is required. It is what renders when
+    # the host app has no `senren.<key>` translation, which is why installing
+    # Senren needs no locale file, why a key nobody translated never raises (not
+    # even under `config.i18n.raise_on_missing_translations`, which only fires
+    # for a key with no default), and why the output is the same as it was before
+    # any string was translatable.
+    #
+    # This is I18n.t on purpose, not ViewComponent's `t`. `t` needs a view
+    # context, so it cannot run in a unit test that renders a template without
+    # Rails; it resolves a leading-dot key against the component's own sidecar
+    # scope, which is the lookup this namespace must not have; and it marks keys
+    # ending in `_html` as safe, which no Senren string is.
+    #
+    # Keys are `senren.<component>.<key>`; `senren.shared.<key>` is for a word
+    # that is the same word in more than one component. Interpolate with `%{}`.
+    # With no values passed the raw template comes back untouched, which is how a
+    # Stimulus controller is handed a string it fills in itself.
+    #
+    # A translation that names a variable the call does not pass (`%{nmae}`
+    # for `%{name}`) would raise I18n::MissingInterpolationArgument and turn a
+    # typo in a locale file into a 500. It falls back to the English instead,
+    # interpolated with the values the call did pass.
+    #
+    # Public, because the unit tests that render a template without a view
+    # delegate every public component method to it.
+    def senren_t(key, default:, **options)
+      I18n.t("senren.#{key}", default: default, **options)
+    rescue I18n::MissingInterpolationArgument
+      I18n.interpolate(default, options)
     end
 
     private

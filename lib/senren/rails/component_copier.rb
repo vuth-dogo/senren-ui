@@ -19,6 +19,7 @@ module Senren
       ).freeze
       BASE_COMPONENT_TEMPLATE = File.join(INSTALL_GENERATOR_TEMPLATES, 'base_component.rb.tt').freeze
       BASE_URL_HELPER_PATCH = BaseComponentPatch::URL_HELPERS
+      BASE_TRANSLATION_HELPER_PATCH = BaseComponentPatch::TRANSLATION_HELPER
 
       attr_reader :registry, :paths, :stdout
 
@@ -35,6 +36,7 @@ module Senren
         validate_client_override!(component_names, client_override)
         paths.ensure_dirs!
         ensure_base_component_url_helpers!
+        ensure_base_component_translation_helper!
 
         requested = Array(component_names).map(&:to_s)
         wanted.each do |name|
@@ -83,6 +85,25 @@ module Senren
         end
 
         copy_file(BASE_COMPONENT_TEMPLATE, dest, force: false, label: 'base_component.rb')
+      end
+
+      # A component that translates its text calls senren_t, so a host whose
+      # BaseComponent predates it needs the helper before the component renders.
+      # Runs after the URL helper step, which copies the whole current template
+      # (helper included) when there is no base component at all, so in that
+      # case there is nothing left to add.
+      #
+      # A destination that escapes the app root was already reported by the URL
+      # step, so this one declines without saying it a second time.
+      def ensure_base_component_translation_helper!
+        dest = paths.base_component_path
+
+        return unless SafeWrite.inside?(dest, paths.root)
+        return unless dest.exist?
+        return if dest.read.include?('def senren_t')
+
+        SafeWrite.write!(dest, dest.read + BASE_TRANSLATION_HELPER_PATCH, paths.root, 'base_component.rb')
+        stdout.puts "  update #{dest} (senren_t)"
       end
 
       # Delegates to SafeWrite so an intermediate symlinked directory is caught,

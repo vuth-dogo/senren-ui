@@ -109,6 +109,10 @@ module Senren
           - A button inside a form needs no `type:`. ButtonComponent omits the
             attribute so the browser submits, as plain HTML does. Pass
             `type: :button` only for a trigger that must not submit.
+          - Text a component shows or announces goes through
+            `senren_t('<component>.<key>', default: 'English')`, with a literal key
+            and default. Never hard-code a sentence in a template or in a Stimulus
+            controller; hand the controller a translated string as a value.
 
           ## Important Files
 

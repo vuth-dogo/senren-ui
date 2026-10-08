@@ -18,6 +18,15 @@ namespace :senren do
     abort e.message
   end
 
+  desc 'Copy a shipped translation into config/locales. bin/rails senren:locales vi [--force]'
+  task :locales, [:names] do |_t, args|
+    options = SenrenRakeArgs.options
+
+    Senren::Rails::LocaleInstaller.new.install(locales: SenrenRakeArgs.names(args), force: options[:force])
+  rescue ArgumentError => e
+    abort e.message
+  end
+
   namespace :skill do
     desc 'Rebuild .senren/skill.md and refresh agent instruction adapters.'
     task sync: :environment do

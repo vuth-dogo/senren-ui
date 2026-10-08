@@ -80,6 +80,40 @@ change, no build step, no configuration. Switch at runtime with
 
 Details and the token table: [docs/visual_style.md](docs/visual_style.md).
 
+## Translating components
+
+Every word a component shows or announces (labels, `aria-label` and
+screen-reader text, default placeholders, the calendar's month and weekday names,
+and what a Stimulus controller says after load) goes through one helper with its
+English as the default:
+
+```ruby
+senren_t('pagination.next', default: 'Next')   # I18n.t("senren.pagination.next", default: "Next")
+```
+
+An app with no locale file renders exactly the English it always did, and the
+installer copies none unless asked. To change a word, set its `senren.*` key in
+your own locale file. To add a language, copy a shipped file and translate it:
+
+```bash
+bin/rails generate senren:install --locales vi   # writes config/locales/senren.vi.yml
+bin/rails senren:locales en                      # every key and its English, to translate from
+```
+
+```yaml
+# config/locales/senren.fr.yml - copy senren.en.yml, change `en:` to `fr:`, translate the values
+fr:
+  senren:
+    pagination:
+      previous: "Précédent"
+      next: "Suivant"
+```
+
+The gem ships `en` and `vi`. A key you leave out stays English, and a missing
+key never raises. [docs/i18n.md](docs/i18n.md) has the key naming, the values a
+controller reads, what is not translated, and how to move components you copied
+before this existed.
+
 ## Daily commands
 
 ```bash
@@ -88,6 +122,7 @@ bin/rails generate senren:component picker --client  # custom component with Sti
 bin/rails generate senren:component picker --no-client  # without Stimulus
 bin/rails senren:add dialog --client        # install interactive official component
 bin/rails senren:add button                 # install static official component
+bin/rails senren:locales vi                 # copy a shipped translation to config/locales
 bundle exec rails senren:add form input     # equivalent alternate entry point
 bin/rails senren:skill:sync                 # rebuild .senren/skill.md
 bin/rails senren:agents:sync                # rebuild .senren/agent-rules + adapters
@@ -263,6 +298,7 @@ bun run controllers:check        # lint + syntax check for templates/controllers
 bun run controllers:lint:fix     # auto-fix lint issues for controllers
 bundle exec rake test:system     # Stimulus/system tests
 bin/lint-fix                     # auto-fix RuboCop, ERB lint, and controller JS
+bin/i18n-sync                    # rewrite templates/locales/senren.en.yml from the senren_t calls
 ```
 
 ## Contributing

@@ -5,7 +5,8 @@ module Senren
     VARIANTS = { default: '' }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(items: [], label: 'Breadcrumb', separator: '/', class_name: nil, **html)
+    def initialize(items: [], label: senren_t('breadcrumb.label', default: 'Breadcrumb'), separator: '/',
+                   class_name: nil, **html)
       super(variant: :default, size: :md, class_name: class_name, **html)
       @items = normalize_items(items)
       @label = label

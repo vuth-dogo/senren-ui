@@ -18,5 +18,11 @@ module Dummy
     config.secret_key_base = 'dummy-secret-key-base'
     config.session_store :cookie_store, key: '_senren_dummy_session'
     config.autoload_paths << root.join('app/helpers')
+
+    # What a host app that ran `bin/rails senren:locales vi` has: the shipped
+    # Vietnamese file, loaded like any other. English needs nothing, which is the
+    # point - every component carries its English as the default.
+    config.i18n.load_path << File.expand_path('../../../templates/locales/senren.vi.yml', __dir__)
+    config.i18n.available_locales = %i[en vi]
   end
 end

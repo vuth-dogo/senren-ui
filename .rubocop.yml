@@ -9,6 +9,13 @@ Style/Documentation:
 Style/FrozenStringLiteralComment:
   Enabled: false
 
+# `%{name}` is I18n's interpolation syntax, and every translatable string in the
+# components uses it. In aggressive mode this cop reads any string containing it
+# as a malformed format string. Conservative mode checks only what is actually
+# handed to format, sprintf, printf or `%`, which is the case it exists for.
+Style/FormatStringToken:
+  Mode: conservative
+
 Naming/PredicateMethod:
   Enabled: false
 

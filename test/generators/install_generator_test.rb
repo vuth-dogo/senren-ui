@@ -243,6 +243,82 @@ module Senren
         assert_file 'app/components/senren/base_component.rb'
       end
 
+      # --- Translations ------------------------------------------------------
+      #
+      # Components work with no locale file at all, because each carries its
+      # English as a default. So the install writes none: a copied senren.en.yml
+      # loads after the app's en.yml, overrides any senren key set there, and pins
+      # the wording against later gem upgrades.
+
+      def test_the_install_writes_no_locale_file_by_default
+        run_generator
+
+        assert_no_file 'config/locales/senren.en.yml'
+        assert_no_file 'config/locales/senren.vi.yml'
+      end
+
+      def test_english_is_copied_when_asked_for
+        run_generator %w[--locales en]
+
+        assert_file 'config/locales/senren.en.yml' do |content|
+          assert_includes content, 'en:'
+          assert_includes content, 'next: "Next"'
+        end
+      end
+
+      # A shipped translation puts its locale into I18n.available_locales, which a
+      # language switcher built from that list then offers. So it is asked for.
+      def test_a_shipped_translation_is_copied_when_asked_for
+        run_generator %w[--locales en vi]
+
+        assert_file 'config/locales/senren.en.yml'
+        assert_file 'config/locales/senren.vi.yml' do |content|
+          assert_includes content, 'vi:'
+          assert_includes content, 'next: "Sau"'
+        end
+      end
+
+      def test_the_generated_locale_files_load_into_i18n
+        run_generator %w[--locales en vi]
+        backend = I18n::Backend::Simple.new
+        backend.load_translations(*Dir[File.join(destination_root, 'config/locales/senren.*.yml')])
+
+        assert_equal 'Previous', backend.translate(:en, 'senren.pagination.previous')
+        assert_equal 'Trước', backend.translate(:vi, 'senren.pagination.previous')
+      end
+
+      # The file is the app's translation. A re-run after a gem upgrade has to
+      # leave it alone -- including the --force that refreshes Senren's own
+      # files -- and only --force-locales replaces it.
+      def test_rerunning_the_install_keeps_an_edited_translation
+        run_generator %w[--locales en vi]
+        edited = File.join(destination_root, 'config/locales/senren.vi.yml')
+        File.write(edited, "vi:\n  senren:\n    pagination:\n      next: \"Tiếp\"\n")
+
+        run_generator %w[--locales en vi]
+
+        assert_includes File.read(edited), 'Tiếp'
+
+        run_generator %w[--locales en vi --force]
+
+        assert_includes File.read(edited), 'Tiếp', '--force refreshes Senren files, not the app\'s translations'
+
+        run_generator %w[--locales en vi --force-locales]
+
+        assert_includes File.read(edited), 'Sau'
+      end
+
+      # Refused while the options are parsed, so nothing has been written: a half
+      # install (components copied, no instruction files) is worse than none.
+      def test_an_unknown_locale_is_refused_before_anything_is_written
+        message = capture(:stderr) { run_generator %w[--locales fr] }
+
+        assert_includes message, 'fr'
+        assert_includes message, 'en, vi'
+        assert_no_directory '.senren'
+        assert_no_file 'config/locales/senren.en.yml'
+      end
+
       private
 
       # Mirrors what `rails new` produces for an importmap application.

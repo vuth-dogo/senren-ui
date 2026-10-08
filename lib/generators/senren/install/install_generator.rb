@@ -11,6 +11,24 @@ module Senren
       class_option :force, type: :boolean, default: false,
                            desc: 'Overwrite existing Senren-managed files.'
 
+      # Nothing by default: English renders with no file. Every locale, English
+      # included, is asked for by name. A shipped translation adds its locale to
+      # I18n.available_locales, which a language switcher built from that list
+      # will then offer; a copied English file overrides the app's own en.yml.
+      #
+      # `enum:` makes Thor refuse an unknown locale while it parses the options,
+      # before any step has run. Refusing in the middle would leave an app with the
+      # components copied and no instruction files.
+      class_option :locales, type: :array, default: [],
+                             enum: Senren::Rails::LocaleInstaller.available,
+                             desc: 'Translations to copy into config/locales.'
+
+      # --force refreshes the files Senren owns. A locale file stops being one
+      # the moment it is copied: it is the app's translation. So replacing it is
+      # its own flag, and a routine --force re-run cannot undo someone's wording.
+      class_option :force_locales, type: :boolean, default: false,
+                                   desc: 'Replace locale files that already exist with the shipped ones.'
+
       def create_senren_dir
         empty_directory '.senren'
       end
@@ -39,6 +57,23 @@ module Senren
 
       def mirror_registry
         copy_file Senren::Rails.registry_path, '.senren/registry.yml'
+      end
+
+      # Components work without these: the English is in the code. Nothing is
+      # copied unless asked for, English included -- a copied senren.en.yml would
+      # override the app's own en.yml and pin today's wording (see
+      # LocaleInstaller). An existing file is a translation someone wrote, so it
+      # is kept unless --force-locales is given.
+      def copy_locale_files
+        locales = options[:locales]
+        if locales.empty?
+          say_status :senren, 'no locale files copied: English needs none (bin/rails senren:locales vi to add one)'
+          return
+        end
+
+        say_status :senren, "copying locale files (#{locales.join(', ')}) to config/locales"
+        installer = Senren::Rails::LocaleInstaller.new(paths: host_paths)
+        installer.install(locales: locales, force: options[:force_locales])
       end
 
       # Switches Stimulus to on-demand loading instead of documenting it.
@@ -75,6 +110,7 @@ module Senren
       def print_next_steps
         say "\nSenren installed."
         say 'Next: bin/rails senren:add button card badge alert dialog'
+        say 'Translate the components: bin/rails senren:locales vi (see docs/i18n.md)'
         say 'Then: bin/rails senren:agents:sync'
       end
 

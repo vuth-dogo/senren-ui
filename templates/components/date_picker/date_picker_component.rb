@@ -8,7 +8,8 @@ module Senren
     }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(name:, value: nil, id: nil, placeholder: 'Select date', variant: :default, class_name: nil, **html)
+    def initialize(name:, value: nil, id: nil, placeholder: senren_t('date_picker.placeholder', default: 'Select date'),
+                   variant: :default, class_name: nil, **html)
       super(variant: variant, size: :md, class_name: class_name, **html)
       @name = name
       @value = value

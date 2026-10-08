@@ -5,7 +5,13 @@ controllers:
   # source-copy means an app installs only the controllers it uses, and the
   # per-file cap plus lazy loading are what bound a real page. Recorded rather
   # than nudged, because a budget raised quietly is a budget that does nothing.
-  total_bytes: 56000
+  #
+  # Raised from 56000 to 56500 in plans/027. Five controllers stopped writing a
+  # sentence of their own ("Copied", "Slide 2 of 3", "Light theme", a prompt) and
+  # read it from a Stimulus value the server translated, which costs a value
+  # declaration each and, for the carousel, the substitution. +317B in all; the
+  # gzip total and the per-file cap are unchanged and still pass.
+  total_bytes: 56500
   total_gzip_bytes: 14000
   # Raised from 18000 in plans/019: the rich text editor now rebuilds pasted
   # markup against an allowlist (+4.2KB) because the browser's contenteditable
@@ -13,7 +19,12 @@ controllers:
   # above are unchanged and still pass, so this caps one file, not the payload.
   file_bytes: 20000
 components:
-  total_bytes: 140000
+  # Raised from 140000 to 150000 in plans/027. Every string a component shows now
+  # carries a key and a senren_t call around the English it already had: 111 of
+  # them across 27 components, +9.3KB, from 139238B. That is the price of letting
+  # a host translate the library without forking it. The per-file cap below is
+  # unchanged and the largest file (the carousel, +63B) is well inside it.
+  total_bytes: 150000
   file_bytes: 8000
 system:
   static_dom_nodes: 180

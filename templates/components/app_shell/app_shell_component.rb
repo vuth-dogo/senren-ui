@@ -13,7 +13,8 @@ module Senren
     }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(content_id: 'senren-main', skip_label: 'Skip to content', variant: :default, class_name: nil, **html)
+    def initialize(content_id: 'senren-main', skip_label: senren_t('app_shell.skip_to_content', default: 'Skip to content'),
+                   variant: :default, class_name: nil, **html)
       super(variant: variant, size: :md, class_name: class_name, **html)
       @content_id = content_id
       @skip_label = skip_label

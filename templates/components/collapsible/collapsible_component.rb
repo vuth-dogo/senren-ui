@@ -6,7 +6,7 @@ module Senren
     VARIANTS = { default: '' }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(title: 'Details', open: false, class_name: nil, **html)
+    def initialize(title: senren_t('collapsible.details', default: 'Details'), open: false, class_name: nil, **html)
       super(variant: :default, size: :md, class_name: class_name, **html)
       @title = title
       @open = open

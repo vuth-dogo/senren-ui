@@ -1,4 +1,4 @@
-<%= tag.div(**root_attrs("space-y-2", data: { controller: "senren--api-key-field", "senren--api-key-field-reveal-label-value": reveal_label, "senren--api-key-field-hide-label-value": hide_label, "senren--api-key-field-copy-label-value": copy_label })) do %>
+<%= tag.div(**root_attrs("space-y-2", data: { controller: "senren--api-key-field", "senren--api-key-field-reveal-label-value": reveal_label, "senren--api-key-field-hide-label-value": hide_label, "senren--api-key-field-copy-label-value": copy_label, "senren--api-key-field-copied-status-value": copied_status })) do %>
   <% if content? && value.blank? %>
     <%= content %>
   <% else %>

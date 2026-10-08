@@ -59,6 +59,30 @@ module Senren
           end
         end
       RUBY
+
+      # Ruby appended to a host app's existing BaseComponent when it predates
+      # senren_t. A component copied by `senren:add` calls it, so without this a
+      # host that upgraded the gem and added one component would get a
+      # NoMethodError the first time that component rendered.
+      #
+      # Same arrangement as URL_HELPERS: apps installed earlier never receive the
+      # template again, so the helper is duplicated here, and
+      # test/i18n_catalog_test.rb pins the two bodies together.
+      TRANSLATION_HELPER = <<~'RUBY'
+
+        # Added by senren:add so components that translate their text can render.
+        require 'active_support/i18n'
+
+        module Senren
+          class BaseComponent
+            def senren_t(key, default:, **options)
+              I18n.t("senren.#{key}", default: default, **options)
+            rescue I18n::MissingInterpolationArgument
+              I18n.interpolate(default, options)
+            end
+          end
+        end
+      RUBY
     end
   end
 end

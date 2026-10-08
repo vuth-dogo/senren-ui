@@ -9,7 +9,7 @@
   <% else %>
     <button type="button" data-action="click->senren--alert-dialog#open"
             data-senren--alert-dialog-target="trigger"
-            class="hidden">Open</button>
+            class="hidden"><%= senren_t('shared.open', default: 'Open') %></button>
   <% end %>
 
   <div data-senren--alert-dialog-target="overlay" hidden

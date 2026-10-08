@@ -30,10 +30,10 @@
             <p class="text-sm text-[hsl(var(--senren-muted-foreground))]" data-senren--cart-target="lineTotal"><%= line_total(item) %></p>
           </div>
 
-          <div class="flex items-center gap-1" role="group" aria-label="<%= item[:name] %> quantity">
+          <div class="flex items-center gap-1" role="group" aria-label="<%= quantity_label(item) %>">
             <button type="button"
                     data-action="click->senren--cart#decrement"
-                    aria-label="Decrease <%= item[:name] %> quantity"
+                    aria-label="<%= decrease_label(item) %>"
                     class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-(--senren-radius) border border-[hsl(var(--senren-border))] text-sm hover:bg-[hsl(var(--senren-accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]">&minus;</button>
 
             <output class="w-8 text-center text-sm tabular-nums text-[hsl(var(--senren-foreground))]"
@@ -41,21 +41,21 @@
 
             <button type="button"
                     data-action="click->senren--cart#increment"
-                    aria-label="Increase <%= item[:name] %> quantity"
+                    aria-label="<%= increase_label(item) %>"
                     class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-(--senren-radius) border border-[hsl(var(--senren-border))] text-sm hover:bg-[hsl(var(--senren-accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]">+</button>
           </div>
 
           <button type="button"
                   data-action="click->senren--cart#remove"
-                  aria-label="Remove <%= item[:name] %>"
-                  class="inline-flex h-8 cursor-pointer items-center rounded-(--senren-radius) px-2 text-sm text-[hsl(var(--senren-muted-foreground))] hover:bg-[hsl(var(--senren-accent))] hover:text-[hsl(var(--senren-destructive))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]">Remove</button>
+                  aria-label="<%= remove_item_label(item) %>"
+                  class="inline-flex h-8 cursor-pointer items-center rounded-(--senren-radius) px-2 text-sm text-[hsl(var(--senren-muted-foreground))] hover:bg-[hsl(var(--senren-accent))] hover:text-[hsl(var(--senren-destructive))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--senren-ring))]"><%= remove_label %></button>
         </li>
       <% end %>
     </ul>
 
     <footer class="flex items-center justify-between gap-3 border-t border-[hsl(var(--senren-border))] px-4 py-3">
       <div class="text-sm text-[hsl(var(--senren-muted-foreground))]">
-        Subtotal
+        <%= subtotal_label %>
         <span class="ml-1 font-semibold text-[hsl(var(--senren-foreground))]" data-senren--cart-target="subtotal"><%= subtotal %></span>
       </div>
 

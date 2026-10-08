@@ -8,7 +8,8 @@ module Senren
     }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(items: [], brand: 'Senren', variant: :default, label: 'Primary', class_name: nil, **html)
+    def initialize(items: [], brand: senren_t('sidebar.brand', default: 'Senren'), variant: :default,
+                   label: senren_t('sidebar.label', default: 'Primary'), class_name: nil, **html)
       super(variant: variant, size: :md, class_name: class_name, **html)
       @items = normalize_items(items)
       @brand = brand
@@ -16,6 +17,8 @@ module Senren
     end
 
     attr_reader :items, :brand, :label
+
+    def toggle_label = senren_t('sidebar.toggle', default: 'Toggle sidebar')
 
     private
 

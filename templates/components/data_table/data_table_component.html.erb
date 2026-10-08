@@ -18,7 +18,7 @@
                 <% if sortable? %>
                   <button type="button" class="inline-flex cursor-pointer items-center gap-1 rounded-sm hover:text-[hsl(var(--senren-foreground))]" data-action="click->senren--data-table#sort" data-sort-key="<%= column_sort_key(column) %>">
                     <%= column_label(column) %>
-                    <span aria-hidden="true">Sort</span>
+                    <span aria-hidden="true"><%= senren_t('data_table.sort', default: 'Sort') %></span>
                   </button>
                 <% else %>
                   <%= column_label(column) %>

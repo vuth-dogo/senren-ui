@@ -11,7 +11,8 @@ module Senren
     }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(items: [], current_path: nil, label: 'Global', variant: :default, class_name: nil, **html)
+    def initialize(items: [], current_path: nil, label: senren_t('top_nav.label', default: 'Global'), variant: :default,
+                   class_name: nil, **html)
       super(variant: variant, size: :md, class_name: class_name, **html)
       @items = normalize_items(items)
       @current_path = current_path

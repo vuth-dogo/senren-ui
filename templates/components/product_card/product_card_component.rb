@@ -20,7 +20,7 @@ module Senren
     SIZES = { md: '' }.freeze
 
     def initialize(title:, price:, url:, image_url: nil, description: nil, badge: nil,
-                   action_label: 'Add to cart', available: true, method: :post,
+                   action_label: senren_t('product_card.add_to_cart', default: 'Add to cart'), available: true, method: :post,
                    variant: :default, id: nil, class_name: nil, **html)
       super(variant: variant, size: :md, class_name: class_name, **html)
       @title = title
@@ -44,6 +44,6 @@ module Senren
     def safe_action_url = safe_url(@url)
     def safe_image_url = safe_media_url(@image_url)
 
-    def button_label = available? ? action_label : 'Out of stock'
+    def button_label = available? ? action_label : senren_t('product_card.out_of_stock', default: 'Out of stock')
   end
 end

@@ -8,9 +8,17 @@ module Senren
     VARIANTS = { default: '' }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(title: 'Invite teammate', description: 'Send an invitation to join this workspace.',
-                   email_name: 'email', role_name: 'role', roles: %w[Member
-                                                                     Admin], button_label: 'Invite member', id: nil, class_name: nil, **html)
+    # The role option values stay `Member` and `Admin`, because that is what the
+    # form submits and what the host's code compares against. Only the label a
+    # person reads is translated.
+    def initialize(title: senren_t('invite_member_dialog.title', default: 'Invite teammate'),
+                   description: senren_t('invite_member_dialog.description',
+                                         default: 'Send an invitation to join this workspace.'),
+                   email_name: 'email', role_name: 'role',
+                   roles: [['Member', senren_t('invite_member_dialog.role_member', default: 'Member')],
+                           ['Admin', senren_t('invite_member_dialog.role_admin', default: 'Admin')]],
+                   button_label: senren_t('invite_member_dialog.button', default: 'Invite member'),
+                   id: nil, class_name: nil, **html)
       super(variant: :default, size: :md, class_name: class_name, **html)
       @title = title
       @description = description

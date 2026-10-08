@@ -8,7 +8,8 @@ module Senren
     }.freeze
     SIZES = { md: '' }.freeze
 
-    def initialize(name:, options:, value: nil, placeholder: 'Search...', variant: :default, class_name: nil, **html)
+    def initialize(name:, options:, value: nil, placeholder: senren_t('combobox.placeholder', default: 'Search...'),
+                   variant: :default, class_name: nil, **html)
       super(variant: variant, size: :md, class_name: class_name, **html)
       @name = name
       @options = normalize_options(options)

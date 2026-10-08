@@ -24,6 +24,11 @@ module Senren
 
       def stylesheet_path       = root.join('app', 'assets', 'stylesheets', 'senren.css')
 
+      # Where the host's translations of component text live. One file per
+      # locale, so a team adds a language by adding a file.
+      def locales_dir           = root.join('config', 'locales')
+      def locale_file(locale)   = locales_dir.join("senren.#{locale}.yml")
+
       def stimulus_dir          = root.join('app', 'javascript', 'controllers', 'senren')
 
       def github_dir            = root.join('.github')
