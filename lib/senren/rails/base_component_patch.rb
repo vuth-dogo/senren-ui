@@ -77,6 +77,8 @@ module Senren
           class BaseComponent
             def senren_t(key, default:, **options)
               I18n.t("senren.#{key}", default: default, **options)
+            rescue I18n::MissingInterpolationArgument
+              I18n.interpolate(default, options)
             end
           end
         end

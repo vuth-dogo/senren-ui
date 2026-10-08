@@ -131,10 +131,17 @@ module Senren
     # With no values passed the raw template comes back untouched, which is how a
     # Stimulus controller is handed a string it fills in itself.
     #
+    # A translation that names a variable the call does not pass (`%{nmae}`
+    # for `%{name}`) would raise I18n::MissingInterpolationArgument and turn a
+    # typo in a locale file into a 500. It falls back to the English instead,
+    # interpolated with the values the call did pass.
+    #
     # Public, because the unit tests that render a template without a view
     # delegate every public component method to it.
     def senren_t(key, default:, **options)
       I18n.t("senren.#{key}", default: default, **options)
+    rescue I18n::MissingInterpolationArgument
+      I18n.interpolate(default, options)
     end
 
     private

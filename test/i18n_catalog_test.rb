@@ -67,6 +67,18 @@ class I18nCatalogTest < Minitest::Test
                  'with no values the raw template comes back, which is how a controller is handed one'
   end
 
+  # A typo'd variable in a host's translation must cost the translation, not
+  # the page.
+  def test_a_translation_naming_an_unknown_variable_falls_back_to_the_english
+    component = Senren::BaseComponent.new
+    I18n.backend.store_translations(:en, senren: { carousel: { status: 'Bild %{curent} von %{total}' } })
+
+    assert_equal 'Slide 1 of 3',
+                 component.senren_t('carousel.status', default: 'Slide %{current} of %{total}', current: 1, total: 3)
+  ensure
+    I18n.reload!
+  end
+
   def test_senren_t_is_public_so_templates_rendered_without_a_view_can_reach_it
     assert_includes Senren::BaseComponent.public_instance_methods(false), :senren_t
   end
