@@ -1,7 +1,14 @@
 class AssetsController < ActionController::Base
-  skip_forgery_protection
+  # These GET endpoints publish static JavaScript for normal script/module tags.
+  # Rails' separate non-XHR JavaScript response check would reject those tags;
+  # keep the CSRF token verifier and exempt only these public script responses.
+  skip_after_action :verify_same_origin_request,
+                    only: %i[application stimulus senren_controller], if: -> { request.get? }
 
   REPO_ROOT = File.expand_path('../../../..', __dir__)
+  CONTROLLER_FILES = Dir.glob(File.join(REPO_ROOT, 'templates/controllers/*_controller.js')).to_h do |path|
+    [File.basename(path, '.js'), path]
+  end.freeze
 
   def application
     serve_file Rails.root.join('app/javascript/application.js')
@@ -12,10 +19,10 @@ class AssetsController < ActionController::Base
   end
 
   def senren_controller
-    name = params.fetch(:name_controller).delete_suffix('_controller')
-    return head :not_found unless name.match?(/\A[a-z0-9_]+\z/)
+    path = CONTROLLER_FILES[params[:name_controller]]
+    return head :not_found unless path
 
-    serve_file File.join(REPO_ROOT, 'templates/controllers', "#{name}_controller.js")
+    serve_file path
   end
 
   private

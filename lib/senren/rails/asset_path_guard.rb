@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'pathname'
+
 module Senren
   module Rails
     # Refuses to let component source be served as a static asset.
@@ -58,23 +60,20 @@ module Senren
         components = components_dir(app)
         return [] unless components&.directory?
 
-        asset_paths(app).select { |path| publishes_source?(path, components) }
+        sources = component_sources(components)
+        return [] if sources.empty?
+
+        asset_paths(app).select { |path| publishes_source?(path, sources) }
       end
 
-      # Whether serving this asset path would serve component source.
-      #
-      # `source_files?` used to be asked once about app/components as a whole,
-      # which is the wrong question for a descendant path: with that shape,
-      # app/components/assets holding nothing but CSS looked identical to
-      # app/components/senren holding every component. Only the overlapping
-      # subtree can publish anything, and that subtree is the deeper of the two
-      # paths.
-      def publishes_source?(asset_path, components)
+      # Propshaft follows directory and file symlinks when collecting assets.
+      # Compare their real targets, including links nested below an asset path,
+      # so an alias cannot publish source past the production boot guard.
+      def publishes_source?(asset_path, sources)
         asset = Pathname.new(asset_path.to_s).expand_path
-        components = components.expand_path
-        return false unless overlap?(asset, components)
+        return false unless asset.directory?
 
-        source_files?(asset.to_s.length >= components.to_s.length ? asset : components)
+        each_file(asset).any? { |_, target| sources.key?(target) }
       end
 
       def components_dir(app)
@@ -83,32 +82,36 @@ module Senren
         nil
       end
 
-      def source_files?(dir)
-        SOURCE_EXTENSIONS.any? { |ext| Dir.glob(dir.join("**/*#{ext}")).any? }
+      def component_sources(components)
+        each_file(components).with_object({}) do |(path, target), sources|
+          sources[target] = true if [path.extname, target.extname].any? { |ext| SOURCE_EXTENSIONS.include?(ext) }
+        end
+      end
+
+      # Track real directory identities so aliases and cycles are visited once.
+      # Keep the original filename as well: widget.rb may point to a differently
+      # named file outside app/components, which is still component source.
+      def each_file(path, visited = {}, &block)
+        return enum_for(__method__, path, visited) unless block
+
+        target = path.realpath
+        if target.directory?
+          return if visited[target]
+
+          visited[target] = true
+          target.children.each { |child| each_file(child, visited, &block) }
+        else
+          block.call(path, target)
+        end
+      rescue Errno::ENOENT, Errno::ENOTDIR, Errno::ELOOP
+        # Broken links cannot publish content; visited directories stop cycles.
+        nil
       end
 
       def asset_paths(app)
         app.config.respond_to?(:assets) ? Array(app.config.assets.paths) : []
       rescue StandardError
         []
-      end
-
-      # Two paths overlap when one contains the other, in EITHER direction, and
-      # the test has to be separator-aware:
-      #
-      #   app/components         is an ancestor  -> publishes everything
-      #   app/components/senren  is a descendant -> publishes the components
-      #   app/comp               shares a prefix -> publishes nothing
-      #
-      # The first version tested only the ancestor direction with a bare
-      # start_with?, so it missed the descendant case — which is what a
-      # developer writes after reading this module's own remediation text — and
-      # it blocked production boots over an unrelated app/comp directory.
-      def overlap?(one, other)
-        a = "#{one}#{File::SEPARATOR}"
-        b = "#{other}#{File::SEPARATOR}"
-
-        a.start_with?(b) || b.start_with?(a)
       end
 
       def message_for(offenders)

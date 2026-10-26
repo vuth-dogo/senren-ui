@@ -5,6 +5,15 @@
 Security fixes are applied to the latest released tag on `main`. Older
 tags may receive guidance, but fixes are not guaranteed to be backported.
 
+### Rails compatibility and security support
+
+The test matrix includes Rails 7.1 to check compatibility. That line no longer
+receives upstream security patches: Rails 7.1.6 still has known vulnerabilities.
+Use a maintained Rails line with its latest security patches for deployed apps.
+For Rails 7.2, use at least 7.2.3.2; later Rails lines also need their current
+security patches. An application's own lockfile must be audited independently
+of this library's development bundle.
+
 ## Reporting a Vulnerability
 
 Please do not open public GitHub issues for security problems.

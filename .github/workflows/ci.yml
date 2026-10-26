@@ -99,6 +99,9 @@ jobs:
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
 
+      - name: Audit JavaScript dependencies for known vulnerabilities
+        run: bun audit
+
       - name: Run controller checks
         run: bun run controllers:check
 

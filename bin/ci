@@ -68,6 +68,7 @@ step "JavaScript checks" bun run controllers:check
 step "performance"       bin/performance
 # Dependabot opens PRs but cannot fail a build. This gate does.
 step "dependency audit"  audit_dependencies
+step "JavaScript dependency audit" bun audit
 
 if [ "$RUN_MATRIX" -eq 1 ]; then
   step "Rails matrix" bin/matrix

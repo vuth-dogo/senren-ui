@@ -29,6 +29,25 @@ module Senren
       class_option :force_locales, type: :boolean, default: false,
                                    desc: 'Replace locale files that already exist with the shipped ones.'
 
+      # Thor's template/copy/gsub actions follow destination symlinks. Check
+      # every destination before the first directory is created, including
+      # files read before rewriting and links whose targets do not exist yet.
+      def validate_install_destinations
+        destinations = [
+          host_paths.senren_dir, host_paths.components_dir, host_paths.stimulus_dir,
+          host_paths.stylesheet_path, host_paths.stylesheet_path.dirname.join('senren_themes.css'),
+          host_paths.base_component_path, host_paths.conventions_file, host_paths.installed_components,
+          host_paths.registry_mirror, host_paths.skill_file, host_paths.agent_rules_file,
+          host_paths.codex_agents_md, host_paths.claude_md, host_paths.copilot_instructions,
+          host_paths.cursor_rule_file,
+          host_paths.root.join('app/javascript/controllers/index.js'), host_paths.root.join('config/importmap.rb')
+        ]
+        destinations.concat(options[:locales].map { |locale| host_paths.locale_file(locale) })
+        destinations.each do |path|
+          Senren::Rails::SafeWrite.assert_inside!(path, host_paths.root, 'senren:install')
+        end
+      end
+
       def create_senren_dir
         empty_directory '.senren'
       end
