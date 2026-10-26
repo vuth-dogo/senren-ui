@@ -89,6 +89,85 @@ module Senren
         assert_empty AssetPathGuard.offending_paths(app)
       end
 
+      def test_an_asset_path_aliasing_components_is_reported
+        assets = @dir.join('linked-assets')
+        File.symlink(@components, assets)
+
+        assert_raises(RuntimeError) do
+          AssetPathGuard.check!(app_with([assets]), production: true)
+        end
+      end
+
+      def test_a_nested_symlink_to_components_is_reported
+        assets = @dir.join('app/assets')
+        assets.mkpath
+        File.symlink(@components, assets.join('sidecars'))
+
+        refute_empty AssetPathGuard.offending_paths(app_with([assets]))
+      end
+
+      def test_a_symlink_to_a_component_source_file_is_reported
+        assets = @dir.join('app/assets')
+        assets.mkpath
+        File.symlink(@components.join('button_component.rb'), assets.join('innocent.css'))
+
+        refute_empty AssetPathGuard.offending_paths(app_with([assets]))
+      end
+
+      def test_a_symlinked_components_directory_is_reported
+        external = @dir.join('shared-components')
+        FileUtils.mv(@dir.join('app/components'), external)
+        File.symlink(external, @dir.join('app/components'))
+
+        refute_empty AssetPathGuard.offending_paths(app_with([external]))
+      end
+
+      def test_a_component_source_file_symlinked_outside_components_is_reported
+        FileUtils.rm_rf(@components)
+        @components.mkpath
+        external = @dir.join('shared-widget.rb')
+        external.write("class WidgetComponent; end\n")
+        File.symlink(external, @components.join('widget_component.rb'))
+
+        assert_raises(RuntimeError) do
+          AssetPathGuard.check!(app_with([@dir.join('app/components')]), production: true)
+        end
+      end
+
+      def test_a_component_directory_symlinked_outside_components_is_reported
+        FileUtils.rm_rf(@components)
+        external = @dir.join('shared-components')
+        external.mkpath
+        external.join('widget_component.html.erb').write("<button>Private component</button>\n")
+        File.symlink(external, @components)
+
+        assert_raises(RuntimeError) do
+          AssetPathGuard.check!(app_with([@dir.join('app/components')]), production: true)
+        end
+      end
+
+      def test_an_external_asset_path_serving_a_symlinked_component_target_is_reported
+        FileUtils.rm_rf(@components)
+        @components.mkpath
+        external = @dir.join('shared')
+        external.mkpath
+        external.join('private.txt').write("class PrivateComponent; end\n")
+        File.symlink(external.join('private.txt'), @components.join('private_component.rb'))
+
+        assert_raises(RuntimeError) do
+          AssetPathGuard.check!(app_with([external]), production: true)
+        end
+      end
+
+      def test_asset_symlink_cycles_and_broken_links_do_not_block_a_clean_app
+        assets = @dir.join('app/assets')
+        assets.mkpath
+        File.symlink(assets, assets.join('loop'))
+        File.symlink(@dir.join('missing'), assets.join('broken'))
+
+        assert AssetPathGuard.check!(app_with([assets]), production: true)
+      end
+
       def test_an_app_with_no_component_source_is_fine
         FileUtils.rm_rf(@components)
         @components.mkpath

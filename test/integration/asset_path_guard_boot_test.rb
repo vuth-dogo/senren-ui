@@ -91,6 +91,16 @@ module Senren
       assert_empty published, 'no component source may reach public/assets'
     end
 
+    def test_precompile_cannot_publish_source_through_a_nested_asset_symlink
+      File.symlink(File.join(@root, 'app/components'), File.join(@root, 'app/assets/stylesheets/sidecars'))
+
+      result = precompile
+
+      assert_equal 'raised', result[:status], result[:stdout]
+      assert_includes result[:stdout], 'app/components is on the asset load path'
+      assert_empty Dir.glob(File.join(@root, 'public/assets/**/*.{rb,erb}'))
+    end
+
     # Reordering railties must not change the answer. This does not currently
     # discriminate between placements — an application's own initializers run
     # ahead of every engine's either way — but it pins the property the guard
