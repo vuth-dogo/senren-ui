@@ -38,6 +38,8 @@ Gem::Specification.new do |spec|
 
   spec.require_paths = ['lib']
 
+  # Rails/Loofah sanitize CSS through Crass; host apps do not use our lockfile.
+  spec.add_dependency 'crass', '>= 1.0.8'
   spec.add_dependency 'rails', '>= 7.1'
-  spec.add_dependency 'view_component', '>= 4.9.0'
+  spec.add_dependency 'view_component', '>= 4.14.0'
 end

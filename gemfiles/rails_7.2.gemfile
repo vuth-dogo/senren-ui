@@ -5,7 +5,7 @@
 
 source 'https://rubygems.org'
 
-gem 'rails', '~> 7.2.0'
+gem 'rails', '~> 7.2.0', '>= 7.2.3.2'
 
 # json 3.0 dropped the `quirks_mode:` keyword, and ActiveSupport before 8.1
 # still passes it whenever it encodes a value, so every component with a

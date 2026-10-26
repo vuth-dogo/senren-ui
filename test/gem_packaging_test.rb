@@ -21,8 +21,10 @@ class GemPackagingTest < Minitest::Test
   def test_runtime_dependencies_are_minimal_and_intentional
     names = spec.runtime_dependencies.map(&:name).sort
 
-    assert_equal %w[rails view_component], names,
-                 'a UI library that copies source should not pull extra gems into every host app'
+    # Crass already arrives through Rails/Loofah; its explicit requirement
+    # carries the sanitizer security floor into consumer bundles.
+    assert_equal %w[crass rails view_component], names,
+                 'runtime dependencies should contain only the framework and required security constraints'
   end
 
   # nokogiri is used only by component tests to parse rendered HTML. Shipping it
