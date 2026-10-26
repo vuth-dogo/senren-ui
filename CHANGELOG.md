@@ -7,6 +7,21 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 v0.x is a pre-stable line: minor bumps may break things; patch bumps are
 bug fixes only.
 
+## [Unreleased]
+
+### Security
+
+- Refuse `senren:install` destinations that resolve outside the host app,
+  including symlinked files, parent directories, and dangling links, before
+  creating or changing files.
+- Detect component source exposed through symlinked asset paths before a
+  deployed app boots or precompiles assets. Dedicated sidecar asset directories
+  remain supported.
+- Require Crass 1.0.8 and ViewComponent 4.14.0 or newer so consumer bundles
+  enforce the CSS sanitizer and render-state security fixes.
+- Update development tooling's `source-map-js` to 1.2.2 for CVE-2026-93749
+  and add JavaScript dependency audits to local and GitHub CI.
+
 ## [0.4.1] — 2026-10-08
 
 ### Fixed
