@@ -319,7 +319,80 @@ module Senren
         assert_no_file 'config/locales/senren.en.yml'
       end
 
+      def test_escaping_destination_files_are_refused_before_any_install_writes
+        %w[
+          app/javascript/controllers/index.js config/importmap.rb
+          app/components/senren/base_component.rb app/assets/stylesheets/senren.css
+          app/assets/stylesheets/senren_themes.css .senren/conventions.md
+          .senren/installed_components.yml .senren/registry.yml .senren/skill.md
+          .senren/agent-rules.md AGENTS.md CLAUDE.md
+          .github/copilot-instructions.md .cursor/rules/senren.mdc
+          config/locales/senren.vi.yml
+        ].each do |relative|
+          assert_escaping_install_refused(relative, directory: false)
+        end
+      end
+
+      def test_escaping_destination_directories_are_refused_before_any_install_writes
+        dirs = %w[.senren app/components app/javascript/controllers app/assets/stylesheets config .github .cursor]
+        dirs.each do |relative|
+          assert_escaping_install_refused(relative, directory: true)
+        end
+      end
+
+      def test_dangling_destination_symlinks_are_refused_before_any_install_writes
+        assert_escaping_install_refused('app/components/senren', directory: true, dangling: true)
+        assert_escaping_install_refused('config/importmap.rb', directory: false, dangling: true)
+      end
+
+      def test_internal_destination_symlinks_remain_supported
+        write_host_file 'config/shared_importmap.rb', "pin \"application\"\n"
+        File.symlink('shared_importmap.rb', File.join(destination_root, 'config/importmap.rb'))
+
+        run_generator ['--force']
+
+        assert File.symlink?(File.join(destination_root, 'config/importmap.rb'))
+        assert_includes read_generated('config/shared_importmap.rb'), 'preload: false'
+        assert_file 'app/components/senren/base_component.rb'
+      end
+
       private
+
+      def assert_escaping_install_refused(relative, directory:, dangling: false)
+        prepare_destination
+        Dir.mktmpdir('senren-install-outside') do |outside|
+          target = File.join(outside, 'target')
+          if directory
+            FileUtils.mkdir_p(target) unless dangling
+          elsif !dangling
+            File.write(target, "eagerLoadControllersFrom(\"controllers\", application)\n")
+          end
+          path = File.join(destination_root, relative)
+          FileUtils.mkdir_p(File.dirname(path))
+          File.symlink(target, path)
+          before = Dir.glob(File.join(destination_root, '**', '*'), File::FNM_DOTMATCH).sort
+          outside_before = File.read(target) unless directory || dangling
+
+          error = assert_raises(Senren::Rails::SafeWrite::Escape, relative) do
+            run_generator %w[--force --locales vi --force-locales]
+          end
+
+          assert_includes error.message, 'outside the app root'
+          assert_equal before, Dir.glob(File.join(destination_root, '**', '*'), File::FNM_DOTMATCH).sort,
+                       "#{relative} must be refused before creating any install files"
+          assert_outside_target_untouched(target, outside_before, directory: directory, dangling: dangling)
+        end
+      end
+
+      def assert_outside_target_untouched(target, original, directory:, dangling:)
+        if dangling
+          refute File.exist?(target)
+        elsif directory
+          assert_empty Dir.children(target)
+        else
+          assert_equal original, File.read(target)
+        end
+      end
 
       # Mirrors what `rails new` produces for an importmap application.
       def seed_default_importmap_app
